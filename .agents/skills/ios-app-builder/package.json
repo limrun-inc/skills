@@ -1,0 +1,9 @@
+{
+  "name": "ios-app-builder-skill",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@limrun/api": "0.23.1",
+    "tsx": "^4.20.5"
+  }
+}
