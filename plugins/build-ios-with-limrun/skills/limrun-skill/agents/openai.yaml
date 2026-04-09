@@ -1,0 +1,4 @@
+interface:
+  display_name: "Limrun Cloud Simulator"
+  short_description: "Build and test iOS apps on cloud simulators"
+  default_prompt: "Use $limrun-skill to build, run, and test the current iOS app on a Limrun cloud simulator."
