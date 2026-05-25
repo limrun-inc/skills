@@ -163,8 +163,7 @@ Once connected, JS/TS edits should update through Metro without another native b
 
 Tell the user:
 
-- simulator stream URL
-- Metro tunnel URL
+- simulator stream as a short Markdown link, for example `[Open simulator stream](<signedStreamUrl>)`
 - uploaded Debug asset name
 - that JS/TS changes can now iterate through Metro
 - that native changes require a new Debug build
