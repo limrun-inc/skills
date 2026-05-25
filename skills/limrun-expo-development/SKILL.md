@@ -98,12 +98,29 @@ Start Metro after the Debug app is installed:
 npx expo start --dev-client --tunnel
 ```
 
-If `8081` is busy, choose a free port with `--port <port>`. If tunnel startup fails or exits, retry a few times before changing approach. Keep Metro running while the user iterates.
+If `8081` is busy, choose a free port with `--port <port>`. If tunnel startup fails or exits, retry a few times; if it still fails, use the Limrun reverse fallback below. Keep Metro running while the user iterates.
 
 Get the `https://*.exp.direct` tunnel URL from Expo output. If Expo does not print it, query the local ngrok API:
 
 ```bash
 curl -sS http://127.0.0.1:4040/api/tunnels
+```
+
+### Fallback: Limrun Reverse Tunnel
+
+If Expo's `--tunnel` repeatedly fails, use `lim ios reverse` with a matched remote/local port. Expo dev-client can derive or advertise multiple packager URLs, so mismatched mappings like `57090:8081` can leave some URLs pointing at the local Metro port instead of the simulator-facing tunnel port.
+
+Use the simulator-facing host printed by `lim ios reverse` in both `REACT_NATIVE_PACKAGER_HOSTNAME` and the encoded dev-client URL. Keep the reverse command running in a separate or background terminal while Metro is running:
+
+```bash
+lim ios reverse 57090:57090 --id <ios-instance-id>
+
+REACT_NATIVE_PACKAGER_HOSTNAME=<reverse-host> \
+  npx expo start --dev-client --host lan --port 57090
+
+ENCODED_URL="$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "http://<reverse-host>:57090")"
+DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
+lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 ```
 
 ## Launch Dev Client
