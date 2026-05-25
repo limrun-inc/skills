@@ -7,7 +7,7 @@
     },
     {
       "name": "limrun-expo-development",
-      "defaultSelected": false
+      "defaultSelected": true
     },
     {
       "name": "limrun-detox-testing",
