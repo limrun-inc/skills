@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "skills": [
+    {
+      "name": "limrun-xcode-and-ios-simulator",
+      "defaultSelected": true
+    },
+    {
+      "name": "limrun-expo-development",
+      "defaultSelected": false
+    },
+    {
+      "name": "limrun-detox-testing",
+      "defaultSelected": false
+    }
+  ]
+}
