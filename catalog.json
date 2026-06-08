@@ -14,7 +14,7 @@
       "defaultSelected": false
     },
     {
-      "name": "limrun-bazel-rbe",
+      "name": "limrun-xcode-bazel",
       "defaultSelected": false
     }
   ]

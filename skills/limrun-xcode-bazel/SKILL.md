@@ -30,14 +30,21 @@ the source of truth, run `lim xcode rbe --help` before relying on flags.
    `WORKSPACE`), run `lim xcode rbe`. It targets/creates an Xcode instance,
    opens the tunnel, writes `.limrun/` (an `xcode_config` pinning the fleet's
    Xcode plus the RBE flags under `--config=limrun`, wired via `try-import`),
-   and **prints the exact build command**. Keep it running; Ctrl+C tears down
-   the tunnel and the remote stack.
-2. In another shell, run the printed command, e.g.
-   `bazelisk --digest_function=sha256 build --config=limrun //App`.
+   and **prints the exact build command**. By default it runs the tunnel in the
+   **background** and returns the terminal (it prints the PID); `--no-daemon`
+   keeps it in the foreground instead (for CI/debugging).
+2. In the **same terminal**, run the printed command, e.g.
+   `bazelisk --digest_function=sha256 build --config=limrun //App`. (The CLI
+   infers a single app target when it can, else prints a `//your:target`
+   placeholder to edit.)
+3. When done, stop the background tunnel with **`lim xcode rbe --stop`** (it
+   closes the tunnel and stops the remote stack; takes ~20s while the remote
+   stack tears down). Re-running `lim xcode rbe` while one is up reports the
+   running tunnel rather than starting a second.
 
 Do not hand-write the flags or `.limrun/` files, the CLI generates them and
 adapts to the fleet's Xcode and your OS. Re-run `lim xcode rbe` to refresh after
-a fleet Xcode upgrade.
+a fleet Xcode upgrade (stop the running one first).
 
 ## Gotchas
 

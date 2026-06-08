@@ -26,7 +26,7 @@ would show your own paths.
 
 **Positive — make a cache miss with the tunnel up, then look for `remote`:**
 ```
-# lim xcode rbe running in another shell
+# lim xcode rbe running (background by default)
 echo '// poke' >> path/to/Some.swift            # or any source edit
 bazelisk --digest_function=sha256 build --config=limrun //App
 # INFO: N processes: … M remote   ← M > 0 means it executed on the worker
@@ -38,7 +38,7 @@ bazelisk --digest_function=sha256 build --config=limrun //App --noremote_accept_
 
 **Decisive negative — make a cache miss with the tunnel DOWN; it must fail:**
 ```
-# no instance / no tunnel
+lim xcode rbe --stop                            # close the tunnel + stop the stack
 echo '// poke again' >> path/to/Some.swift
 bazelisk --digest_function=sha256 build --config=limrun //App
 # expect: connection error to 127.0.0.1:<port> / Remote Execution Failure
