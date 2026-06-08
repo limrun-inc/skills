@@ -12,6 +12,10 @@
     {
       "name": "limrun-detox-testing",
       "defaultSelected": false
+    },
+    {
+      "name": "limrun-bazel-rbe",
+      "defaultSelected": false
     }
   ]
 }
