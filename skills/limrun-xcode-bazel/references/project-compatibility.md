@@ -11,9 +11,12 @@ setup, not a Limrun bug. Symptom → cause → what to do.
   `xcode_version` / `available_xcodes` / `xcode_config` from apple_support on
   Bazel 9 (where they're no longer native globals) and omits them on Bazel 8
   (where loading them fails). Driven off the workspace `.bazelversion`.
-- **Remote/local Xcode split + `--xcode_version`** — the fleet's Xcode is pinned
-  as a remote-only version so client-side `xcode-locator` never demands it. The
-  benign `DEBUG: --xcode_version=… not available locally` line is expected.
+- **Xcode pinned to the fleet's, both remote and local** — the `.limrun/BUILD`
+  declares the fleet's Xcode as both the remote AND local version and sets
+  `--xcode_version` to it, so the build uses only the fleet's Xcode and resolves
+  cleanly (no apple_support "…not available locally" notice). This is the
+  "everything runs remotely" stance — see the local-Apple-actions pattern below
+  if a project genuinely needs a Mac-local Apple action.
 - **`--strategy=SwiftCompile=remote` / `--strategy=Genrule=remote`** — overrides
   the common local pins (rules_swift's worker, standalone genrules).
 - **Darwin exec platform on non-mac clients**, and `PATH` including `/usr/sbin`.
@@ -52,6 +55,24 @@ lacks those tools. Symptom: `sysctl: command not found` / `Exit 127` in a
 ### codesign digest algorithm
 A target that sets `codesignopts = ["--digest-algorithm=sha1"]` fails under
 recent Xcode's codesign: `signing with only SHA1 not allowed`. Use `sha256`.
+
+### A Mac-local Apple action that must use the client's own Xcode
+The generated config pins Xcode to the fleet's version for **both** the remote
+and local sets, and forces every action remote (`--spawn_strategy=remote`,
+`--noremote_local_fallback`). That's deliberate: it makes the build identical on
+a Mac and a Linux client and silences the "Xcode not available locally" notice.
+The trade-off: if a project *forces* an Apple/Swift action to run on the Mac
+client (e.g. a `--strategy=…=local` pin, or a rule that runs `xcode-locator`
+against the host), it will look for the fleet's Xcode build locally and fail
+(`xcode-locator … not available`) instead of using the Mac's own Xcode. This is
+intended — under Limrun RBE everything is meant to run remotely. If you genuinely
+need that local action: either drop the local strategy pin so it runs remote
+like everything else (preferred), or, if you must keep it local, hand-edit
+`.limrun/BUILD` to declare the client's *real* local Xcode as a distinct
+`local_xcode` (a different major.minor from the fleet's, so its alias doesn't
+collide) under `local_versions` — accepting the "not available locally" notice
+back. Re-running `lim xcode rbe` regenerates `.limrun/`, so make the edit durable
+elsewhere if you keep it.
 
 ## Expected, benign
 
