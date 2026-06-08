@@ -1,5 +1,5 @@
 ---
-name: limrun-bazel-rbe
+name: limrun-xcode-bazel
 description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac. Use when the project is a Bazel workspace (has MODULE.bazel or WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it, or when a `--config=limrun` build fails with a digest/BLAKE3 error, 'no matching worker', a CoreSimulator permission error, 'name xcode_version is not defined', or finishes suspiciously fast. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
 user-invocable: true
 effort: high
@@ -41,11 +41,16 @@ a fleet Xcode upgrade.
 
 ## Gotchas
 
-- **Bazel 9 needs `--digest_function=sha256`, placed *before* `build`.** The
-  Limrun cache is SHA256-only; Bazel 9 defaults to BLAKE3, and `--digest_function`
-  is a startup flag (can't live in `--config=limrun`). Use the command the CLI
-  prints verbatim. Symptom if missing: `Cannot use hash function BLAKE3 with
-  remote cache. Server supported functions are: [SHA256]`.
+- **Always build with `--digest_function=sha256`, placed *before* `build`.** The
+  Limrun cache is SHA256-only. Bazel 9 defaults to BLAKE3, and some workspaces
+  configure BLAKE3 explicitly (even on Bazel 8, e.g. `startup --digest_function=blake3`),
+  so the flag is required there; where SHA256 is already the default it is a
+  harmless no-op — which is why the CLI prints it unconditionally. It is a
+  *startup* flag, so it can't live in `--config=limrun` (and putting it in
+  `.bazelrc` would change the digest for all the user's builds, not just limrun);
+  hence it precedes `build`. Use the command the CLI prints verbatim. Symptom if
+  missing: `Cannot use hash function BLAKE3 with remote cache. Server supported
+  functions are: [SHA256]`.
 - **Run `lim xcode rbe` from inside the workspace**, not a subdirectory dump. It
   writes `.limrun/` at the workspace root (where bazelrc `%workspace%` resolves)
   and fails fast if you're not in a workspace.
