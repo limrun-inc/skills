@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode-bazel
-description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac. Use when the project is a Bazel workspace (has MODULE.bazel or WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it, or when a `--config=limrun` build fails with a digest/BLAKE3 error, 'no matching worker', a CoreSimulator permission error, 'name xcode_version is not defined', or finishes suspiciously fast. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
+description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and optionally install the build on a remote iOS simulator. Use when the project is a Bazel workspace (has MODULE.bazel or WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it (or run it on a simulator), or when a `--config=limrun` build/install fails with a digest/BLAKE3 error, 'no matching worker', a CoreSimulator permission error, 'name xcode_version is not defined', or finishes suspiciously fast. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
 user-invocable: true
 effort: high
 ---
@@ -45,6 +45,30 @@ the source of truth, run `lim xcode rbe --help` before relying on flags.
 Do not hand-write the flags or `.limrun/` files, the CLI generates them and
 adapts to the fleet's Xcode and your OS. Re-run `lim xcode rbe` to refresh after
 a fleet Xcode upgrade (stop the running one first).
+
+## Installing on a simulator
+
+The build's `.ipa` stays in the instance cache (it is never downloaded to your
+machine). To run it on a simulator you can watch live:
+
+1. Pass **`--ios`** to `lim xcode rbe` — it also creates an iOS simulator,
+   attaches it to the instance, and prints a stream URL (torn down on `--stop`).
+   Alternatively attach an existing one: `lim xcode attach-simulator <ios-id>
+   --id <xcode-id>`.
+2. Build as usual (with `--config=limrun`, so the build event log is written).
+3. Run **`lim xcode rbe install`** — the instance reads the build's `.ipa` CAS
+   digest from the Bazel build event log (`.limrun/bep.json`), fetches the blob
+   from its own cache, unpacks the `.app`, and diff-syncs it to the attached
+   simulator (no client round-trip; re-installs are fast deltas). The target is
+   inferred when the workspace has a single app; otherwise pass it explicitly
+   (`lim xcode rbe install //App`).
+
+Install is **explicit and on-demand**: a `bazel build` does not auto-install, and
+attaching a simulator does not install a prior build. Run `install` (with a
+simulator attached) each time you want the latest build on the sim. The same
+`--digest_function=sha256` requirement applies — otherwise install fails with a
+clear "non-SHA256 digest … rebuild with --digest_function=sha256" message (the
+instance cache is SHA256-keyed).
 
 ## Gotchas
 
