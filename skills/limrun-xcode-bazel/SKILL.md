@@ -28,8 +28,6 @@ relying on flags.
    `--no-daemon` keeps it foreground.
 2. Run the printed command, e.g.
    `bazelisk --digest_function=sha256 build --config=limrun //App`.
-3. Stop with **`lim xcode rbe --stop`** (~20s to tear the remote stack down).
-   Re-running while one is up just reports it.
 
 Don't hand-write `.limrun/` or the flags — the CLI generates them for the fleet's
 Xcode and your OS. Re-run `lim xcode rbe` (after `--stop`) to refresh after a
@@ -53,6 +51,10 @@ each time you want the current build on the sim:**
 bazelisk --digest_function=sha256 build --config=limrun //App
 lim xcode rbe install        # target inferred for a single-app workspace; else: install //App
 ```
+
+## Teardown
+
+Stop with **`lim xcode rbe --stop`** (~20s to tear the remote stack down) and delete the instance with **`lim xcode delete <id>`**
 
 ## Gotchas
 
