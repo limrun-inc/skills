@@ -1,117 +1,75 @@
 ---
 name: limrun-xcode-bazel
-description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and optionally install the build on a remote iOS simulator. Use when the project is a Bazel workspace (has MODULE.bazel or WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it (or run it on a simulator), or when a `--config=limrun` build/install fails with a digest/BLAKE3 error, 'no matching worker', a CoreSimulator permission error, 'name xcode_version is not defined', or finishes suspiciously fast. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
+description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and optionally run the build on a remote iOS simulator. Use when the project is a Bazel workspace (has MODULE.bazel or WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it (or run it on a simulator), or when a `--config=limrun` build/install fails with a digest/BLAKE3 error, 'no matching worker', a CoreSimulator permission error, 'name xcode_version is not defined', or finishes suspiciously fast. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
 user-invocable: true
 effort: high
 ---
 
 # Bazel iOS builds on Limrun RBE
 
-You build Bazel Apple projects on Limrun's remote Mac workers, so the build runs
-from any environment (Linux, Windows, macOS, VM, container) with no local Xcode.
-Limrun runs an embedded Bazel RBE stack on a remote Xcode instance; `lim xcode
-rbe` brings it up, tunnels its gRPC frontend to a local port, and generates a
-`.limrun/` Bazel config so `bazelisk build --config=limrun` executes Apple
-actions remotely. Never fall back to local Xcode or local build tools.
-
-Use this skill only for **Bazel** workspaces (a `MODULE.bazel` / `WORKSPACE`
-exists). For plain `xcodebuild` projects, use `limrun-xcode-and-ios-simulator`.
+Build Bazel Apple projects on Limrun's remote Mac workers — from any environment
+(Linux, Windows, macOS, VM, container), no local Xcode. `lim xcode rbe` brings up
+a remote RBE stack, tunnels it to a local port, and writes a `.limrun/` config so
+`bazelisk build --config=limrun` runs Apple actions remotely. Never fall back to
+local Xcode or build tools.
 
 ## Auth and CLI
 
-Install if needed: `npm install --global lim`. Authentication is via `lim
-login` or `LIM_API_KEY`; credentials may already be set outside the project, so
-don't ask for `LIM_API_KEY` just because it's absent from the shell. The CLI is
-the source of truth, run `lim xcode rbe --help` before relying on flags.
+Install if needed: `npm install --global lim`. Auth is `lim login` or
+`LIM_API_KEY` (may be set outside the project — don't ask for it just because
+it's absent). The CLI is the source of truth; run `lim xcode rbe --help` before
+relying on flags.
 
-## Core workflow
+## Build
 
-1. From the **Bazel workspace root** (the directory with `MODULE.bazel` /
-   `WORKSPACE`), run `lim xcode rbe`. It targets/creates an Xcode instance,
-   opens the tunnel, writes `.limrun/` (an `xcode_config` pinning the fleet's
-   Xcode plus the RBE flags under `--config=limrun`, wired via `try-import`),
-   and **prints the exact build command**. By default it runs the tunnel in the
-   **background** and returns the terminal (it prints the PID); `--no-daemon`
-   keeps it in the foreground instead (for CI/debugging).
-2. In the **same terminal**, run the printed command, e.g.
-   `bazelisk --digest_function=sha256 build --config=limrun //App`. (The CLI
-   infers a single app target when it can, else prints a `//your:target`
-   placeholder to edit.)
-3. When done, stop the background tunnel with **`lim xcode rbe --stop`** (it
-   closes the tunnel and stops the remote stack; takes ~20s while the remote
-   stack tears down). Re-running `lim xcode rbe` while one is up reports the
-   running tunnel rather than starting a second.
+1. From the **Bazel workspace root** (has `MODULE.bazel` / `WORKSPACE`), run
+   `lim xcode rbe`. It sets up the instance + `.limrun/` config and **prints the
+   exact build command**. The tunnel runs in the background (prints a PID);
+   `--no-daemon` keeps it foreground.
+2. Run the printed command, e.g.
+   `bazelisk --digest_function=sha256 build --config=limrun //App`.
+3. Stop with **`lim xcode rbe --stop`** (~20s to tear the remote stack down).
+   Re-running while one is up just reports it.
 
-Do not hand-write the flags or `.limrun/` files, the CLI generates them and
-adapts to the fleet's Xcode and your OS. Re-run `lim xcode rbe` to refresh after
-a fleet Xcode upgrade (stop the running one first).
+Don't hand-write `.limrun/` or the flags — the CLI generates them for the fleet's
+Xcode and your OS. Re-run `lim xcode rbe` (after `--stop`) to refresh after a
+fleet Xcode upgrade.
 
-## Running on a simulator
+## Run on a simulator
 
-By default `lim xcode rbe` is **build-only** — no simulator — exactly like
-`lim xcode build` in the xcodebuild skill. Create a simulator only when you want
-to see the app run, tap UI, or take screenshots. Attach one to the remembered
-Xcode target the same way:
+`lim xcode rbe` is build-only. To run the app on a simulator, attach one:
 
 ```bash
-lim ios create --attach
+lim ios create --attach     # creates + attaches a simulator to the rbe target
 ```
 
-Share the signed stream URL it prints as a Markdown link, e.g. [Live simulator](<signed-stream-url>).
-(Shortcut: `lim xcode rbe --ios` creates and attaches a simulator when it starts
-the tunnel, torn down on `--stop`.)
+Share the signed stream URL it prints so the user can watch. (Shortcut:
+`lim xcode rbe --ios` attaches one at startup, removed on `--stop`.)
 
-Then build and install **explicitly**:
+Then build and install. **The build does NOT auto-install — install explicitly
+each time you want the current build on the sim:**
 
 ```bash
 bazelisk --digest_function=sha256 build --config=limrun //App
 lim xcode rbe install        # target inferred for a single-app workspace; else: install //App
 ```
 
-**The one difference from `lim xcode build`:** an RBE build does **not**
-auto-install. Where xcodebuild re-installs and re-launches the app on every
-successful build (and on simulator attach), RBE is explicit — run
-`lim xcode rbe install` (with a simulator attached) each time you want the
-current build on the sim. Under the hood the `.ipa` never leaves the instance:
-install reads its CAS digest from the Bazel build event log (`.limrun/bep.json`),
-fetches the blob from the instance cache, and diff-syncs the `.app` to the
-simulator server-side (fast deltas, no client download). The same
-`--digest_function=sha256` requirement applies — otherwise install fails with a
-clear "non-SHA256 digest … rebuild with --digest_function=sha256" message (the
-instance cache is SHA256-keyed).
-
 ## Gotchas
 
-- **Always build with `--digest_function=sha256`, placed *before* `build`.** The
-  Limrun cache is SHA256-only. Bazel 9 defaults to BLAKE3, and some workspaces
-  configure BLAKE3 explicitly (even on Bazel 8, e.g. `startup --digest_function=blake3`),
-  so the flag is required there; where SHA256 is already the default it is a
-  harmless no-op — which is why the CLI prints it unconditionally. It is a
-  *startup* flag, so it can't live in `--config=limrun` (and putting it in
-  `.bazelrc` would change the digest for all the user's builds, not just limrun);
-  hence it precedes `build`. Use the command the CLI prints verbatim. Symptom if
-  missing: `Cannot use hash function BLAKE3 with remote cache. Server supported
-  functions are: [SHA256]`.
-- **Run `lim xcode rbe` from inside the workspace**, not a subdirectory dump. It
-  writes `.limrun/` at the workspace root (where bazelrc `%workspace%` resolves)
-  and fails fast if you're not in a workspace.
-- **A green build does not prove remote execution, the cache hides it.** Repeat
-  builds report `action cache hit` / `remote cache hit` and run no actions, so
-  they succeed even with the tunnel gone. To exercise and verify real remote
-  execution, see `references/verify-remote.md`.
-- **`You don't have permission to save … in "CoreSimulator"`** during
-  AssetCatalogCompile (actool) or StoryboardCompile (ibtool) is a fleet-side
-  simulator-device gap, not your config. Retry; if it persists, report it to
+- **Always pass `--digest_function=sha256` before `build`** (use the command the
+  CLI prints verbatim). The Limrun cache is SHA256-only; Bazel 9 defaults to
+  BLAKE3. It's a startup flag, so it can't live in `--config=limrun`. Symptoms:
+  build → `Cannot use hash function BLAKE3 with remote cache`; install →
+  `non-SHA256 digest … rebuild with --digest_function=sha256`.
+- **Run `lim xcode rbe` from the workspace root**, not a subdirectory — it writes
+  `.limrun/` there and fails fast otherwise.
+- **A green build doesn't prove remote execution** — cache hits (`action cache
+  hit` / `remote cache hit`) make builds pass even with the tunnel gone. To force
+  and verify real remote execution, see `references/verify-remote.md`.
+- **`You don't have permission to save … in "CoreSimulator"`** (actool/ibtool) is
+  a fleet-side device gap, not your config. Retry; if it persists, report it to
   Limrun.
-- **The project's own Bazel settings can fight RBE** (an Xcode pinned via a
-  Starlark transition, custom `remote_default_exec_properties`, a foreign-build
-  genrule that won't run in the sandbox, …). These are per-project, not Limrun
-  bugs. Walk `references/project-compatibility.md` before concluding RBE is
-  broken.
-
-## Onboarding a repo
-
-`lim xcode rbe` + the printed command is the whole happy path for an idiomatic
-rules_apple / rules_swift project on Bazel 8 or 9. If it doesn't go green, work
-through `references/project-compatibility.md` (symptom → cause → fix), and append
-new patterns there as you hit them.
+- **The project's own Bazel settings can fight RBE** (Xcode pinned via a Starlark
+  transition, custom `remote_default_exec_properties`, sandbox-hostile genrules).
+  These are per-project, not Limrun bugs — walk
+  `references/project-compatibility.md` before concluding RBE is broken.
