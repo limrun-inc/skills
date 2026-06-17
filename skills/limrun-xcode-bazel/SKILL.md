@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode-bazel
-description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and optionally run the build on a remote iOS simulator. Use when the project is a Bazel workspace (has MODULE.bazel or WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it (or run it on a simulator), or when a `--config=limrun` build/install fails with a digest/BLAKE3 error, 'no matching worker', a CoreSimulator permission error, 'name xcode_version is not defined', finishes suspiciously fast, or reports a built `.ipa` at a path that doesn't exist on disk. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
+description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and optionally run it on a remote iOS simulator. Use when the project is a Bazel workspace (MODULE.bazel / WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it or run it on a simulator, or when a `--config=limrun` build or install misbehaves. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
 user-invocable: true
 effort: high
 ---
@@ -35,22 +35,44 @@ fleet Xcode upgrade.
 
 ## Run on a simulator
 
-`lim xcode rbe` is build-only. To run the app on a simulator, attach one:
+`lim xcode rbe` is build-only. Don't attach a simulator until the user needs
+simulator interaction such as launching the app, tapping UI, reading the element
+tree, taking screenshots, or recording video. Builds run remotely without one.
+
+When the user needs simulator interaction, inspect whether the rbe target
+already has a simulator attached:
 
 ```bash
-lim ios create --attach     # creates + attaches a simulator to the rbe target
+lim xcode get
 ```
 
-Share the signed stream URL it prints so the user can watch. (Shortcut:
-`lim xcode rbe --ios` attaches one at startup, removed on `--stop`.)
+If a simulator is attached, continue using the current target. If not, create
+one and attach it — it installs the last build immediately, so you don't need to
+rebuild:
 
-Then build and install. **The build does NOT auto-install — install explicitly
-each time you want the current build on the sim:**
+```bash
+lim ios create --attach
+```
+
+If the create output includes a signed stream URL, share it with the user as a
+Markdown link, such as [Live simulator](<signed-stream-url>).
+
+When a simulator is attached, every successful `--config=limrun` build
+automatically re-installs the app on the iOS Simulator and re-launches it — no
+separate install step:
 
 ```bash
 bazelisk --digest_function=sha256 build --config=limrun //App
-lim xcode rbe install        # target inferred for a single-app workspace; else: install //App
 ```
+
+Notes:
+- **Attach upfront** if you already know you want a sim: `lim xcode rbe --ios`
+  (attaches at startup, removed on `--stop`).
+- **Multi-app workspaces:** pass `--target //App` so auto-install knows which app
+  to install (a single-app workspace is inferred).
+- **Disable** with `--no-auto-install` for a tunnel-only / CI session.
+- **Manual install** remains as a fallback or to force a reinstall:
+  `lim xcode rbe install` (`install //App` in a multi-app workspace).
 
 ## Teardown
 
@@ -72,11 +94,11 @@ Stop with **`lim xcode rbe --stop`** (~20s to tear the remote stack down) and de
   carries `--remote_download_outputs=minimal`, which keeps the artifact in the
   instance's cache and downloads nothing. Bazel still prints its usual
   `Target //App:App up-to-date: …/App.ipa` line, but that file is **not** on
-  disk. This is expected, not a failed build. Install it with `lim xcode rbe
-  install` (it reads the artifact's cache digest from the build event log, not
-  the local file). Only if you genuinely need the `.ipa` locally, drop
+  disk. This is expected, not a failed build. With a simulator attached, the
+  build auto-installs from the artifact's cache digest (read from the build event
+  log, not the local file). Only if you genuinely need the `.ipa` locally, drop
   `--remote_download_outputs=minimal` from the build command and Bazel downloads
-  the top-level output; install keeps working either way.
+  the top-level output; auto-install keeps working either way.
 - **`You don't have permission to save … in "CoreSimulator"`** (actool/ibtool) is
   a fleet-side device gap, not your config. Retry; if it persists, report it to
   Limrun.
