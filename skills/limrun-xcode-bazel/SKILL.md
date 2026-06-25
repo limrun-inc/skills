@@ -33,6 +33,11 @@ Don't hand-write `.limrun/` or the flags — the CLI generates them for the flee
 Xcode and your OS. Re-run `lim xcode rbe` (after `--stop`) to refresh after a
 fleet Xcode upgrade.
 
+To add your own Bazel flags to the limrun path without editing the generated
+config, put them in **`user.limrun.bazelrc`** at the workspace root. The
+generated config try-imports it last, so your `build:limrun --…` lines win, and
+it survives `lim xcode rbe` regeneration (`.limrun/` does not).
+
 ## Run on a simulator
 
 `lim xcode rbe` is build-only. Don't attach a simulator until the user needs

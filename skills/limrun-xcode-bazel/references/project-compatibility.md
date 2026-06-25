@@ -19,6 +19,17 @@ setup, not a Limrun bug. Symptom → cause → what to do.
   if a project genuinely needs a Mac-local Apple action.
 - **`--strategy=SwiftCompile=remote` / `--strategy=Genrule=remote`** — overrides
   the common local pins (rules_swift's worker, standalone genrules).
+- **rules_apple `no-remote` / `no-remote-exec` stripped**
+  (`--modify_execution_info=.*=-no-remote,.*=-no-remote-exec`): bundling,
+  linking, and signing actions that rules_apple (or a repo's recommended
+  `+no-remote` bazelrc) pins local are stripped so they run on the worker.
+  Without this they fail on a thin (e.g. Linux) client with `cannot be executed
+  with any of the available strategies: [remote]`.
+- **A workspace `--remote_cache` is cleared** (`--remote_cache=`): a repo
+  pointing `--remote_cache` at a separate backend (BuildBuddy, EngFlow) would
+  split the CAS against Limrun's executor and fail with `Lost inputs no longer
+  available remotely`. The generated config empties it under `--config=limrun`,
+  and the repo's non-limrun builds keep their own cache.
 - **Darwin exec platform on non-mac clients**, and `PATH` including `/usr/sbin`.
 - **CoreSimulator IB utility devices** (actool/ibtool) — provisioned by the fleet.
 
