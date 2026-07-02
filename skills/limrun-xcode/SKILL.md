@@ -22,8 +22,9 @@ record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
 `LIM_API_KEY` (it may be set outside the project, so don't ask for it just
-because it's missing from `.env` or the shell). The CLI is the source of truth;
-run a command's `--help` before relying on its flags:
+because it's missing from `.env` or the shell). The CLI is the source of truth:
+the commands in this skill are verified, but if a flag errors or you need one
+not shown here, check `--help` instead of guessing:
 
 ```bash
 lim xcode --help

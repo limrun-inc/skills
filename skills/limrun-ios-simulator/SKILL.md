@@ -19,8 +19,9 @@ Never use local Xcode, local simulators, or local macOS tools.
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
 `LIM_API_KEY` (it may be set outside the project, so don't ask for it just
-because it's missing from `.env` or the shell). The CLI is the source of truth;
-run `lim ios --help` and `lim ios <subcommand> --help` before relying on flags.
+because it's missing from `.env` or the shell). The CLI is the source of truth:
+the commands in this skill are verified, but if a flag errors or you need one
+not shown here, check `lim ios <subcommand> --help` instead of guessing.
 
 ## Get a simulator attached
 
@@ -44,6 +45,10 @@ share it with the user as a Markdown link, like
 [Live simulator](<signed-stream-url>). If you have a browser the user can see,
 open the URL there and tell them.
 
+`lim xcode get` prints a Limrun console URL instead. It opens the same live
+view but requires a console login, so prefer the signed stream URL for sharing.
+If the console URL is all you have, share it and mention it needs login.
+
 ## Targeting the right instance
 
 Most `lim ios` commands default to the last created instance and resolve the
@@ -65,6 +70,20 @@ lim ios element-tree --id <that-id>    # pass --id to EVERY lim ios command
 all `lim ios` calls for the rest of the session (screenshot, tap, type,
 element-tree, record). Alternatively, `git init` the project so the workspace
 resolves on its own. When controlling multiple instances, always pass `--id`.
+
+## Launching the app
+
+The build skills reinstall and relaunch the app after every successful build,
+so you usually don't need to launch it yourself. When the app is closed (a
+fresh attach to an old build, or after a terminate), launch it by bundle ID:
+
+```bash
+lim ios launch-app <bundle-id>                            # foregrounds it if already running
+lim ios launch-app <bundle-id> --mode RelaunchIfRunning   # restart for a clean state
+lim ios terminate-app <bundle-id>                         # stop it, e.g. to reset app state
+```
+
+If you don't know the bundle ID, run `lim ios list-apps`.
 
 ## Testing changes
 

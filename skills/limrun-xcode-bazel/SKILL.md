@@ -17,8 +17,9 @@ local Xcode or build tools.
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
 `LIM_API_KEY` (may be set outside the project — don't ask for it just because
-it's absent). The CLI is the source of truth; run `lim xcode rbe --help` before
-relying on flags.
+it's absent). The CLI is the source of truth: the commands in this skill are
+verified, but if a flag errors or you need one not shown here, check
+`lim xcode rbe --help` instead of guessing.
 
 ## Build
 
