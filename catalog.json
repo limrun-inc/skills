@@ -2,7 +2,11 @@
   "schemaVersion": 1,
   "skills": [
     {
-      "name": "limrun-xcode-and-ios-simulator",
+      "name": "limrun-xcode",
+      "defaultSelected": true
+    },
+    {
+      "name": "limrun-ios-simulator",
       "defaultSelected": true
     },
     {
