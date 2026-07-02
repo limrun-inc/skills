@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode-bazel
-description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and optionally run it on a remote iOS simulator. Use when the project is a Bazel workspace (MODULE.bazel / WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it or run it on a simulator, or when a `--config=limrun` build or install misbehaves. For non-Bazel (plain xcodebuild) projects use limrun-xcode-and-ios-simulator instead."
+description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and install it on a remote iOS simulator. Use when the project is a Bazel workspace (MODULE.bazel / WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it or run it on a simulator, or when a `--config=limrun` build or install misbehaves. To then tap, type, screenshot, or otherwise interact with the running app, use limrun-ios-simulator. For non-Bazel (plain xcodebuild) projects use limrun-xcode instead."
 user-invocable: true
 effort: high
 ---
@@ -17,8 +17,9 @@ local Xcode or build tools.
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
 `LIM_API_KEY` (may be set outside the project — don't ask for it just because
-it's absent). The CLI is the source of truth; run `lim xcode rbe --help` before
-relying on flags.
+it's absent). The CLI is the source of truth: the commands in this skill are
+verified, but if a flag errors or you need one not shown here, check
+`lim xcode rbe --help` instead of guessing.
 
 ## Build
 
@@ -40,31 +41,20 @@ it survives `lim xcode rbe` regeneration (`.limrun/` does not).
 
 ## Run on a simulator
 
-`lim xcode rbe` is build-only. Don't attach a simulator until the user needs
-simulator interaction such as launching the app, tapping UI, reading the element
-tree, taking screenshots, or recording video. Builds run remotely without one.
-
-When the user needs simulator interaction, inspect whether the rbe target
-already has a simulator attached:
+`lim xcode rbe` is build-only; attach a simulator when the user wants to see or
+run the app. Check or attach (it installs the last build immediately, so no
+rebuild is needed):
 
 ```bash
-lim xcode get
+lim xcode get             # is a simulator already attached?
+lim ios create --attach   # attach one
 ```
 
-If a simulator is attached, continue using the current target. If not, create
-one and attach it — it installs the last build immediately, so you don't need to
-rebuild:
-
-```bash
-lim ios create --attach
-```
-
-If the create output includes a signed stream URL, share it with the user as a
+If the attach output includes a signed stream URL, share it with the user as a
 Markdown link, such as [Live simulator](<signed-stream-url>).
 
-When a simulator is attached, every successful `--config=limrun` build
-automatically re-installs the app on the iOS Simulator and re-launches it — no
-separate install step:
+With a simulator attached, every successful `--config=limrun` build automatically
+reinstalls and relaunches the app, no separate install step:
 
 ```bash
 bazelisk --digest_function=sha256 build --config=limrun //App
@@ -76,8 +66,11 @@ Notes:
 - **Multi-app workspaces:** pass `--target //App` so auto-install knows which app
   to install (a single-app workspace is inferred).
 - **Disable** with `--no-auto-install` for a tunnel-only / CI session.
-- **Manual install** remains as a fallback or to force a reinstall:
-  `lim xcode rbe install` (`install //App` in a multi-app workspace).
+- **Manual install** as a fallback or to force a reinstall: `lim xcode rbe install`
+  (`install //App` in a multi-app workspace).
+
+To tap, type, read the element tree, screenshot, or record the running app,
+switch to the **`limrun-ios-simulator`** skill.
 
 ## Teardown
 
@@ -104,6 +97,11 @@ Stop with **`lim xcode rbe --stop`** (~20s to tear the remote stack down) and de
   log, not the local file). Only if you genuinely need the `.ipa` locally, drop
   `--remote_download_outputs=minimal` from the build command and Bazel downloads
   the top-level output; auto-install keeps working either way.
+- **A fresh instance can fail the first build with `Lost inputs no longer
+  available remotely`** (e.g. `… Assets.car`). It's a transient cache eviction
+  between instances, not a code error; Bazel prints `Found transient remote cache
+  error, retrying the build...` and the retry succeeds. To avoid hitting it
+  mid-demo, pre-warm with a full build right after `lim xcode rbe`.
 - **`You don't have permission to save … in "CoreSimulator"`** (actool/ibtool) is
   a fleet-side device gap, not your config. Retry; if it persists, report it to
   Limrun.
