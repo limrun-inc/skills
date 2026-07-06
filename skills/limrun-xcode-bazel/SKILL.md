@@ -63,14 +63,37 @@ bazelisk --digest_function=sha256 build --config=limrun //App
 Notes:
 - **Attach upfront** if you already know you want a sim: `lim xcode rbe --ios`
   (attaches at startup, removed on `--stop`).
-- **Multi-app workspaces:** pass `--target //App` so auto-install knows which app
-  to install (a single-app workspace is inferred).
-- **Disable** with `--no-auto-install` for a tunnel-only / CI session.
-- **Manual install** as a fallback or to force a reinstall: `lim xcode rbe install`
-  (`install //App` in a multi-app workspace).
+- Auto-install happens server-side from the build's events; there is no
+  `lim xcode rbe install` subcommand or `--target` flag. To force a reinstall,
+  rebuild (a cache-hit rebuild is seconds).
+- It fires when the successful invocation produced a single app, so in a
+  multi-app workspace build one app target per invocation (`//App`, not
+  `//...`); a multi-app build succeeds but installs nothing.
 
 To tap, type, read the element tree, screenshot, or record the running app,
 switch to the **`limrun-ios-simulator`** skill.
+
+## Upload builds as assets
+
+To publish a build as a Limrun asset (preview links, installing on other
+simulators, CI artifacts), arm uploads at tunnel start or upload one build
+after the fact:
+
+```bash
+lim xcode rbe --auto-upload preview/my-app --upload-ttl 24h  # every successful build refreshes the asset
+lim xcode rbe upload preview/my-app --ttl 24h                # one-shot: the newest successful build
+```
+
+- `--auto-upload` holds for the tunnel's lifetime: each successful
+  `--config=limrun` build re-uploads the app under that asset name, no
+  post-build step. Upload results land in `.limrun/rbe.log`.
+- `rbe upload` runs from the workspace root and needs a background tunnel
+  plus at least one successful build; it errors otherwise.
+- TTLs are Go durations (`24h`, `30m`; `1d` is invalid) and optional.
+- To change the `--auto-upload` config of a running tunnel, `--stop` and
+  re-run; the CLI refuses a mismatched re-arm instead of silently ignoring it.
+- Preview an uploaded app in a browser at
+  `https://console.limrun.com/preview?asset=<name>&platform=ios`.
 
 ## Teardown
 
