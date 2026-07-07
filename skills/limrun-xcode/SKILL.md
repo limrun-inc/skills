@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, React Native / Expo native build) when the user wants to build, compile, reload, or produce a preview build. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, React Native / Expo native build) when the user wants to build, compile, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -90,6 +90,40 @@ When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
 the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
 
+## Signed device builds (IPA)
+
+To produce a signed IPA for real devices, build with `--sdk iphoneos`, pass the
+signing material, and upload the result to Asset Storage:
+
+```bash
+lim xcode build . --sdk iphoneos --configuration Release \
+  --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
+  --provisioning-profile app.mobileprovision \
+  --upload myapp.ipa
+```
+
+The upload output includes a download URL for the signed IPA. A SUCCEEDED build
+means the signature already passed Apple's verifier on the server, so don't
+re-verify the IPA yourself unless the user asks. Invalid signing fails the
+build loudly instead of producing a broken artifact.
+
+Use a p12 that includes its full CA chain, not just the leaf certificate. If
+needed, re-export it with the chain:
+
+```bash
+openssl pkcs12 -export -inkey dist.key -in dist.pem -certfile wwdr.pem -out dist-chain.p12
+```
+
+Failure strings to recognize in the build output:
+
+- `Unknown issuer hash`: the p12 lacks its CA chain; re-export it with the
+  chain as above.
+- `code signature verification failed`: the platform's post-sign check rejected
+  the artifact. Not a problem in the user's code; retry, and report it if it
+  persists.
+- p12 password errors: `--certificate-password` doesn't match the file; ask the
+  user for the right password.
+
 ## Preview builds
 
 Only create a reusable preview asset when the user asks for a preview build or
@@ -122,3 +156,13 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
   project files or run `lim ios list-apps` after a successful build.
 - **Auth errors** on an authenticated command mean the session expired or
   `LIM_API_KEY` is wrong; ask the user to run `lim login` or provide a key.
+- **Build settings are allowlisted.** Only `APP_CONFIG_*` keys and
+  `SWIFT_ACTIVE_COMPILATION_CONDITIONS` pass `--build-setting`; anything else
+  is rejected. Bump `CURRENT_PROJECT_VERSION` and friends in the Xcode project
+  file instead.
+- **Keep synced files small.** A single ~2MB+ file can fail the client-side
+  sync with ENOMEM before the build starts; compress large assets.
+- **Signing failures are loud and specific.** `Unknown issuer hash` means the
+  p12 lacks its CA chain, so re-export it with the chain; `code signature
+  verification failed` means the platform's post-sign check rejected the
+  artifact, which is not a code problem, so retry or report it.
