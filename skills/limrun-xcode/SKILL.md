@@ -126,21 +126,21 @@ Failure strings to recognize in the build output:
 
 ## Ship to TestFlight
 
-To upload the signed IPA straight to TestFlight, add the App Store Connect API
-key flags to a signed device build. Like signing, passing the flags IS the
-intent; there is no separate toggle:
+To upload the signed IPA straight to TestFlight, pass `--testflight` with the
+App Store Connect API key flags on a signed device build:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
   --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
   --provisioning-profile app.mobileprovision \
-  --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
+  --testflight --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
   --asc-key AuthKey.p8
 ```
 
-`--asc-issuer-id` is only for team keys; omit it for individual keys. Requires
-the signing flags and `--sdk iphoneos` (implied when signing flags are set).
-Combine with `--upload` when the user also wants the IPA in Asset Storage.
+`--asc-issuer-id` is only for team keys; omit it for individual keys.
+`--testflight` requires the signing flags, `--asc-key-id`, and `--asc-key`;
+the asc flags do nothing without it. Combine with `--upload` when the user
+also wants the IPA in Asset Storage.
 
 After the upload, the build watches Apple's processing verdict for up to 120
 seconds (`--asc-wait-timeout`, 0 skips, max 1800). Read the outcome from the
