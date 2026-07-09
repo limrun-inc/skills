@@ -124,6 +124,53 @@ Failure strings to recognize in the build output:
 - p12 password errors: `--certificate-password` doesn't match the file; ask the
   user for the right password.
 
+## Ship to TestFlight
+
+To upload the signed IPA straight to TestFlight, add the App Store Connect API
+key flags to a signed device build. Like signing, passing the flags IS the
+intent; there is no separate toggle:
+
+```bash
+lim xcode build . --sdk iphoneos --configuration Release \
+  --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
+  --provisioning-profile app.mobileprovision \
+  --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
+  --asc-key AuthKey.p8
+```
+
+`--asc-issuer-id` is only for team keys; omit it for individual keys. Requires
+the signing flags and `--sdk iphoneos` (implied when signing flags are set).
+Combine with `--upload` when the user also wants the IPA in Asset Storage.
+
+After the upload, the build watches Apple's processing verdict for up to 120
+seconds (`--asc-wait-timeout`, 0 skips, max 1800). Read the outcome from the
+final lines:
+
+- `TestFlight: accepted by App Store Connect`: done; the build appears in
+  TestFlight once Apple finishes.
+- `TestFlight: uploaded, still processing (upload <id>)`: the exit code is 0
+  and the upload succeeded; Apple is still processing. Do NOT retry the build.
+- `TestFlight upload failed: ...`: exit code 1 with Apple's error text. The
+  compile and signing succeeded; only the delivery failed.
+
+Failure strings to recognize:
+
+- Apple text about the bundle version being already used: bump
+  `CFBundleVersion` (Expo: `expo.ios.buildNumber` in app.json) and rebuild.
+- `HTTP 401`: key ID / issuer ID / .p8 mismatch, or a revoked key.
+- `HTTP 403`: the key's role cannot upload builds; it needs the Developer role
+  or higher.
+- `no App Store Connect app with bundle id`: the app record doesn't exist;
+  the user must create it in App Store Connect manually (the API cannot).
+- Build later stuck at "Missing Compliance" in TestFlight: the app doesn't
+  answer the export-compliance question at build time. Set
+  `ITSAppUsesNonExemptEncryption` to `NO` in Info.plist (Expo:
+  `expo.ios.config.usesNonExemptEncryption: false` in app.json) and rebuild.
+
+For hands-off delivery to testers, the app's internal TestFlight group must
+have automatic distribution enabled (create-only setting) and the compliance
+key above must be set; then no post-upload steps exist at all.
+
 ## Preview builds
 
 Only create a reusable preview asset when the user asks for a preview build or
