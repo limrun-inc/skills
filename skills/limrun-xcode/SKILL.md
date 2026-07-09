@@ -126,8 +126,8 @@ Failure strings to recognize in the build output:
 
 ## Ship to TestFlight
 
-To upload the signed IPA straight to TestFlight, pass `--upload-to-testflight` with the
-App Store Connect API key flags on a signed device build:
+To upload the signed IPA straight to TestFlight, pass `--upload-to-testflight`
+with the App Store Connect API key flags on a signed device build:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
@@ -139,8 +139,8 @@ lim xcode build . --sdk iphoneos --configuration Release \
 
 `--asc-issuer-id` is only for team keys; omit it for individual keys.
 `--upload-to-testflight` requires the signing flags, `--asc-key-id`, and
-`--asc-key`; passing asc flags without it is an error. Combine with
-`--upload` when the user also wants the IPA in Asset Storage.
+`--asc-key`; passing asc flags without it is an error. Combine with `--upload <asset-name>`
+when the user also wants the IPA in Asset Storage.
 
 After the upload, the build watches Apple's processing verdict for up to 120
 seconds (`--asc-wait-timeout`, 0 skips, max 1800). Read the outcome from the
@@ -148,8 +148,9 @@ final lines:
 
 - `TestFlight: accepted by App Store Connect`: done; the build appears in
   TestFlight once Apple finishes.
-- `TestFlight: uploaded, still processing (upload <id>)`: the exit code is 0
-  and the upload succeeded; Apple is still processing. Do NOT retry the build.
+- `TestFlight: uploaded, still processing on Apple's side (upload <id>).`: the
+  exit code is 0 and the upload succeeded; Apple is still processing. Do NOT
+  retry the build.
 - `TestFlight upload failed: ...`: exit code 1 with Apple's error text. The
   compile and signing succeeded; only the delivery failed.
 
