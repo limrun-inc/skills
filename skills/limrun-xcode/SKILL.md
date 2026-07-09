@@ -139,9 +139,8 @@ lim xcode build . --sdk iphoneos --configuration Release \
 
 `--asc-issuer-id` is only for team keys; omit it for individual keys.
 `--upload-to-testflight` requires the signing flags, `--asc-key-id`, and
-`--asc-key`;
-the asc flags do nothing without it. Combine with `--upload` when the user
-also wants the IPA in Asset Storage.
+`--asc-key`; passing asc flags without it is an error. Combine with
+`--upload` when the user also wants the IPA in Asset Storage.
 
 After the upload, the build watches Apple's processing verdict for up to 120
 seconds (`--asc-wait-timeout`, 0 skips, max 1800). Read the outcome from the
