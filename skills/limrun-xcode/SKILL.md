@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, React Native / Expo native build) when the user wants to build, compile, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -66,6 +66,13 @@ simulator. Framework-specific skills construct the correct URL.
 lim xcode build . --configuration Debug --dev-server-url '<absolute-url>'
 ```
 
+If the app launches without using the expected URL, open it explicitly to
+separate build/install issues from URL routing:
+
+```bash
+lim ios open-url --id <ios-instance-id> '<absolute-url>'
+```
+
 ## Generated Xcode projects (XcodeGen)
 
 If the repo has a `project.yml` and the `.xcodeproj` is gitignored, do not run
@@ -93,13 +100,6 @@ lim xcode build . --include '^ios/GeneratedKit/'
 `--include` takes a regular expression like `--ignore`, not gitignore syntax.
 To reach files under a directory that is ignored as a whole, the pattern must
 also match the directory path itself, as above.
-
-If the app launches without using the expected URL, open it explicitly to
-separate build/install issues from URL routing:
-
-```bash
-lim ios open-url --id <ios-instance-id> '<absolute-url>'
-```
 
 ## Run on a simulator
 
