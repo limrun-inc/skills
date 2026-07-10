@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, React Native / Expo native build) when the user wants to build, compile, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -72,6 +72,34 @@ separate build/install issues from URL routing:
 ```bash
 lim ios open-url --id <ios-instance-id> '<absolute-url>'
 ```
+
+## Generated Xcode projects (XcodeGen)
+
+If the repo has a `project.yml` and the `.xcodeproj` is gitignored, do not run
+xcodegen locally and do not treat the missing project as an error. The remote
+sandbox generates the project from `project.yml` before building:
+
+```bash
+lim xcode build .
+```
+
+The spec is found at the repo root or one directory down (like `ios/`), no
+flags needed. The project regenerates on every build, so `project.yml` edits
+take effect by just rebuilding. A committed or force-synced `.xcodeproj`
+always wins: the sandbox only generates when the sync didn't supply one.
+
+If the repo's codegen produces gitignored inputs the build needs (a generated
+local Swift package, config-derived sources), run that step locally first and
+force-sync its output with `--include`:
+
+```bash
+make generate   # or whatever the repo's codegen step is
+lim xcode build . --include '^ios/GeneratedKit/'
+```
+
+`--include` takes a regular expression like `--ignore`, not gitignore syntax.
+To reach files under a directory that is ignored as a whole, the pattern must
+also match the directory path itself, as above.
 
 ## Run on a simulator
 
@@ -222,6 +250,10 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
   file instead.
 - **Keep synced files small.** A single ~2MB+ file can fail the client-side
   sync with ENOMEM before the build starts; compress large assets.
+- **Symlinks sync when relative and in-root.** A symlink whose target is an
+  absolute path is skipped with a warning; recreate it with a relative target
+  if the build needs it. A relative link escaping the synced folder fails the
+  sync; `--ignore` it or sync from the repo root that contains the target.
 - **Signing failures are loud and specific.** `Unknown issuer hash` means the
   p12 lacks its CA chain, so re-export it with the chain; `code signature
   verification failed` means the platform's post-sign check rejected the
