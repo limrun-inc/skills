@@ -137,10 +137,22 @@ lim xcode build . --sdk iphoneos --configuration Release \
   --asc-key AuthKey.p8
 ```
 
-`--asc-issuer-id` is only for team keys; omit it for individual keys.
 `--upload-to-testflight` requires the signing flags, `--asc-key-id`, and
-`--asc-key`; passing asc flags without it is an error. Combine with `--upload <asset-name>`
-when the user also wants the IPA in Asset Storage.
+`--asc-key`; passing asc flags without it is an error. Combine with
+`--upload <asset-name>` when the user also wants the IPA in Asset Storage.
+
+Collect from the user (all three live in App Store Connect under Users and
+Access, Integrations tab, App Store Connect API):
+
+- `--asc-key-id`: the Key ID next to their API key. If they don't have one,
+  point them at Team Keys with the **Developer** role: the least-privileged
+  role that can upload builds. Creating team keys needs an Admin account.
+- `--asc-issuer-id`: the Issuer ID at the TOP of the Integrations page (a
+  team value, not per-key). Omit this flag entirely for individual API keys.
+- `--asc-key`: path to the downloaded `.p8` file. Apple keeps no copy and
+  the download link disappears after leaving the page; if the user lost it,
+  they must generate a new key. Never commit the `.p8` or paste its content
+  into files; pass a filesystem path.
 
 After the upload, the build watches Apple's processing verdict for up to 120
 seconds (`--asc-wait-timeout`, 0 skips, max 1800). Read the outcome from the
