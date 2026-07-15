@@ -204,6 +204,8 @@ Here is how to upload it:
 ```bash
 export ASSET_NAME=myapp.tar.gz # can be any name
 lim asset push ${ASSET_NAME}
+
+echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios"
 ```
 
 Once the command finishes, you can give the following URL to the user to
