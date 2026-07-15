@@ -23,7 +23,14 @@ because it's missing from `.env` or the shell). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `lim ios <subcommand> --help` instead of guessing.
 
-## Get a simulator attached
+## Installing an app bundle
+
+You can either use Limrun remote Bazel or Xcode services to build the app bundle and have
+it installed to the simulator automatically or you can sync a pre-built local `.ipa`
+file or `.app` folder to the simulator. The main requirement is that it must be
+built for simulator.
+
+### Build and install
 
 A build skill usually attaches the simulator for you (`lim xcode rbe --ios`, or
 `lim xcode build .` then attach). Check what's already there:
@@ -48,6 +55,27 @@ open the URL there and tell them.
 `lim xcode get` prints a Limrun console URL instead. It opens the same live
 view but requires a console login, so prefer the signed stream URL for sharing.
 If the console URL is all you have, share it and mention it needs login.
+
+### Install app from local
+
+Create a new simulator:
+
+```bash
+lim ios create
+```
+
+Share the signed stream URL with the user as a Markdown link, like
+[Live simulator](<signed-stream-url>). If you have a browser the user can see,
+open the URL there and tell them.
+
+You can then run the following command to upload a bundle from local:
+
+```bash
+lim ios sync <path to .ipa file or .app folder>
+```
+
+You can run the same command every time you need to install a new version of the
+bundle. It will patch with the difference and reload it in the simulator.
 
 ## Targeting the right instance
 
@@ -84,6 +112,9 @@ lim ios terminate-app <bundle-id>                         # stop it, e.g. to res
 ```
 
 If you don't know the bundle ID, run `lim ios list-apps`.
+
+The `lim ios launch-app` will stream the logs from the app in realtime for you
+to debug. If you'd like to launch and forget, you can use `--detach` flag.
 
 ## Testing changes
 
@@ -163,16 +194,32 @@ lim ios record stop -o /tmp/recording.mp4
 
 For UI changes, include a demo video in the pull request so the user can see it.
 
+## Preview URL for humans
+
+Upload the `.ipa` file directly or targz archive of the `.app` folder
+to Limrun Asset Storage and return a preview URL for the user to open it and
+test the app manually in the browser.
+
+Here is how to upload it:
+```bash
+export ASSET_NAME=myapp.tar.gz # can be any name
+lim asset push ${ASSET_NAME}
+```
+
+Once the command finishes, you can give the following URL to the user to
+click to see a simulator where this bundle is pre-installed.
+
+```
+https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
+```
+
 ## Cleanup
 
-When the user is done with the dev session:
+When the work is completed, you can delete the iOS simulator.
 
 ```bash
 lim ios delete
 ```
-
-If they're still iterating in a dev-client / Metro session, leave the simulator
-running and tell them it's still available.
 
 ## Gotchas
 
