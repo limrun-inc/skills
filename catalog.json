@@ -20,6 +20,10 @@
     {
       "name": "limrun-xcode-bazel",
       "defaultSelected": false
+    },
+    {
+      "name": "limrun-gradle",
+      "defaultSelected": true
     }
   ]
 }
