@@ -169,6 +169,13 @@ lim xcode build . --sdk iphoneos --configuration Release \
 `--asc-key`; passing asc flags without it is an error. Combine with
 `--upload <asset-name>` when the user also wants the IPA in Asset Storage.
 
+Add `--auto-build-number` to set the build number to one more than the highest
+already in App Store Connect (1 for a new app), so repeat uploads never collide
+on `CFBundleVersion`. It is resolved server-side with the same ASC key and
+requires `--upload-to-testflight`. It takes effect for projects using
+Xcode-standard versioning (`CFBundleVersion = $(CURRENT_PROJECT_VERSION)`),
+which modern templates and Expo prebuilds do.
+
 Collect from the user (all three live in App Store Connect under Users and
 Access, Integrations tab, App Store Connect API):
 
@@ -196,8 +203,9 @@ final lines:
 
 Failure strings to recognize:
 
-- Apple text about the bundle version being already used: bump
-  `CFBundleVersion` (Expo: `expo.ios.buildNumber` in app.json) and rebuild.
+- Apple text about the bundle version being already used: rebuild with
+  `--auto-build-number`, or bump `CFBundleVersion` (Expo:
+  `expo.ios.buildNumber` in app.json) manually and rebuild.
 - `HTTP 401`: key ID / issuer ID / .p8 mismatch, or a revoked key.
 - `HTTP 403`: the key's role cannot upload builds; it needs the Developer role
   or higher.
