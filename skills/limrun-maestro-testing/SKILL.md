@@ -97,6 +97,15 @@ Install the app under test as usual (`lim ios create --install app.ipa`,
 MAESTRO_EXPO_URL='exp://<tunnel-host>' lim ios maestro test flow.yaml
 ```
 
+## Expo dev-client builds
+
+Expo Go is the quickest path, but a dev-client build works too. `launchApp`
+lands on the dev launcher rather than your app, so open the dev-client URL
+instead: `- stopApp` followed by
+`- openLink: <scheme>://expo-development-client/?url=<url-encoded-metro-url>`.
+Use `limrun-expo-development` for building the dev client, starting Metro, and
+deriving that URL.
+
 ## Flow gotchas on Limrun
 
 - `startRecording`/`stopRecording` YAML commands are not supported (the
@@ -119,6 +128,10 @@ MAESTRO_EXPO_URL='exp://<tunnel-host>' lim ios maestro test flow.yaml
 - Fleet variance: anchor assertions on stable accessibility identifiers and
   text, not on timing. Use `extendedWaitUntil` with a generous timeout for
   first app load.
+- Text selectors match the element's accessibility label, and on iOS a label
+  often folds in sibling content (icon names, adjacent text) or non-breaking
+  spaces. Read the exact label with `lim ios element-tree` before writing the
+  selector instead of guessing from what the screen shows.
 
 ## Validation signals
 

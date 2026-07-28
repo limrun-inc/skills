@@ -50,7 +50,8 @@ lim ios create --attach
 If the create (or `lim xcode rbe --ios`) output includes a signed stream URL,
 share it with the user as a Markdown link, like
 [Live simulator](<signed-stream-url>). If you have a browser the user can see,
-open the URL there and tell them.
+open the URL there and tell them. Otherwise pass `--no-open` to `create`: it
+skips opening the URL locally and still prints it for sharing.
 
 `lim xcode get` prints a Limrun console URL instead. It opens the same live
 view but requires a console login, so prefer the signed stream URL for sharing.
