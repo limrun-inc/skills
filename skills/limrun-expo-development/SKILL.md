@@ -123,6 +123,8 @@ DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
 lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 ```
 
+Tunnel lifecycle: only traffic flowing through the tunnel counts as instance activity, so an open idle tunnel does not stop the instance's inactivity timeout. If a previous tunnel process died without cleanup, its port frees automatically within about two minutes; on `already in use`, wait and retry rather than switching ports.
+
 ## Launch Dev Client
 
 Open the Debug app through the dev-client URL:
