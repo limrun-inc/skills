@@ -50,6 +50,9 @@ lim xcode get             # is a simulator already attached?
 lim ios create --attach   # attach one
 ```
 
+Add `--no-open` when you have no browser to show the user; it skips opening
+the stream URL locally and still prints it for sharing.
+
 If the attach output includes a signed stream URL, share it with the user as a
 Markdown link, such as [Live simulator](<signed-stream-url>).
 

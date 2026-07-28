@@ -73,6 +73,9 @@ lim ios create --xcode \
   --label agent=<agent>
 ```
 
+Add `--no-open` to any `create` when you have no browser to show the user; it
+skips opening the stream URL and leaves the URL in the output to share.
+
 If an iOS simulator is already running from a reused asset and a later native rebuild becomes necessary, attach or create Xcode for that same simulator instead of creating a second iOS simulator:
 
 ```bash
@@ -97,6 +100,10 @@ Start Metro after the Debug app is installed:
 ```bash
 npx expo start --dev-client --tunnel
 ```
+
+`--tunnel` needs `@expo/ngrok`, and Expo tries to install it interactively, which
+fails in non-interactive environments with `Input is required, but 'npx expo' is
+in non-interactive mode`. Install it up front: `npm install --global @expo/ngrok`.
 
 If `8081` is busy, choose a free port with `--port <port>`. If tunnel startup fails or exits, retry a few times; if it still fails, use the Limrun reverse fallback below. Keep Metro running while the user iterates.
 
@@ -153,7 +160,7 @@ Use the element tree first:
 lim ios element-tree
 ```
 
-Success means the app UI is visible or the Expo dev menu shows it is connected to the tunnel. Dismiss the dev menu overlay if needed. If the tree does not confirm the connection, inspect app logs:
+Success means the app UI is visible or the Expo dev menu shows it is connected to the tunnel. On a fresh instance the first dev-client launch can land on the dev-menu onboarding sheet covering the launcher: tap through it (`lim ios tap-element --text Continue`), then open the dev-client URL again, since the first deep link is consumed by the sheet. If the tree does not confirm the connection, inspect app logs:
 
 ```bash
 lim ios app-log "$BUNDLE_ID" --tail 100
