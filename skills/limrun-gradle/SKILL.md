@@ -154,6 +154,19 @@ You cannot run the publish itself: it is a browser flow with a Google sign-in.
 Prepare the artifact, then hand off:
 
 ```bash
+lim gradle build . --sign --upload-to-playstore --playstore-service-account sa.json --auto-version-code
+```
+
+`--auto-version-code` makes the server resolve the next free versionCode from
+Google Play before the build and stamp it into the workspace copy
+(`expo.android.versionCode` in app.json for Expo projects, the single literal
+`versionCode` in the conventional `app/` module build script for native
+Gradle projects), so repeat publishes never collide. Without it, or on
+projects with computed or flavor-split versionCodes (which it rejects at
+request time), manage the versionCode yourself as below. For the
+build-then-publish-via-console flow, upload the AAB as an asset instead:
+
+```bash
 lim gradle build . --sign --upload <app>-v<versionCode>.aab
 ```
 
@@ -163,8 +176,9 @@ release access to the app (the session lives in the browser only; nothing is
 stored). Then on the **Registry** page they click **Publish to Play Store** on
 the uploaded AAB and enter the package name (the application ID). The app
 listing must already exist in Play Console. Google Play requires a versionCode
-it has never seen: bump `versionCode` in `app/build.gradle(.kts)` (Expo:
-`expo.android.versionCode` in app.json) before the build when in doubt.
+it has never seen: `--auto-version-code` handles that on publish builds;
+without it, bump `versionCode` in `app/build.gradle(.kts)` (Expo:
+`expo.android.versionCode` in app.json) before the build.
 
 Failure strings to recognize on the `--sign` path:
 
@@ -185,7 +199,8 @@ Failure strings to recognize on the `--sign` path:
 - **Instance reuse is per git worktree.** Commands resolve the remembered
   instance from the worktree of your cwd; pass `--id <gradle-instance-id>`
   (from `lim gradle list`) to target a specific one.
-- **versionCode must increase for every Play upload.** A rejected publish
+- **versionCode must increase for every Play upload.** Prefer
+  `--auto-version-code` on publish builds. A rejected publish
   saying the version code already exists means bump, rebuild, republish. If a
   publish RETRY reports it, the earlier attempt already succeeded; don't
   publish again.
