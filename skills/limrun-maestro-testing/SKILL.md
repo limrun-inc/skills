@@ -1,6 +1,6 @@
 ---
 name: limrun-maestro-testing
-description: "Run Maestro YAML flows against a Limrun cloud iOS simulator with `lim ios maestro`, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to run, write, or debug Maestro flows or `maestro test` on iOS, migrate an existing Maestro suite to remote simulators, or asks for UI testing with Maestro. For Detox suites use limrun-detox-testing; for driving the simulator without a test framework use limrun-ios-simulator."
+description: "Run Maestro YAML flows against a Limrun cloud iOS simulator with `lim ios maestro`, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to run, write, or debug Maestro flows or `maestro test` on iOS, migrate an existing Maestro suite to remote simulators, or asks for UI testing with Maestro. iOS simulators only today. For Detox suites use limrun-detox-testing; for driving the simulator without a test framework use limrun-ios-simulator."
 user-invocable: true
 ---
 
@@ -22,18 +22,47 @@ no local Xcode.
   2.6+ work; `lim` adapts to the installed version automatically.
 
 The CLI is the source of truth: if a flag errors or you need one not shown
-here, check `lim ios maestro --help` instead of guessing.
+here, check `lim ios <subcommand> --help` instead of guessing.
+
+## Verify the setup
+
+Before touching the user's app, prove the whole pipeline with a flow against
+the built-in Settings app; it needs no app install, tunnel, or build:
+
+```bash
+ID=$(lim ios create --install-asset appstore/maestro-ios-runner-2.5.1.tar.gz \
+  --no-open --quiet --json | jq -r .metadata.id)
+
+cat > hello-flow.yaml <<'EOF'
+appId: com.apple.Preferences
+---
+- launchApp
+- assertVisible: General
+- takeScreenshot: settings-check
+EOF
+
+lim ios maestro --id "$ID" test hello-flow.yaml
+```
+
+All three steps reporting `COMPLETED` means Maestro, the runner, and the
+remote wiring all work; anything failing after this point is about the app or
+the flow, not the setup.
 
 ## Run a flow
 
 ```bash
 lim ios maestro test flow.yaml
 lim ios maestro test flows/
+lim ios maestro --id <ios-id> test flow.yaml
 ```
 
-This targets the most recently created iOS instance in the current workspace
-(pass `--id <ios-id>` explicitly in scripts, agents, or when running from a
-different directory). Extra Maestro flags go after `--`:
+Without `--id` this targets the most recently created iOS instance in the
+current workspace (workspaces follow the git repo or worktree you run from);
+pass `--id <ios-id>` (before `test`) in scripts, agents, or when running from
+a different directory. The first run on an instance takes a few extra seconds
+to launch the runner (plus the install when it wasn't preinstalled); later
+runs skip that. Extra Maestro flags go after
+`--`:
 
 ```bash
 lim ios maestro -- test flow.yaml --include-tags smoke --test-output-dir artifacts
@@ -50,8 +79,13 @@ Any running iOS instance works; the runner is installed on first use. Creating
 the instance with the runner preinstalled skips that step:
 
 ```bash
-lim ios create --install-asset appstore/maestro-ios-runner-2.5.1.tar.gz
+lim ios create --install-asset appstore/maestro-ios-runner-2.5.1.tar.gz --no-open
 ```
+
+`--no-open` skips opening the stream URL in a browser (important on headless
+and CI machines). The runner asset name above is the only published one and it
+is version-agnostic: the same runner serves Maestro 2.5.x through 2.7.x, so do
+not look for an asset matching your Maestro version.
 
 Install the app under test as usual (`lim ios create --install app.ipa`,
 `lim ios install-app`, or a build skill), then reference its bundle id via
@@ -66,8 +100,12 @@ MAESTRO_EXPO_URL='exp://<tunnel-host>' lim ios maestro test flow.yaml
 ## Flow gotchas on Limrun
 
 - `startRecording`/`stopRecording` YAML commands are not supported (the
-  simulator is remote). Record with `lim ios record start` / `lim ios record
-  stop -o video.mp4` around the run instead.
+  simulator is remote). Record around the run instead: `lim ios record start
+  --id <ios-id>` returns immediately (recording happens on the instance), and
+  after the flow `lim ios record stop --id <ios-id> -o video.mp4` downloads
+  the video to the local path.
+- `takeScreenshot` works and saves the PNG locally into the working
+  directory (or `--test-output-dir`), like stock Maestro.
 - `addMedia` and flow commands that reference local simulator file paths are
   not supported.
 - HTTP calls from `runScript`/`evalScript` must use `https://` URLs. Plain
@@ -86,8 +124,11 @@ MAESTRO_EXPO_URL='exp://<tunnel-host>' lim ios maestro test flow.yaml
 
 - `Running maestro <version> against <ios-id>...` then
   `Running on Limrun iPhone - iOS ...`: the driver is connected end to end.
-- `Installing the Maestro runner...` / `Launching the Maestro runner...`:
-  first use on this instance; subsequent runs skip both.
+- `Launching the Maestro runner...`: first use on this instance.
+  `Installing the Maestro runner...` additionally appears only when the
+  instance was created without the runner asset. Subsequent runs skip both.
+- Maestro itself prints several JDK `WARNING` lines (reflection, native
+  access) on every run; they are benign upstream noise, not Limrun errors.
 - Flow failures print Maestro's own debug output directory with screenshots
   and the UI hierarchy; `lim ios element-tree --id <ios-id>` shows the live
   screen when debugging selectors.
