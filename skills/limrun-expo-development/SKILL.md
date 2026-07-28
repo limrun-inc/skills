@@ -43,12 +43,15 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did: if nothing native changed, the name matches an existing asset and the slow native build is skipped. Adding or updating native dependencies or changing native app config changes the fingerprint; pure JS/TS edits do not.
 
-Compute it in the project root after dependencies are installed:
+Install dependencies first if the project has no `node_modules` yet (`npm install`, `yarn install`, or `bun install` per the lockfile), then compute the fingerprint in the project root:
 
 ```bash
 FPRINT="$(npx -y @expo/fingerprint . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
+[ -n "$FPRINT" ] || echo "fingerprint failed"
 ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
 ```
+
+If `FPRINT` comes out empty, stop and investigate; do not proceed with a malformed asset name, or every session would collide on the same name regardless of native changes.
 
 Then check whether that exact asset already exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
 
@@ -172,7 +175,7 @@ lim ios app-log "$BUNDLE_ID" --tail 100
 
 ## Iterating
 
-Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rebuild Debug before relaunching the dev loop.
+Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, recompute `FPRINT` and `ASSET_NAME` (see Debug Build Asset), then rebuild Debug and upload under the new name before relaunching the dev loop. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
 
 Tell the user:
 
