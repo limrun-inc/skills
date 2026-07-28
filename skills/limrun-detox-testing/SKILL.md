@@ -49,6 +49,8 @@ npx detox test --no-start
 Prefer starting the tester before the app connects, or use the maintained orchestration in `examples/detox-ios`, to avoid benign mediator "cannot forward" noise.
 If you manually launch the app before `npx detox test --no-start`, that mediator message is expected until the tester connects.
 
+If `lim ios reverse` reports the port is `already in use`, first kill any leftover `lim ios reverse` process from an earlier run; a port whose session died uncleanly frees on its own within about two minutes, so wait and retry rather than switching ports. An open idle tunnel does not count as instance activity, so it will not stop the instance's inactivity timeout between runs.
+
 ## Detox Test Setup
 
 `npx detox test --no-start` still needs the normal Detox project configuration:
