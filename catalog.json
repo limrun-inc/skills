@@ -18,6 +18,10 @@
       "defaultSelected": false
     },
     {
+      "name": "limrun-maestro-testing",
+      "defaultSelected": false
+    },
+    {
       "name": "limrun-xcode-bazel",
       "defaultSelected": false
     }
