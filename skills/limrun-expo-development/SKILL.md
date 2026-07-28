@@ -26,8 +26,8 @@ Derive:
 - `BUNDLE_ID` from `ios.bundleIdentifier`
 - `SLUG` from `slug`
 - `SCHEME` from `scheme`, falling back to `exp+${SLUG}`
-- `BRANCH` from `git branch --show-current`, falling back to `main`
-- `ASSET_NAME="${BUNDLE_ID}/${BRANCH}-debug.zip"`
+
+`ASSET_NAME` is derived from the native fingerprint in the Debug Build Asset section below, after dependencies are installed.
 
 ## Ensure Dev Client
 
@@ -41,18 +41,22 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 ## Debug Build Asset
 
-First check whether a reusable Debug dev-client asset already exists:
+Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did: if nothing native changed, the name matches an existing asset and the slow native build is skipped. Adding or updating native dependencies or changing native app config changes the fingerprint; pure JS/TS edits do not.
+
+Compute it in the project root after dependencies are installed:
 
 ```bash
-lim asset list --name-prefix "$BUNDLE_ID/"
+FPRINT="$(npx -y @expo/fingerprint . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
+ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
 ```
 
-Reuse the exact `$ASSET_NAME` only when:
+Then check whether that exact asset already exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
 
-- it exists, and
-- no native dependency or native config changed in this session.
+```bash
+lim asset list --name-prefix "$ASSET_NAME"
+```
 
-If the current task changed native dependencies or native config, skip asset reuse even if `$ASSET_NAME` exists.
+Reuse `$ASSET_NAME` when the list is non-empty; build fresh when it is not. Recompute the fingerprint after any dependency or config change (installing `expo-dev-client` included), since that is what turns a native change into a rebuild.
 
 When reusing the asset, create or reuse a simulator and install it:
 
