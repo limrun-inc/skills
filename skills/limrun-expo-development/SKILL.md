@@ -46,7 +46,7 @@ Debug assets are keyed by a fingerprint of the app's native inputs, so any agent
 Install dependencies first if the project has no `node_modules` yet (`npm install`, `yarn install`, or `bun install` per the lockfile), then compute the fingerprint in the project root:
 
 ```bash
-FPRINT="$(npx -y @expo/fingerprint . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
+FPRINT="$(npx -y @expo/fingerprint@0 . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
 [ -n "$FPRINT" ] || echo "fingerprint failed"
 ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
 ```
