@@ -61,7 +61,7 @@ Treat compute, check, and act as one uninterrupted step: run this block, decide,
 Check whether the exact asset exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
 
 ```bash
-lim asset list --name-prefix "$ASSET_NAME"
+[ -n "$ASSET_NAME" ] && lim asset list --name-prefix "$ASSET_NAME"
 ```
 
 Reuse `$ASSET_NAME` when the list is non-empty; build fresh and upload under it when it is not.
