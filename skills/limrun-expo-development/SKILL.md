@@ -41,29 +41,30 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 ## Debug Build Asset
 
-Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did: if nothing native changed, the name matches an existing asset and the slow native build is skipped. Adding or updating native dependencies or changing native app config changes the fingerprint; pure JS/TS edits do not.
+Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did. Native dependency or config changes change the fingerprint; pure JS/TS edits do not. This is the same library and computation expo-updates uses for its `fingerprint` runtime version policy.
 
-Dependencies must be installed first; the rest of this flow (`npx expo config`, Metro) needs them anyway, so this adds no extra install. Without `node_modules` the tool still exits 0 and prints a plausible hash, but computed with zero dependency information, so native dependency changes would not change it and reuse decisions go silently wrong.
-
-Compute the fingerprint in the Expo app directory (where `app.json` lives; in a monorepo that is the directory you would pass as `--expo-app-dir`, not the repo root):
+Compute the fingerprint in the Expo app directory (where `app.json` lives; in a monorepo, the directory you would pass as `--expo-app-dir`) with dependencies installed. Without `node_modules` the tool still exits 0 but silently omits every dependency source, so the block below fails closed; the rest of this flow needs the install anyway, so it adds none.
 
 ```bash
-[ -d node_modules ] || echo "install dependencies before fingerprinting"
+ASSET_NAME=""
 FPRINT="$(npx -y @expo/fingerprint@0 . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
-# da39a3... is the hash of an empty source list: nothing was found at all.
+# da39a3... hashes an empty source list: nothing was scanned at all.
 case "$FPRINT" in da39a3ee5e6b4b0d3255bfef95601890afd80709) FPRINT="";; esac
-[ -n "$FPRINT" ] && ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
+if [ -d node_modules ] && [ -n "$FPRINT" ]; then
+  ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
+fi
+[ -n "$ASSET_NAME" ] || echo "fingerprint failed; fix the project state and rerun this block"
 ```
 
-A failed fingerprint leaves `ASSET_NAME` unset. Do not continue to the asset check or a build upload without it; fix the project state and recompute.
+Treat compute, check, and act as one uninterrupted step: run this block, decide, and immediately reuse or build-and-upload. If anything native changes afterwards, including between a check and a later upload, the name is stale; rerun the block. An empty `ASSET_NAME` means stop; never fall back to a value from an earlier run.
 
-Then check whether that exact asset already exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
+Check whether the exact asset exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
 
 ```bash
 lim asset list --name-prefix "$ASSET_NAME"
 ```
 
-Reuse `$ASSET_NAME` when the list is non-empty; build fresh when it is not. Compute `FPRINT` immediately before using it, both for this check and for an upload, never earlier in the session: a value computed before the latest dependency or config change (installing `expo-dev-client` included) points at the wrong build, and recomputing at use time is what turns a native change into a rebuild.
+Reuse `$ASSET_NAME` when the list is non-empty; build fresh and upload under it when it is not.
 
 When reusing the asset, create or reuse a simulator and install it:
 
@@ -179,7 +180,7 @@ lim ios app-log "$BUNDLE_ID" --tail 100
 
 ## Iterating
 
-Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, recompute `FPRINT` and `ASSET_NAME` (see Debug Build Asset), then rebuild Debug and upload under the new name before relaunching the dev loop. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
+Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rerun the Debug Build Asset block: it yields the new name to rebuild and upload under. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
 
 Tell the user:
 
