@@ -43,11 +43,12 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did: if nothing native changed, the name matches an existing asset and the slow native build is skipped. Adding or updating native dependencies or changing native app config changes the fingerprint; pure JS/TS edits do not.
 
-Install dependencies first if the project has no `node_modules` yet (`npm install`, `yarn install`, or `bun install` per the lockfile), then compute the fingerprint in the project root:
+Dependencies must be installed first; the rest of this flow (`npx expo config`, Metro) needs them anyway, so this adds no extra install. Without `node_modules` the tool does not fail, it silently hashes an empty tree, and every uninstalled project collides on the same asset name. Compute the fingerprint in the project root:
 
 ```bash
 FPRINT="$(npx -y @expo/fingerprint@0 . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
-[ -n "$FPRINT" ] || echo "fingerprint failed"
+# da39a3... is the empty-tree hash: the tool saw no dependencies.
+case "$FPRINT" in ""|da39a3ee5e6b4b0d3255bfef95601890afd80709) echo "fingerprint failed";; esac
 ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
 ```
 
