@@ -59,7 +59,7 @@ Then check whether that exact asset already exists (`lim asset list` truncates l
 lim asset list --name-prefix "$ASSET_NAME"
 ```
 
-Reuse `$ASSET_NAME` when the list is non-empty; build fresh when it is not. Recompute the fingerprint after any dependency or config change (installing `expo-dev-client` included), since that is what turns a native change into a rebuild.
+Reuse `$ASSET_NAME` when the list is non-empty; build fresh when it is not. Compute `FPRINT` immediately before using it, both for this check and for an upload, never earlier in the session: a value computed before the latest dependency or config change (installing `expo-dev-client` included) points at the wrong build, and recomputing at use time is what turns a native change into a rebuild.
 
 When reusing the asset, create or reuse a simulator and install it:
 
