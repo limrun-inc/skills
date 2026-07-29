@@ -43,16 +43,17 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did: if nothing native changed, the name matches an existing asset and the slow native build is skipped. Adding or updating native dependencies or changing native app config changes the fingerprint; pure JS/TS edits do not.
 
-Dependencies must be installed first; the rest of this flow (`npx expo config`, Metro) needs them anyway, so this adds no extra install. Without `node_modules` the tool does not fail, it silently hashes an empty tree, and every uninstalled project collides on the same asset name. Compute the fingerprint in the project root:
+Dependencies must be installed first; the rest of this flow (`npx expo config`, Metro) needs them anyway, so this adds no extra install. Without `node_modules` the tool still exits 0 and prints a plausible hash, but computed with zero dependency information, so native dependency changes would not change it and reuse decisions go silently wrong. Compute the fingerprint in the project root:
 
 ```bash
+[ -d node_modules ] || echo "install dependencies before fingerprinting"
 FPRINT="$(npx -y @expo/fingerprint@0 . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
-# da39a3... is the empty-tree hash: the tool saw no dependencies.
+# da39a3... is the hash of an empty source list: nothing was found at all.
 case "$FPRINT" in ""|da39a3ee5e6b4b0d3255bfef95601890afd80709) echo "fingerprint failed";; esac
 ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
 ```
 
-If `FPRINT` comes out empty, stop and investigate; do not proceed with a malformed asset name, or every session would collide on the same name regardless of native changes.
+If either check trips, stop and fix the project state; do not proceed to the asset check with a fingerprint computed from an incomplete tree.
 
 Then check whether that exact asset already exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
 
