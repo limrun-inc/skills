@@ -43,20 +43,15 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did. Native dependency or config changes change the fingerprint; pure JS/TS edits do not. This is the same library and computation expo-updates uses for its `fingerprint` runtime version policy.
 
-Compute the fingerprint in the Expo app directory (where `app.json` lives; in a monorepo, the directory you would pass as `--expo-app-dir`) with dependencies installed. Without `node_modules` the tool still exits 0 but silently omits every dependency source, so the block below fails closed; the rest of this flow needs the install anyway, so it adds none.
+Derive the name with the `scripts/debug-asset-name.sh` helper shipped in this skill's directory. Your working directory must be the Expo app directory (in a monorepo, the directory you would pass as `--expo-app-dir`), so invoke the helper by its full path under wherever this skill is installed:
 
 ```bash
-ASSET_NAME=""
-FPRINT="$(npx -y @expo/fingerprint@0 . | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')"
-# da39a3... hashes an empty source list: nothing was scanned at all.
-case "$FPRINT" in da39a3ee5e6b4b0d3255bfef95601890afd80709) FPRINT="";; esac
-if [ -d node_modules ] && [ -n "$FPRINT" ]; then
-  ASSET_NAME="${BUNDLE_ID}/native-${FPRINT}-debug.zip"
-fi
-[ -n "$ASSET_NAME" ] || echo "fingerprint failed; fix the project state and rerun this block"
+ASSET_NAME="$(bash <this-skill-dir>/scripts/debug-asset-name.sh)"
 ```
 
-Treat compute, check, and act as one uninterrupted step: run this block, decide, and immediately reuse or build-and-upload. If anything native changes afterwards, including between a check and a later upload, the name is stale; rerun the block. An empty `ASSET_NAME` means stop; never fall back to a value from an earlier run.
+It prints the asset name, or exits nonzero with the reason on stderr (wrong directory, dependencies not installed, incomplete fingerprint). On failure, fix the project state and rerun; never proceed with a guessed or earlier name.
+
+Treat derive, check, and act as one uninterrupted step: run the helper, decide, and immediately reuse or build-and-upload. If anything native changes afterwards, including between a check and a later upload, the name is stale; rerun the helper.
 
 Check whether the exact asset exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
 
@@ -180,7 +175,7 @@ lim ios app-log "$BUNDLE_ID" --tail 100
 
 ## Iterating
 
-Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rerun the Debug Build Asset block: it yields the new name to rebuild and upload under. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
+Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rerun `scripts/debug-asset-name.sh` to get the new name, then rebuild and upload under it. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
 
 Tell the user:
 
