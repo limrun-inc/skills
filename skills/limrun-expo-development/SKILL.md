@@ -46,8 +46,10 @@ Debug assets are keyed by a fingerprint of the app's native inputs, so any agent
 Derive the name with the `scripts/debug-asset-name.sh` helper shipped in this skill's directory. Your working directory must be the Expo app directory (in a monorepo, the directory you would pass as `--expo-app-dir`), so invoke the helper by its full path under wherever this skill is installed:
 
 ```bash
-ASSET_NAME="$(bash <this-skill-dir>/scripts/debug-asset-name.sh)"
+ASSET_NAME="$(bash <this-skill-dir>/scripts/debug-asset-name.sh "$BUNDLE_ID")"
 ```
+
+Passing `BUNDLE_ID` (derived in Expo Readiness) skips a duplicate `expo config` run; without an argument the helper derives it itself.
 
 It prints the asset name, or exits nonzero with the reason on stderr (wrong directory, dependencies not installed, incomplete fingerprint). On failure, fix the project state and rerun; never proceed with a guessed or earlier name.
 
@@ -175,7 +177,7 @@ lim ios app-log "$BUNDLE_ID" --tail 100
 
 ## Iterating
 
-Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rerun `scripts/debug-asset-name.sh` to get the new name, then rebuild and upload under it. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
+Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rerun the helper the same way as in Debug Build Asset (`bash <this-skill-dir>/scripts/debug-asset-name.sh "$BUNDLE_ID"` from the app directory) to get the new name, then rebuild and upload under it. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
 
 Tell the user:
 

@@ -23,8 +23,8 @@ fail() {
   exit 1
 }
 
-[ -f app.json ] || [ -f app.config.js ] || [ -f app.config.ts ] \
-  || fail "run this from the Expo app directory (where app.json lives)"
+[ -f app.json ] || compgen -G "app.config.*" > /dev/null \
+  || fail "run this from the Expo app directory (where app.json or app.config.* lives)"
 
 # Without installed dependencies, @expo/fingerprint still exits 0 but
 # silently omits every dependency source, producing a plausible hash that
