@@ -177,7 +177,7 @@ lim ios app-log "$BUNDLE_ID" --tail 100
 
 ## Iterating
 
-Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rerun the helper the same way as in Debug Build Asset (`bash <this-skill-dir>/scripts/debug-asset-name.sh` from the app directory) to get the new name, then rebuild and upload under it. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
+Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, re-derive the Expo Readiness values (native config can change `BUNDLE_ID` and `SCHEME`) and rerun the helper the same way as in Debug Build Asset (`bash <this-skill-dir>/scripts/debug-asset-name.sh` from the app directory) to get the new name, then rebuild and upload under it. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
 
 Tell the user:
 
