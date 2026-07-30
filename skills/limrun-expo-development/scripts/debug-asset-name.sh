@@ -13,8 +13,9 @@
 # reason on stderr when the name cannot be derived safely; never proceed
 # with a guessed name in that case.
 #
-# Usage: debug-asset-name.sh [bundle-id]
-#   bundle-id: optional; derived from `expo config` when omitted.
+# Takes no arguments: every component of the name is derived from the
+# project's current state at call time, so a cached value can never leak
+# into the name after the project changed.
 
 set -euo pipefail
 
@@ -34,12 +35,9 @@ fail() {
 node -e 'require.resolve("expo/package.json", { paths: [process.cwd()] })' 2>/dev/null \
   || fail "dependencies not installed (cannot resolve expo from here); run npm/yarn/bun install first"
 
-bundle_id="${1:-}"
-if [ -z "$bundle_id" ]; then
-  bundle_id="$(npx expo config --type introspect --json 2>/dev/null \
-    | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{const b=JSON.parse(d).ios?.bundleIdentifier;if(!b)process.exit(1);console.log(b)})')" \
-    || fail "could not derive ios.bundleIdentifier from expo config"
-fi
+bundle_id="$(npx expo config --type introspect --json 2>/dev/null \
+  | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{const b=JSON.parse(d).ios?.bundleIdentifier;if(!b)process.exit(1);console.log(b)})')" \
+  || fail "could not derive ios.bundleIdentifier from expo config"
 
 # Pinned to major 0: hashes only need to agree across our own sessions, and
 # a floating major could change output format under every agent at once.
