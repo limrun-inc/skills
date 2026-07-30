@@ -26,10 +26,13 @@ fail() {
 [ -f app.json ] || [ -f app.config.js ] || [ -f app.config.ts ] \
   || fail "run this from the Expo app directory (where app.json lives)"
 
-# Without node_modules, @expo/fingerprint still exits 0 but silently omits
-# every dependency source, producing a plausible hash that would not change
-# on native dependency changes. Refuse to compute from an incomplete tree.
-[ -d node_modules ] || fail "install dependencies first (npm/yarn/bun per the lockfile)"
+# Without installed dependencies, @expo/fingerprint still exits 0 but
+# silently omits every dependency source, producing a plausible hash that
+# would not change on native dependency changes. Gate on actual resolution
+# rather than a node_modules directory: an empty directory must fail, and a
+# monorepo with hoisted dependencies must pass.
+node -e 'require.resolve("expo/package.json", { paths: [process.cwd()] })' 2>/dev/null \
+  || fail "dependencies not installed (cannot resolve expo from here); run npm/yarn/bun install first"
 
 bundle_id="${1:-}"
 if [ -z "$bundle_id" ]; then
@@ -40,9 +43,11 @@ fi
 
 # Pinned to major 0: hashes only need to agree across our own sessions, and
 # a floating major could change output format under every agent at once.
+# The parser accepts only a 40-hex hash, so "undefined"/"null"/other shapes
+# fail here instead of leaking into the asset name.
 fprint="$(npx -y @expo/fingerprint@0 . \
-  | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>console.log(JSON.parse(d).hash))')" \
-  || fail "@expo/fingerprint failed"
+  | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{const h=JSON.parse(d).hash;if(typeof h!=="string"||!/^[0-9a-f]{40}$/.test(h))process.exit(1);console.log(h)})')" \
+  || fail "@expo/fingerprint did not produce a valid hash"
 
 # da39a3... is the hash of an empty source list: nothing was scanned at all.
 case "$fprint" in
