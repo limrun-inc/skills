@@ -138,6 +138,25 @@ means the signature already passed Apple's verifier on the server, so don't
 re-verify the IPA yourself unless the user asks. Invalid signing fails the
 build loudly instead of producing a broken artifact.
 
+If the app embeds extensions (WidgetKit widgets, share sheets, intents) or a
+watch app, App Store signing needs one provisioning profile per bundle id, all
+issued for the same distribution certificate. Repeat `--provisioning-profile`
+once per bundle; each profile is matched to its bundle by the
+application-identifier inside it, so order doesn't matter:
+
+```bash
+lim xcode build . --sdk iphoneos --configuration Release \
+  --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
+  --provisioning-profile app.mobileprovision \
+  --provisioning-profile widgets.mobileprovision \
+  --upload myapp.ipa
+```
+
+With multiple profiles, every profile must carry an explicit (non-wildcard)
+bundle id. A `signing preflight failed: no provisioning profile covers ...`
+error names the embedded bundle that lacks a profile; ask the user for a
+profile with exactly that bundle id.
+
 Use a p12 that includes its full CA chain, not just the leaf certificate. If
 needed, re-export it with the chain:
 
@@ -157,18 +176,19 @@ Failure strings to recognize in the build output:
 
 ## Ship to TestFlight
 
-To upload the signed IPA straight to TestFlight, pass `--upload-to-testflight`
-with the App Store Connect API key flags on a signed device build:
+To upload the signed IPA straight to App Store Connect (TestFlight), pass
+`--upload-to-appstore` with the App Store Connect API key flags on a signed
+device build:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
   --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
   --provisioning-profile app.mobileprovision \
-  --upload-to-testflight --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
+  --upload-to-appstore --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
   --asc-key AuthKey.p8
 ```
 
-`--upload-to-testflight` requires the signing flags, `--asc-key-id`, and
+`--upload-to-appstore` requires the signing flags, `--asc-key-id`, and
 `--asc-key`; passing asc flags without it is an error. Combine with
 `--upload <asset-name>` when the user also wants the IPA in Asset Storage.
 
@@ -185,17 +205,19 @@ Access, Integrations tab, App Store Connect API):
   they must generate a new key. Never commit the `.p8` or paste its content
   into files; pass a filesystem path.
 
-After the upload, the build watches Apple's processing verdict for up to 120
-seconds (`--asc-wait-timeout`, 0 skips, max 1800). Read the outcome from the
-final lines:
+By default the build returns as soon as the upload commits and leaves Apple's
+processing verdict to App Store Connect (processing routinely takes many
+minutes). Pass `--asc-wait-timeout <seconds>` (max 1800) to watch for the
+verdict before returning. Read the outcome from the final lines:
 
-- `TestFlight: accepted by App Store Connect`: done; the build appears in
+- `App Store Connect: upload accepted.`: done; the build appears in
   TestFlight once Apple finishes.
-- `TestFlight: uploaded, still processing on Apple's side (upload <id>).`: the
-  exit code is 0 and the upload succeeded; Apple is still processing. Do NOT
-  retry the build.
-- `TestFlight upload failed: ...`: exit code 1 with Apple's error text. The
-  compile and signing succeeded; only the delivery failed.
+- `App Store Connect: uploaded, still processing on Apple's side (upload
+  <id>).`: the exit code is 0 and the upload succeeded; Apple is still
+  processing. Do NOT retry the build.
+- `App Store Connect upload failed; the build and signing succeeded.`: exit
+  code 1 with Apple's error text earlier in the log. Only the delivery
+  failed.
 
 Failure strings to recognize:
 
