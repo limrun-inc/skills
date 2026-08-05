@@ -123,8 +123,33 @@ the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
 
 ## Signed device builds (IPA)
 
-To produce a signed IPA for real devices, build with `--sdk iphoneos`, pass the
-signing material, and upload the result to Asset Storage:
+Prefer Apple cloud signing when the user has an App Store Connect team API key.
+Apple creates or reuses a cloud-managed certificate and provisioning profile,
+so the user does not need to supply a p12 or `.mobileprovision`:
+
+```bash
+lim xcode build . --sdk iphoneos --configuration Release \
+  --signing-method release-testing --team-id "$APPLE_TEAM_ID" \
+  --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
+  --asc-key AuthKey.p8 \
+  --upload myapp.ipa
+```
+
+Signing methods:
+
+- `debugging`: development-signed IPA for registered development devices.
+- `release-testing`: distribution-signed IPA for registered test devices.
+- `app-store-connect`: distribution-signed IPA for App Store Connect.
+
+Cloud signing requires `--sdk iphoneos`, a team API key with an issuer ID, and
+`--team-id` matching that key's Apple Developer team. For distribution methods,
+the API key must be an Admin key or have **Access to cloud-managed distribution
+certificates** enabled. A `Cloud signing permission error` means that permission
+is missing. `No Account for Team` means the team ID and API key do not match.
+`Failed Registering Bundle Identifier` means the bundle ID belongs to another
+team and cannot be registered automatically.
+
+Manual signing remains available when the user already has a p12 and profiles:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
@@ -174,11 +199,11 @@ Failure strings to recognize in the build output:
 - p12 password errors: `--certificate-password` doesn't match the file; ask the
   user for the right password.
 
-## Ship to TestFlight
+## Upload to App Store Connect
 
-To upload the signed IPA straight to App Store Connect (TestFlight), pass
-`--upload-to-appstore` with the App Store Connect API key flags on a signed
-device build:
+To upload the signed IPA to App Store Connect for TestFlight or App Store
+distribution, pass `--upload-to-appstore` with the App Store Connect API key
+flags on a signed device build:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
@@ -188,9 +213,19 @@ lim xcode build . --sdk iphoneos --configuration Release \
   --asc-key AuthKey.p8
 ```
 
-`--upload-to-appstore` requires the signing flags, `--asc-key-id`, and
-`--asc-key`; passing asc flags without it is an error. Combine with
-`--upload <asset-name>` when the user also wants the IPA in Asset Storage.
+Cloud signing can sign and upload with the same API key:
+
+```bash
+lim xcode build . --sdk iphoneos --configuration Release \
+  --signing-method app-store-connect --team-id "$APPLE_TEAM_ID" \
+  --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
+  --asc-key AuthKey.p8 \
+  --upload-to-appstore --auto-build-number
+```
+
+`--upload-to-appstore` requires either cloud signing or the manual signing
+flags, plus `--asc-key-id` and `--asc-key`. Combine it with `--upload
+<asset-name>` when the user also wants the IPA in Asset Storage.
 
 Collect from the user (all three live in App Store Connect under Users and
 Access, Integrations tab, App Store Connect API):
@@ -199,7 +234,8 @@ Access, Integrations tab, App Store Connect API):
   point them at Team Keys with the **Developer** role: the least-privileged
   role that can upload builds. Creating team keys needs an Admin account.
 - `--asc-issuer-id`: the Issuer ID at the TOP of the Integrations page (a
-  team value, not per-key). Omit this flag entirely for individual API keys.
+  team value, not per-key). Cloud signing requires a team key and this flag.
+  For manual signing plus upload, omit it for individual API keys.
 - `--asc-key`: path to the downloaded `.p8` file. Apple keeps no copy and
   the download link disappears after leaving the page; if the user lost it,
   they must generate a new key. Never commit the `.p8` or paste its content
