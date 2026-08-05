@@ -140,7 +140,6 @@ Signing methods:
 - `debugging`: development-signed IPA for registered development devices.
 - `release-testing`: distribution-signed IPA for registered test devices.
 - `app-store-connect`: distribution-signed IPA for App Store Connect.
-- `ad-hoc`: legacy Xcode alias for `release-testing`.
 
 Cloud signing requires `--sdk iphoneos`, a team API key with an issuer ID, and
 `--team-id` matching that key's Apple Developer team. For distribution methods,
