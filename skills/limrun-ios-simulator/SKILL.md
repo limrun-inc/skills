@@ -202,9 +202,9 @@ play a local video file as the simulator's camera. The app sees the frames
 through its normal capture pipeline:
 
 ```bash
-lim ios camera-video play ./fixtures/qr-scan.mp4            # loops by default
-lim ios camera-video play ./fixtures/intro.mp4 --no-loop    # play once, freeze on last frame
-lim ios camera-video clear                                  # restore the default camera
+lim ios camera play ./fixtures/qr-scan.mp4            # loops by default
+lim ios camera play ./fixtures/intro.mp4 --no-loop    # play once, freeze on last frame
+lim ios camera clear                                  # restore the default camera
 ```
 
 Any AVFoundation-decodable file works (H.264/HEVC in `.mp4`/`.mov`). Use
