@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, screenshot, record video, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, screenshot, record video, play a video file as the camera, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'mock the camera', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -194,6 +194,22 @@ lim ios record stop -o /tmp/recording.mp4
 ```
 
 For UI changes, include a demo video in the pull request so the user can see it.
+
+## Simulate the camera with a video
+
+For camera-driven flows (QR-code scanning, document capture, video calls),
+play a local video file as the simulator's camera. The app sees the frames
+through its normal capture pipeline:
+
+```bash
+lim ios camera-video play ./fixtures/qr-scan.mp4            # loops by default
+lim ios camera-video play ./fixtures/intro.mp4 --no-loop    # play once, freeze on last frame
+lim ios camera-video clear                                  # restore the default camera
+```
+
+Any AVFoundation-decodable file works (H.264/HEVC in `.mp4`/`.mov`). Use
+`--no-loop` when the app must observe the end of the clip exactly once (the
+feed freezes on the last frame rather than stalling).
 
 ## Preview URL for humans
 
