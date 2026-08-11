@@ -8,6 +8,6 @@
     "smoke:npx": "npx --yes skills add . --list"
   },
   "devDependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.3.1"
   }
 }
