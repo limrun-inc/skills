@@ -138,6 +138,21 @@ means the signature already passed Apple's verifier on the server, so don't
 re-verify the IPA yourself unless the user asks. Invalid signing fails the
 build loudly instead of producing a broken artifact.
 
+Uploading by name (`--upload`) also records the built app's metadata on the
+asset automatically: the app title, bundle identifier, versions, deep link
+scheme, and icon, all read from the built bundle. To record a field the bundle
+does not declare, pass repeatable `--upload-option key=value` with keys
+`displayName`, `bundleIdentifier`, `shortVersion`, `buildVersion`, or
+`deeplink` (all optional; values extracted from the bundle win):
+
+```bash
+lim xcode build . --sdk iphoneos ... --upload myapp.ipa \
+  --upload-option deeplink=myapp
+```
+
+`lim asset push` accepts the same `--upload-option` flag for IPAs built
+elsewhere.
+
 If the app embeds extensions (WidgetKit widgets, share sheets, intents) or a
 watch app, App Store signing needs one provisioning profile per bundle id, all
 issued for the same distribution certificate. Repeat `--provisioning-profile`
