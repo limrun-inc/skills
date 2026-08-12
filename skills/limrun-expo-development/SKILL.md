@@ -160,7 +160,7 @@ Use the element tree first:
 lim ios element-tree
 ```
 
-Success means the app UI is visible or the Expo dev menu shows it is connected to the tunnel. On a fresh instance the first dev-client launch can land on the dev-menu onboarding sheet covering the launcher: tap through it (`lim ios tap-element --text Continue`), then open the dev-client URL again, since the first deep link is consumed by the sheet. If the tree does not confirm the connection, inspect app logs:
+Success means the app UI is visible or the Expo dev menu shows it is connected to the tunnel. On a fresh instance the first dev-client launch can land on the dev-menu onboarding sheet covering the launcher: tap through it (`lim ios tap-element --ax-label Continue`), then open the dev-client URL again, since the first deep link is consumed by the sheet. If the tree does not confirm the connection, inspect app logs:
 
 ```bash
 lim ios app-log "$BUNDLE_ID" --tail 100
