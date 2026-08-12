@@ -139,6 +139,12 @@ lim ios tap-element --ax-label "Save"
 lim ios tap 201 450
 ```
 
+`tap-element` taps with a real synthesized touch. If the element is below the
+fold, it scrolls the list to find it first (a bounded sweep, a few pages down
+then up), so you don't need to scroll before tapping. A deep sweep can take
+several seconds. Pass `--activate ax` to use an accessibility press instead of
+a touch (no scrolling, works on elements without a usable frame).
+
 **Toolbar / nav-bar items usually can't be tapped by id.** SwiftUI collapses
 toolbar children into a single nav-bar group, and those items report
 `AXUniqueId: null` even when you set `.accessibilityIdentifier(...)` (regular
@@ -152,10 +158,29 @@ lim ios element-tree --id <id> | grep -i -A6 -B2 moon   # find the item's AXFram
 lim ios tap <x> <y> --id <id>                           # tap the frame's center
 ```
 
-For text input:
+For text input, focus a field first (tap it), then type:
 
 ```bash
-lim ios type "hello world"
+lim ios type "hello world"     # real key events; errors if no field is focused
+lim ios press-key backspace
+lim ios press-key @            # shifted symbols work directly
+```
+
+`type` presses real keys, so text delegates fire and the field's own keyboard
+behavior applies (a default text field autocapitalizes the first letter, for
+example). To set a value verbatim with no keyboard behavior, use `set-text`:
+
+```bash
+lim ios set-text "P@ssw0rd!" --focused                 # into the focused field
+lim ios set-text "hello" --ax-unique-id emailField     # by selector
+```
+
+For scrolling and drags:
+
+```bash
+lim ios scroll down --amount 300                       # from the screen center
+lim ios scroll down --amount 300 --coordinate 200,400  # from a specific point
+lim ios swipe --from 200,600 --to 200,200              # explicit drag; --duration 800 for a slower, precise one
 ```
 
 After every interaction, re-run `element-tree` to confirm the UI transitioned.
