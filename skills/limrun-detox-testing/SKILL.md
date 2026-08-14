@@ -46,7 +46,7 @@ lim ios launch-app <bundle-id> \
 npx detox test --no-start
 ```
 
-Prefer starting the tester before the app connects, or use the maintained orchestration in `examples/detox-ios`, to avoid benign mediator "cannot forward" noise.
+Prefer starting the tester before the app connects, or use the maintained orchestration in [limrun-inc/typescript-sdk `examples/detox-ios`](https://github.com/limrun-inc/typescript-sdk/tree/main/examples/detox-ios), to avoid benign mediator "cannot forward" noise.
 If you manually launch the app before `npx detox test --no-start`, that mediator message is expected until the tester connects.
 
 If `lim ios reverse` reports the port is `already in use`, first kill any leftover `lim ios reverse` process from an earlier run; a port whose session died uncleanly frees on its own within about two minutes, so wait and retry rather than switching ports. An open idle tunnel does not count as instance activity, so it will not stop the instance's inactivity timeout between runs.
@@ -55,12 +55,12 @@ If `lim ios reverse` reports the port is `already in use`, first kill any leftov
 
 `npx detox test --no-start` still needs the normal Detox project configuration:
 
-- Pass the Detox config file and configuration name from your project (see `examples/detox-ios/.detoxrc.cjs` for a reference layout).
+- Pass the Detox config file and configuration name from your project (see [`examples/detox-ios/.detoxrc.cjs` in limrun-inc/typescript-sdk](https://github.com/limrun-inc/typescript-sdk/blob/main/examples/detox-ios/.detoxrc.cjs) for a reference layout).
 - Use the Limrun third-party driver: `type: '@limrun/detox/driver'`.
 - Keep `DETOX_SERVER` and `DETOX_SESSION_ID` aligned with the mediator and launch command.
 - Provide Limrun driver env such as `LIMRUN_IOS_ID`, `LIMRUN_IOS_API_URL`, and `LIMRUN_IOS_TOKEN` when screenshots or driver calls need the instance API.
 
-Use `examples/detox-ios` as the maintained happy path for exact config/env wiring. Use `-l trace` on `detox run-server` only when verbose logs are not enough.
+Use [limrun-inc/typescript-sdk `examples/detox-ios`](https://github.com/limrun-inc/typescript-sdk/tree/main/examples/detox-ios) as the maintained happy path for exact config/env wiring. Use `-l trace` on `detox run-server` only when verbose logs are not enough.
 
 For native SwiftUI apps, a minimal Detox configuration usually looks like:
 

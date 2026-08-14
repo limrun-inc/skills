@@ -150,8 +150,10 @@ Failure strings to recognize on the bring-your-own path:
 
 ## Publish to Play Store
 
-You cannot run the publish itself: it is a browser flow with a Google sign-in.
-Prepare the artifact, then hand off:
+With Play credentials (a service-account JSON via
+`--playstore-service-account`, or an access token via
+`--playstore-access-token`), the build publishes the signed release AAB
+directly, no browser involved:
 
 ```bash
 lim gradle build . --sign --upload-to-playstore --playstore-service-account sa.json --auto-version-code
@@ -163,8 +165,9 @@ Google Play before the build and stamp it into the workspace copy
 `versionCode` in the conventional `app/` module build script for native
 Gradle projects), so repeat publishes never collide. Without it, or on
 projects with computed or flavor-split versionCodes (which it rejects at
-request time), manage the versionCode yourself as below. For the
-build-then-publish-via-console flow, upload the AAB as an asset instead:
+request time), manage the versionCode yourself as below. Without Play
+credentials you cannot run the publish itself: it is a browser flow with a
+Google sign-in. Prepare the artifact, upload it as an asset, and hand off:
 
 ```bash
 lim gradle build . --sign --upload <app>-v<versionCode>.aab
