@@ -134,9 +134,12 @@ Tunnel lifecycle: only traffic flowing through the tunnel counts as instance act
 
 ## Launch Dev Client
 
-Open the Debug app through the dev-client URL:
+Open the Debug app through the dev-client URL, with `TUNNEL_URL` set to the
+`https://*.exp.direct` URL collected above (or the reverse-tunnel URL from the
+fallback):
 
 ```bash
+TUNNEL_URL="https://<subdomain>.exp.direct"
 ENCODED_URL="$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "$TUNNEL_URL")"
 DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
 lim ios open-url "$DEV_CLIENT_URL"
