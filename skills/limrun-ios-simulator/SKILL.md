@@ -139,11 +139,14 @@ lim ios tap-element --ax-label "Save"
 lim ios tap 201 450
 ```
 
-`tap-element` taps with a real synthesized touch. If the element is below the
-fold, it scrolls the list to find it first (a bounded sweep, a few pages down
-then up), so you don't need to scroll before tapping. A deep sweep can take
-several seconds. Pass `--activate ax` to use an accessibility press instead of
-a touch (no scrolling, works on elements without a usable frame).
+`tap-element` taps with a real synthesized touch. Elements the accessibility
+tree can see are scrolled into view automatically. A selector that matches
+nothing in the tree fails in about a second; iOS creates list rows lazily, so
+a below-the-fold row often isn't in the tree at all. For those, pass
+`--scroll-search`: the CLI pages the screen (a few pages down, then up)
+retrying the tap until the row materializes, which can take ~10s. Pass
+`--activate ax` to use an accessibility press instead of a touch (no
+scrolling, works on elements without a usable frame).
 
 **Toolbar / nav-bar items usually can't be tapped by id.** SwiftUI collapses
 toolbar children into a single nav-bar group, and those items report
@@ -162,6 +165,7 @@ For text input, focus a field first (tap it), then type:
 
 ```bash
 lim ios type "hello world"     # real key events; errors if no field is focused
+lim ios type "hi" --no-require-focus  # skip the focus check: for fields focused by coordinate taps when the accessibility focus scan is unreliable
 lim ios press-key backspace
 lim ios press-key @            # shifted symbols work directly
 ```
