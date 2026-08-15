@@ -136,24 +136,72 @@ lim xcode attach-simulator <ios-instance-id> --id <xcode-instance-id>
 
 After the attach, every successful `lim xcode build` installs and launches the app on the attached simulator.
 
-## Start Metro Tunnel
+## Start Metro Through Limrun
 
-Start Metro after the Debug app is installed:
+Start one destination tunnel after the Debug app is installed. Metro can keep
+its normal local port; Expo advertises the simulator-facing endpoint returned by
+Limrun:
 
 ```bash
+METRO_PORT="$(node -e 'const s=require("node:net").createServer(); s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
+TUNNEL_JSON="$(lim ios tunnel \
+  --route "localhost:${METRO_PORT}" \
+  --detach \
+  --json \
+  --id <ios-instance-id>)"
+TUNNEL_HOST="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.bindings[0].endpoint.host)' "$TUNNEL_JSON")"
+TUNNEL_PORT="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.bindings[0].endpoint.port)' "$TUNNEL_JSON")"
+TUNNEL_URL="http://${TUNNEL_HOST}:${TUNNEL_PORT}"
+echo "TUNNEL_URL=$TUNNEL_URL"
+
+EXPO_PACKAGER_PROXY_URL="$TUNNEL_URL" \
+  npx expo start --dev-client --port "$METRO_PORT"
+```
+
+`EXPO_PACKAGER_PROXY_URL` overrides the full URL Expo puts in manifests, bundle
+URLs, and deep links. Set it inline so it takes precedence over project dotenv
+values. Keep Metro and the detached tunnel running while the user iterates.
+Run Metro as a managed background process, or copy the printed `TUNNEL_URL` into
+a second terminal before launching the app.
+
+Only add `--offline` in a genuinely network-isolated environment after
+dependencies are installed. Offline mode disables network checks and dependency
+validation, so do not use it to compensate for ordinary Expo authentication.
+
+For Expo Go, replace `--dev-client` with `--go`, then open:
+
+```bash
+lim ios open-url \
+  --id <ios-instance-id> \
+  "exp://${TUNNEL_URL#http://}"
+```
+
+Tunnel lifecycle:
+
+```bash
+lim ios tunnel status --id <ios-instance-id> --json
+lim ios tunnel stop --id <ios-instance-id>
+```
+
+If Metro stops, the tunnel remains active and status reports a correlated
+`connection_refused`. Restart Metro with the same proxy URL and reopen the
+dev-client URL; do not recreate the simulator or tunnel.
+
+### Fallback: Expo Tunnel
+
+If the Limrun endpoint cannot be used, start Expo's public tunnel:
+
+```bash
+npm install --save-dev '@expo/ngrok@^4.1.0'
 npx expo start --dev-client --tunnel
 ```
 
-`--tunnel` needs `@expo/ngrok`, and Expo tries to install it interactively, which
-fails in non-interactive environments with `Input is required, but 'npx expo' is
-in non-interactive mode`. Install it up front: `npm install --global @expo/ngrok`.
-
-If `8081` is busy, choose a free port with `--port <port>`. If tunnel startup fails or exits, retry a few times; if it still fails, use the Limrun reverse fallback below. Keep Metro running while the user iterates.
-
-Get the `https://*.exp.direct` tunnel URL from Expo output. If Expo does not print it, query the local ngrok API:
+Use the complete dev-client URI Expo prints:
 
 ```bash
-curl -sS http://127.0.0.1:4040/api/tunnels
+DEV_CLIENT_URL="<complete URI printed by Expo>"
+lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
+lim android open-url "$DEV_CLIENT_URL" --id <android-instance-id>
 ```
 
 ### Fallback: Reverse Tunnel
@@ -195,20 +243,15 @@ DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
 lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 ```
 
-Tunnel lifecycle: only traffic flowing through the tunnel counts as instance activity, so an open idle tunnel does not stop the instance's inactivity timeout. If the port is `already in use`, first kill any leftover `lim ios reverse` process from an earlier attempt; a port whose session died uncleanly frees on its own within about two minutes, so wait and retry rather than switching ports.
-
 ## Launch Dev Client
 
-Open the Debug app through the dev-client URL, with `TUNNEL_URL` set to the
-`https://*.exp.direct` URL collected above (or the reverse-tunnel URL from the
-fallback):
+Open the Debug app through the dev-client URL, using the `TUNNEL_URL` collected
+above:
 
 ```bash
-TUNNEL_URL="https://<subdomain>.exp.direct"
 ENCODED_URL="$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "$TUNNEL_URL")"
 DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
-lim ios open-url "$DEV_CLIENT_URL"
-lim android open-url "$DEV_CLIENT_URL" --id <android-instance-id>
+lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 ```
 
 If opening fails and the primary scheme came from `scheme`, retry once with `exp+${SLUG}`.
