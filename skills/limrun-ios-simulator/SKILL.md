@@ -224,6 +224,28 @@ lim ios record stop -o /tmp/recording.mp4
 
 For UI changes, include a demo video in the pull request so the user can see it.
 
+## App container files
+
+List an app's data container before pulling a file so you use the exact path the
+app created. Keep the same `--bundle-id` and `--container-type` flags for list,
+pull, push, and delete:
+
+```bash
+lim ios ls Documents --bundle-id com.example.app --container-type data
+lim ios pull-file Documents/recording.mov ./recording.mov \
+  --bundle-id com.example.app --container-type data
+lim ios push-file ./fixture.json Documents/fixture.json \
+  --bundle-id com.example.app --container-type data
+lim ios delete-file Documents/fixture.json \
+  --bundle-id com.example.app --container-type data
+```
+
+`lim ios ls` defaults to the staging-folder root. With `--bundle-id`, it
+defaults to the app bundle (`--container-type app`); use `data` for the app's
+writable `Documents`, `Library`, and `tmp` directories. Paths in `ls` output are
+relative to the selected root and can be copied directly into the other file
+commands.
+
 ## Simulate the camera with a video
 
 For camera-driven flows (QR-code scanning, document capture, video calls),
