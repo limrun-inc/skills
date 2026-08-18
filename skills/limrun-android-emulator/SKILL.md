@@ -42,6 +42,7 @@ lim gradle build . --upload myapp.apk
 lim android create --install-asset myapp.apk --no-open --no-connect
 ```
 
+Create blocks until the instance is ready to drive; no boot wait is needed.
 The create output includes a signed stream URL; share it with the user as a
 Markdown link, like [Live emulator](<signed-stream-url>). If you have a
 browser the user can see, open the URL there and tell them. Create also
@@ -51,7 +52,8 @@ login, so prefer the signed stream URL for sharing.
 Useful create flags: `--reuse-if-exists` (reuse a running instance with the
 same labels), `--rm` (delete when the CLI exits), `--jurisdiction us|eu|as`
 (where the instance runs; don't use `--region`, it is deprecated),
-`--inactivity-timeout` / `--hard-timeout`, `--label k=v`, `--display-name`.
+`--inactivity-timeout` / `--hard-timeout`, `--display-name`, and `--label k=v`
+(find labeled instances later with `lim android list --label-selector k=v`).
 
 ### Install app from local
 
@@ -66,9 +68,10 @@ lim android install-app https://example.com/app.apk
 A local path is uploaded to Limrun Asset Storage first; a URL is fetched by
 the instance itself, which is much faster for large APKs than uploading from
 your machine. `install-app` returns as soon as the app is sent; the install
-finishes in the background within seconds. Confirm with
-`lim android find-element --text "<app name>"` on the launcher, or over adb
-with `pm list packages`.
+finishes in the background within seconds. Newly installed apps land in the
+app drawer, not the home screen, so don't look for their icon; confirm over
+adb with `pm list packages | grep <name>`, or just launch the app (see the
+adb section below).
 
 Every time you need to install a new version of the APK, sync it instead of
 reinstalling:
@@ -117,7 +120,7 @@ Read the serial from `adb devices` and pass it with `-s` to every adb call:
 SERIAL=127.0.0.1:<port>
 adb -s $SERIAL shell cmd package resolve-activity --brief -c android.intent.category.LAUNCHER com.example.app | tail -1
 adb -s $SERIAL shell am start -n com.example.app/.MainActivity   # launch
-adb -s $SERIAL shell monkey -p com.example.app 1                 # launch without knowing the activity
+adb -s $SERIAL shell monkey -p com.example.app 1                 # launch without knowing the activity; noisy and exits nonzero even on success
 adb -s $SERIAL shell am force-stop com.example.app               # stop, e.g. to reset app state
 adb -s $SERIAL logcat -d | tail -100                             # dump recent logs, don't stream into context
 adb -s $SERIAL logcat -d --pid=$(adb -s $SERIAL shell pidof -s com.example.app) | tail -50   # only the app's logs (app must be running)
@@ -143,9 +146,14 @@ element tree to see what's on screen before acting:
 lim android element-tree
 ```
 
-The output is the raw UIAutomator XML hierarchy on a single line. Grep it for
-the `text`, `resource-id`, `content-desc`, and `bounds` attributes you need
-rather than dumping the whole tree into context.
+The output is the raw UIAutomator XML hierarchy on a single line, so a plain
+grep echoes the whole document. Split it into one node per line first, then
+grep for the `text`, `resource-id`, `content-desc`, or `bounds` you need
+rather than dumping the whole tree into context:
+
+```bash
+lim android element-tree | sed 's/></>\n</g' | grep -i "save"
+```
 
 ## Interacting with the app
 
@@ -164,14 +172,19 @@ match a "Save draft" button. Copy the value verbatim from `element-tree`. A
 selector that matches nothing fails in a couple of seconds with
 `No element found for selector`. Other selectors: `--class-name`,
 `--package-name`, `--index`, `--clickable`, `--enabled`, `--focused`, and
-`--bounds-contains-x/y`; combine them to narrow a match. To inspect matches
-without tapping, use `find-element` with the same selectors:
+`--bounds-contains-x/y`; combine them to narrow a match. On web pages in the
+browser, resource ids are the page's own DOM ids (like `searchIcon`) and are
+often empty; select by `--text` plus `--class-name` there, or fall back to
+coordinates from the node's `bounds`. To inspect matches without tapping, use
+`find-element` with the same selectors:
 
 ```bash
 lim android find-element --text "Save"   # table of matches with bounds
 ```
 
-For text input, target the field directly; no prior focus tap is needed:
+For text input, target the field directly; no prior focus tap is needed.
+`type` takes the same selectors as `tap-element` (`--class-name
+android.widget.EditText --focused` works for a field with no resource id):
 
 ```bash
 lim android type "hello world" --resource-id com.example.app:id/searchBox
@@ -191,7 +204,10 @@ lim android open-url "https://example.com"   # opens in the default browser; als
 ```
 
 After every interaction, re-run `element-tree` to confirm the UI transitioned.
-No sleep is needed between a tap and `element-tree`; the tap blocks until done.
+No sleep is needed between a tap and `element-tree`; the tap blocks until
+done. A page load after `open-url` is asynchronous though: re-run
+`element-tree` until the node you expect appears. A present but childless
+`android.webkit.WebView` means the page is still loading, not a broken tree.
 
 ```bash
 lim android element-tree
@@ -225,8 +241,10 @@ lim android record start                     # non-blocking
 lim android record stop -o /tmp/recording.mp4
 ```
 
-`record stop` accepts `--quality 5-10`. For UI changes, include a demo video
-in the pull request so the user can see it.
+`record stop` accepts `--quality 5-10`. Recorded frames are half the
+screenshot resolution, so read tap coordinates from screenshots, never from
+video frames. For UI changes, include a demo video in the pull request so the
+user can see it.
 
 ## Simulate the microphone with an audio file
 
