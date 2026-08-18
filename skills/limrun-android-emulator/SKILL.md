@@ -70,7 +70,8 @@ the instance itself, which is much faster for large APKs than uploading from
 your machine. `install-app` returns as soon as the app is sent; the install
 finishes in the background within seconds. Newly installed apps land in the
 app drawer, not the home screen, so don't look for their icon; just launch
-the app with `lim android launch-app <package>`, or confirm over adb with
+the app with `lim android launch-app <package> --detach` (without `--detach`
+it blocks watching the app until it exits), or confirm over adb with
 `pm list packages | grep <name>`.
 
 Every time you need to install a new version of the APK, sync it instead of

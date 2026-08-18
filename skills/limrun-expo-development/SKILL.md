@@ -41,11 +41,11 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 ## Debug Build Asset
 
-First check whether a reusable Debug dev-client asset already exists (use
-`$PACKAGE/` as the prefix on Android):
+First check whether a reusable Debug dev-client asset already exists:
 
 ```bash
-lim asset list --name-prefix "$BUNDLE_ID/"
+lim asset list --name-prefix "$BUNDLE_ID/"   # iOS
+lim asset list --name-prefix "$PACKAGE/"     # Android
 ```
 
 Reuse the exact `$ASSET_NAME` only when:
@@ -244,11 +244,12 @@ empty tree coexist (see **limrun-android-emulator**):
 lim android screenshot check.png --id <android-instance-id>
 ```
 
-To see why the app died (crash, ANR), launch it watched; the exit report
-carries the stack trace and a recent app log tail:
+To see why the app died (crash, ANR), relaunch it watched; the command blocks
+while the app runs (run it in a background shell) and prints the exit reason,
+stack trace, and a recent app log tail when the app dies:
 
 ```bash
-lim android launch-app "$PACKAGE" --id <android-instance-id>
+lim android launch-app "$PACKAGE" --mode RelaunchIfRunning --id <android-instance-id>
 ```
 
 ## Iterating
