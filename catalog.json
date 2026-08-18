@@ -28,6 +28,10 @@
     {
       "name": "limrun-gradle",
       "defaultSelected": true
+    },
+    {
+      "name": "limrun-android-emulator",
+      "defaultSelected": true
     }
   ]
 }
