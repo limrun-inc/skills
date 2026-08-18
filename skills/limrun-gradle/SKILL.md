@@ -15,8 +15,10 @@ Android SDK, or a local emulator. Your job doesn't end at a green build: get
 the app running or the artifact delivered, and iterate until the user is
 satisfied.
 
-For iOS work, use **`limrun-xcode`** (native) or **`limrun-expo-development`**
-(Expo dev loop) instead of this skill.
+For iOS builds, use **`limrun-xcode`** instead of this skill. For the Expo
+dev-client loop (Metro, hot reload) on either platform, use
+**`limrun-expo-development`**; it comes back here for the Android Debug
+build.
 
 ## Auth and CLI
 
@@ -63,6 +65,9 @@ pipeline and errors when no Expo app is detected:
 ```bash
 lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 ```
+
+For iterating on an Expo app with Metro and hot reload rather than plain
+builds, use **`limrun-expo-development`**.
 
 ## Run it on an emulator
 
