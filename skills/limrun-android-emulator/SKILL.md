@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, and use adb over the CLI's tunnel for logcat, app lifecycle, files, and shell. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', or 'record a video'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, and use adb over the CLI's tunnel for logcat, files, and shell. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', or 'record a video'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -69,9 +69,10 @@ A local path is uploaded to Limrun Asset Storage first; a URL is fetched by
 the instance itself, which is much faster for large APKs than uploading from
 your machine. `install-app` returns as soon as the app is sent; the install
 finishes in the background within seconds. Newly installed apps land in the
-app drawer, not the home screen, so don't look for their icon; confirm over
-adb with `pm list packages | grep <name>`, or just launch the app (see the
-adb section below).
+app drawer, not the home screen, so don't look for their icon; just launch
+the app with `lim android launch-app <package> --detach` (without `--detach`
+it blocks watching the app until it exits), or confirm over adb with
+`pm list packages | grep <name>`.
 
 Every time you need to install a new version of the APK, sync it instead of
 reinstalling:
@@ -102,11 +103,28 @@ Once you have the ID (format `android_<region>_<ulid>`), pass
 session. Alternatively, `git init` the project so the workspace resolves on
 its own. When controlling multiple instances, always pass `--id`.
 
-## App lifecycle, logs, files, and shell over adb
+## Launching the app
 
-There is no `lim android launch-app` or `app-log`; app lifecycle, logcat, file
-transfer, and arbitrary shell all go through plain `adb` over the CLI's
-tunnel. Start the tunnel in a background shell and keep it alive:
+Launch and stop installed apps by package name:
+
+```bash
+lim android launch-app com.example.app --detach                  # launch and return
+lim android launch-app com.example.app                           # launch and watch until it exits
+lim android launch-app com.example.app --mode RelaunchIfRunning  # restart for a clean state
+lim android terminate-app com.example.app                        # stop it, e.g. to reset app state
+```
+
+Without `--detach`, `launch-app` blocks watching the app: when it crashes,
+ANRs, or is stopped, the command prints the exit reason, crash details with
+the stack trace, and a recent app log tail, then returns. That report is the
+way to see why an app died without adb; logs while the app is running still
+need adb (below). There is no `list-apps`; discover package names over adb
+with `pm list packages`, or take the application ID from the build.
+
+## Logs, files, and shell over adb
+
+Logcat, file transfer, and arbitrary shell go through plain `adb` over the
+CLI's tunnel. Start the tunnel in a background shell and keep it alive:
 
 ```bash
 lim android connect        # prints "Tunnel started on 127.0.0.1:<port>."
@@ -118,10 +136,6 @@ every adb call (`adb devices` also lists it):
 
 ```bash
 SERIAL=127.0.0.1:<port>
-adb -s $SERIAL shell cmd package resolve-activity --brief -c android.intent.category.LAUNCHER com.example.app | tail -1
-adb -s $SERIAL shell am start -n com.example.app/.MainActivity   # launch
-adb -s $SERIAL shell monkey -p com.example.app 1                 # launch without knowing the activity; noisy and exits nonzero even on success
-adb -s $SERIAL shell am force-stop com.example.app               # stop, e.g. to reset app state
 adb -s $SERIAL logcat -d | tail -100                             # dump recent logs, don't stream into context
 adb -s $SERIAL logcat -d --pid=$(adb -s $SERIAL shell pidof -s com.example.app) | tail -50   # only the app's logs (app must be running)
 adb -s $SERIAL shell pm list packages | grep example             # package name discovery
