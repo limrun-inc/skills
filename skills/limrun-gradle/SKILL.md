@@ -1,6 +1,6 @@
 ---
 name: limrun-gradle
-description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, or prepare a Play Store publish, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use the `lim android` commands shown here. For iOS builds, use limrun-xcode or limrun-expo-development."
+description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, or prepare a Play Store publish, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
 user-invocable: true
 effort: high
 ---
@@ -73,15 +73,17 @@ lim gradle build . --upload myapp.apk
 lim android create --install-asset=myapp.apk
 ```
 
-If the create output includes a signed stream URL, share it with the user as a
-Markdown link, such as [Live emulator](<signed-stream-url>). Drive the device
-with `lim android` commands (`screenshot`, `tap`, `type`, `element-tree`,
-`record`; see `lim android --help`). For rebuild iterations, patch the
-installed APK in place instead of recreating the instance:
+Share the signed stream URL from the create output with the user as a
+Markdown link, such as [Live emulator](<signed-stream-url>). For rebuild
+iterations, patch the installed APK in place instead of recreating the
+instance:
 
 ```bash
 lim android sync ./path/to/app-debug.apk
 ```
+
+For everything else on the device (tapping, typing, element tree, screenshots,
+video, logcat over adb), use **limrun-android-emulator**.
 
 ## Sign a release AAB
 
