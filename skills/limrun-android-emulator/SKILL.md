@@ -23,37 +23,39 @@ because it's missing from `.env` or the shell). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `lim android <subcommand> --help` instead of guessing.
 
-One default to know up front: `lim android create` opens an ADB tunnel
+## Installing an app
+
+You can build with Limrun's remote Gradle service and have the APK installed
+on a fresh emulator automatically, or install a pre-built local APK or a URL.
+One default to know first: `lim android create` opens an ADB tunnel
 (`--connect`) and a browser tab with the live stream (`--open`) unless told
 otherwise. As an agent, pass `--no-open` always, and `--no-connect` unless you
 need adb right away.
 
-## Installing an app
+### Build and install
 
-### From a limrun-gradle build
-
-Upload the built APK as a named asset, then create an emulator with it
-pre-installed:
+Upload the APK built by **limrun-gradle** as a named asset, then create an
+emulator with it pre-installed:
 
 ```bash
 lim gradle build . --upload myapp.apk
 lim android create --install-asset myapp.apk --no-open --no-connect
 ```
 
-The create output prints the instance ID, a Console URL, and a Signed Stream
-URL. Share the Signed Stream URL with the user as a Markdown link, like
-[Live emulator](<signed-stream-url>). If you have a browser the user can see,
-open the URL there and tell them. The Console URL opens the same live view but
-requires a console login, so prefer the Signed Stream URL for sharing.
+The create output includes a signed stream URL; share it with the user as a
+Markdown link, like [Live emulator](<signed-stream-url>). If you have a
+browser the user can see, open the URL there and tell them. Create also
+prints a console URL: it opens the same live view but requires a console
+login, so prefer the signed stream URL for sharing.
 
 Useful create flags: `--reuse-if-exists` (reuse a running instance with the
 same labels), `--rm` (delete when the CLI exits), `--jurisdiction us|eu|as`
 (where the instance runs; don't use `--region`, it is deprecated),
 `--inactivity-timeout` / `--hard-timeout`, `--label k=v`, `--display-name`.
 
-### From a local file or URL
+### Install app from local
 
-Create an emulator first, then install:
+Create a new emulator, then install a local file or a URL:
 
 ```bash
 lim android create --no-open --no-connect
@@ -68,15 +70,14 @@ finishes in the background within seconds. Confirm with
 `lim android find-element --text "<app name>"` on the launcher, or over adb
 with `pm list packages`.
 
-### Iterating on a build
-
-Patch the installed APK in place instead of recreating the instance:
+Every time you need to install a new version of the APK, sync it instead of
+reinstalling:
 
 ```bash
 lim android sync ./app-debug.apk
 ```
 
-`sync` sends only a delta against the APK already on the instance, then
+It sends only a delta against the APK already on the instance, then
 reinstalls. `--watch` keeps re-syncing on file changes, and
 `--launch-mode ForegroundIfRunning|RelaunchIfRunning` controls what happens to
 the running app after each install.
@@ -119,7 +120,7 @@ adb -s $SERIAL shell am start -n com.example.app/.MainActivity   # launch
 adb -s $SERIAL shell monkey -p com.example.app 1                 # launch without knowing the activity
 adb -s $SERIAL shell am force-stop com.example.app               # stop, e.g. to reset app state
 adb -s $SERIAL logcat -d | tail -100                             # dump recent logs, don't stream into context
-adb -s $SERIAL logcat -d com.example.app:V "*:S" | tail -50      # filter to one tag
+adb -s $SERIAL logcat -d --pid=$(adb -s $SERIAL shell pidof -s com.example.app) | tail -50   # only the app's logs (app must be running)
 adb -s $SERIAL shell pm list packages | grep example             # package name discovery
 adb -s $SERIAL push ./fixture.json /sdcard/Download/
 adb -s $SERIAL pull /sdcard/Download/out.json ./
@@ -192,6 +193,10 @@ lim android open-url "https://example.com"   # opens in the default browser; als
 After every interaction, re-run `element-tree` to confirm the UI transitioned.
 No sleep is needed between a tap and `element-tree`; the tap blocks until done.
 
+```bash
+lim android element-tree
+```
+
 ### When the element tree is empty
 
 Some React Native and Expo apps expose no accessibility nodes at all, which
@@ -223,10 +228,11 @@ lim android record stop -o /tmp/recording.mp4
 `record stop` accepts `--quality 5-10`. For UI changes, include a demo video
 in the pull request so the user can see it.
 
-## Inject microphone audio
+## Simulate the microphone with an audio file
 
 For voice-driven flows (assistants, speech-to-text, audio calls), play a local
-audio file as the emulator's microphone input:
+audio file as the emulator's microphone. The app hears the audio through its
+normal capture pipeline:
 
 ```bash
 lim android play-on-microphone ./fixtures/command.wav          # loops by default
@@ -264,7 +270,7 @@ pre-installed.
 
 ## Cleanup
 
-When the work is completed, delete the emulator. `delete` takes a
+When the work is completed, you can delete the emulator. `delete` takes a
 **positional** ID (`--id` is not a valid flag here, unlike other commands):
 
 ```bash
@@ -294,8 +300,8 @@ lim android delete <android-instance-id>
   instance may exist anyway and should be deleted.
 - **Empty element tree usually means a React Native app**, not a broken
   instance. See "When the element tree is empty" above.
-- **`element-tree` can be large.** Grep it for the attribute you need rather
-  than dumping the whole tree into context.
+- **`element-tree` can be large.** Pipe through `grep` to extract what you
+  need rather than dumping the whole tree into context.
 - **Instance resolution can miss in a non-git dir.** See "Targeting the right
   instance" above; pass `--id` when in doubt.
 - **Build errors are the build skill's job.** If the APK isn't building, the
