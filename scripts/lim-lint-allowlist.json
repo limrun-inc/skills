@@ -1,0 +1,7 @@
+[
+  {
+    "file": "skills/limrun-android-emulator/SKILL.md",
+    "snippet": "lim android launch-app",
+    "reason": "Deliberate negative: the skill documents that this command does not exist and routes readers to adb instead."
+  }
+]

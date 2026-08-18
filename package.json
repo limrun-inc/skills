@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "validate": "node scripts/validate-skills.mjs",
-    "smoke:npx": "npx --yes skills add . --list"
+    "smoke:npx": "npx --yes skills add . --list",
+    "lint:commands": "node scripts/lint-lim-commands.mjs",
+    "lint:commands:self-test": "node scripts/lint-lim-commands.mjs --self-test"
   },
   "devDependencies": {
     "js-yaml": "^4.1.0"
