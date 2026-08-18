@@ -109,12 +109,12 @@ transfer, and arbitrary shell all go through plain `adb` over the CLI's
 tunnel. Start the tunnel in a background shell and keep it alive:
 
 ```bash
-lim android connect        # prints "Tunnel started. Press Ctrl+C to stop."
-adb devices                # shows the tunnel as 127.0.0.1:<port>  device
+lim android connect        # prints "Tunnel started on 127.0.0.1:<port>."
 ```
 
 `connect` runs `adb connect` for you (use `--adb-path` if adb isn't on PATH).
-Read the serial from `adb devices` and pass it with `-s` to every adb call:
+The printed `127.0.0.1:<port>` is the device serial; pass it with `-s` to
+every adb call (`adb devices` also lists it):
 
 ```bash
 SERIAL=127.0.0.1:<port>
