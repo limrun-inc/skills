@@ -26,8 +26,8 @@ Derive:
 - `BUNDLE_ID` from `ios.bundleIdentifier`
 - `SLUG` from `slug`
 - `SCHEME` from `scheme`, falling back to `exp+${SLUG}`
-- `BRANCH` from `git branch --show-current`, falling back to `main`
-- `ASSET_NAME="${BUNDLE_ID}/${BRANCH}-debug.zip"`
+
+`ASSET_NAME` is derived from the native fingerprint in the Debug Build Asset section below, after dependencies are installed.
 
 ## Ensure Dev Client
 
@@ -41,18 +41,27 @@ Installing `expo-dev-client`, adding/removing/updating native dependencies, or c
 
 ## Debug Build Asset
 
-First check whether a reusable Debug dev-client asset already exists:
+Debug assets are keyed by a fingerprint of the app's native inputs, so any agent can decide reuse-or-rebuild without knowing what earlier sessions did. Native dependency or config changes change the fingerprint; pure JS/TS edits do not. This is the same library and computation expo-updates uses for its `fingerprint` runtime version policy.
+
+Derive the name with the `scripts/debug-asset-name.sh` helper shipped in this skill's directory. Your working directory must be the Expo app directory (in a monorepo, the directory you would pass as `--expo-app-dir`), so invoke the helper by its full path under wherever this skill is installed:
 
 ```bash
-lim asset list --name-prefix "$BUNDLE_ID/"
+ASSET_NAME="$(bash <this-skill-dir>/scripts/debug-asset-name.sh)"
 ```
 
-Reuse the exact `$ASSET_NAME` only when:
+The helper takes no arguments; it derives everything, including the bundle id, from the project's current state so no cached value can go stale.
 
-- it exists, and
-- no native dependency or native config changed in this session.
+It prints the asset name, or exits nonzero with the reason on stderr (wrong directory, dependencies not installed, incomplete fingerprint). On failure, fix the project state and rerun; never proceed with a guessed or earlier name.
 
-If the current task changed native dependencies or native config, skip asset reuse even if `$ASSET_NAME` exists.
+Treat derive, check, and act as one uninterrupted step: run the helper, decide, and immediately reuse or build-and-upload. If anything native changes afterwards, including between a check and a later upload, the name is stale; rerun the helper.
+
+Check whether the exact asset exists (`lim asset list` truncates long listings, so query by the exact name, not the bundle prefix):
+
+```bash
+[ -n "$ASSET_NAME" ] && lim asset list --name-prefix "$ASSET_NAME"
+```
+
+Reuse `$ASSET_NAME` when the list is non-empty; build fresh and upload under it when it is not.
 
 When reusing the asset, create or reuse a simulator and install it:
 
@@ -171,7 +180,7 @@ lim ios app-log "$BUNDLE_ID" --tail 100
 
 ## Iterating
 
-Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, rebuild Debug before relaunching the dev loop.
+Once connected, JS/TS edits should update through Metro without another native build. If the task changes native dependencies, native config, or build settings, re-derive the Expo Readiness values (native config can change `BUNDLE_ID` and `SCHEME`) and rerun the helper the same way as in Debug Build Asset (`bash <this-skill-dir>/scripts/debug-asset-name.sh` from the app directory) to get the new name, then rebuild and upload under it. Uploading under the old name would register the new build under the previous fingerprint and poison reuse for later sessions.
 
 Tell the user:
 
