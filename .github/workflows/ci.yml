@@ -20,3 +20,5 @@ jobs:
       - run: npm ci
       - run: npm run validate
       - run: npm run smoke:npx
+      - run: npm i --no-save lim@latest
+      - run: npm run lint:commands
