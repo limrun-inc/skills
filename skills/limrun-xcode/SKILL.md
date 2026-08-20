@@ -309,6 +309,12 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
   `SWIFT_ACTIVE_COMPILATION_CONDITIONS` pass `--build-setting`; anything else
   is rejected. Bump `CURRENT_PROJECT_VERSION` and friends in the Xcode project
   file instead.
+- **Artifact not found after a successful build.** The server resolves the
+  built .app on its own, including when the scheme name differs from the
+  product name (scheme "MyApp Dev" building MyApp-dev.app). If an upload
+  still fails with `built artifact not found`, pass the product name
+  explicitly with `--upload-product-name MyApp-dev` (no .app extension); the
+  server then takes `<name>.app` from the build products verbatim.
 - **Keep synced files small.** A single ~2MB+ file can fail the client-side
   sync with ENOMEM before the build starts; compress large assets.
 - **Symlinks sync when relative and in-root.** A symlink whose target is an
