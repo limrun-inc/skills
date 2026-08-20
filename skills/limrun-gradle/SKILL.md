@@ -78,6 +78,10 @@ lim gradle build . --upload myapp.apk
 lim android create --install-asset=myapp.apk
 ```
 
+Uploaded assets expire after 14 days by default. Pass `--upload-ttl` with a
+Go duration (e.g. `720h`; `1d` is invalid) to change that; re-uploads keep
+the asset's current expiry.
+
 Share the signed stream URL from the create output with the user as a
 Markdown link, such as [Live emulator](<signed-stream-url>). For rebuild
 iterations, patch the installed APK in place instead of recreating the

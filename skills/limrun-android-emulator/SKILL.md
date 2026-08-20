@@ -297,6 +297,10 @@ lim asset push ./app-debug.apk -n ${ASSET_NAME}
 echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=android"
 ```
 
+The asset expires after 14 days by default. Pass `--ttl` with a Go duration
+(e.g. `720h`; `1d` is invalid) to change that; re-uploads keep the asset's
+current expiry.
+
 Opening the link in the Limrun console provisions an emulator with the APK
 pre-installed.
 
