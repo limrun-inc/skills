@@ -101,10 +101,25 @@ lim android install-app "<Download URL from the build output>" --id <android-ins
 
 ### Fresh build on iOS
 
-When building fresh, create or reuse an iOS simulator with Xcode:
+When building fresh, create or reuse a standalone Xcode sandbox and build
+before creating a simulator, so the simulator doesn't sit idle (and hit its
+inactivity timeout) during a long build:
 
 ```bash
-lim ios create --xcode \
+lim xcode create --reuse-if-exists --label repo=<repo> --label agent=<agent>
+
+lim xcode build . \
+  --configuration Debug \
+  --upload "$ASSET_NAME"
+```
+
+Use `--expo-app-dir`, `--scheme`, or `--workspace` when the project layout requires it.
+
+Then create the simulator attached to that Xcode target; the attach installs
+and launches the build immediately:
+
+```bash
+lim ios create --attach \
   --reuse-if-exists \
   --label repo=<repo> \
   --label agent=<agent>
@@ -113,22 +128,13 @@ lim ios create --xcode \
 Add `--no-open` to any `create` when you have no browser to show the user; it
 skips opening the stream URL and leaves the URL in the output to share.
 
-If an iOS simulator is already running from a reused asset and a later native rebuild becomes necessary, attach or create Xcode for that same simulator instead of creating a second iOS simulator:
+If an iOS simulator is already running from a reused asset and a later native rebuild becomes necessary, attach that same simulator instead of creating a second one:
 
 ```bash
-lim xcode create --reuse-if-exists --label repo=<repo> --label agent=<agent>
 lim xcode attach-simulator <ios-instance-id> --id <xcode-instance-id>
 ```
 
-Then build and upload Debug:
-
-```bash
-lim xcode build . \
-  --configuration Debug \
-  --upload "$ASSET_NAME"
-```
-
-Use `--expo-app-dir`, `--scheme`, or `--workspace` when the project layout requires it. A successful build installs and launches the app on the attached simulator.
+After the attach, every successful `lim xcode build` installs and launches the app on the attached simulator.
 
 ## Start Metro Tunnel
 
