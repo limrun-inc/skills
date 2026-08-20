@@ -276,10 +276,6 @@ lim asset push ${ASSET_NAME}
 echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios"
 ```
 
-The asset expires after 14 days by default. Pass `--ttl` with a Go duration
-(e.g. `720h`; `1d` is invalid) to change that; re-uploads keep the asset's
-current expiry.
-
 Once the command finishes, you can give the following URL to the user to
 click to see a simulator where this bundle is pre-installed.
 

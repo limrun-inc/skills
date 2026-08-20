@@ -92,9 +92,8 @@ lim xcode rbe upload preview/my-app --ttl 24h                # one-shot: the new
   post-build step. Upload results land in `.limrun/rbe.log`.
 - `rbe upload` runs from the workspace root and needs a background tunnel
   plus at least one successful build; it errors otherwise.
-- TTLs are Go durations (`24h`, `30m`; `1d` is invalid) and optional; without
-  one a newly created asset expires after 14 days, and re-uploads keep the
-  asset's current expiry.
+- TTLs are Go durations (`24h`, `30m`; `1d` is invalid) and optional; each
+  upload without one pushes the asset's expiry to 14 days from that upload.
 - To change the `--auto-upload` config of a running tunnel, `--stop` and
   re-run; the CLI refuses a mismatched re-arm instead of silently ignoring it.
 - Preview an uploaded app in a browser at
