@@ -285,9 +285,9 @@ lim xcode build . --upload ${ASSET_NAME}
 lim xcode build . --configuration Debug --upload ${ASSET_NAME}
 ```
 
-Uploaded assets expire after 14 days by default. Pass `--upload-ttl` with a
-Go duration (e.g. `720h`; `1d` is invalid) to change that; re-uploads keep
-the asset's current expiry.
+Build uploads default to a 14-day TTL: each build pushes the asset's expiry
+to 14 days from that upload. Pass `--upload-ttl` with a Go duration (e.g.
+`720h`; `1d` is invalid) to change it.
 
 Then construct the preview link and include it in your last message (and in the
 PR, if you're opening one):
