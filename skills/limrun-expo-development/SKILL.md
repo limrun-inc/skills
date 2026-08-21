@@ -139,27 +139,23 @@ After the attach, every successful `lim xcode build` installs and launches the a
 ## Start Metro Through Limrun
 
 Start one destination tunnel after the Debug app is installed. Metro can keep
-its normal local port; Expo advertises the simulator-facing endpoint returned by
-Limrun:
+its normal local port; Expo advertises localhost:
 
 ```bash
 METRO_PORT="$(node -e 'const s=require("node:net").createServer(); s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
-TUNNEL_JSON="$(lim ios tunnel \
+lim ios tunnel \
   --route "localhost:${METRO_PORT}" \
   --detach \
-  --json \
-  --id <ios-instance-id>)"
-TUNNEL_HOST="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.bindings[0].endpoint.host)' "$TUNNEL_JSON")"
-TUNNEL_PORT="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.bindings[0].endpoint.port)' "$TUNNEL_JSON")"
-TUNNEL_URL="http://${TUNNEL_HOST}:${TUNNEL_PORT}"
+  --id <ios-instance-id>
+TUNNEL_URL="http://localhost:${METRO_PORT}"
 echo "TUNNEL_URL=$TUNNEL_URL"
 
 EXPO_PACKAGER_PROXY_URL="$TUNNEL_URL" \
   npx expo start --dev-client --port "$METRO_PORT"
 ```
 
-`EXPO_PACKAGER_PROXY_URL` overrides the full URL Expo puts in manifests, bundle
-URLs, and deep links. Set it inline so it takes precedence over project dotenv
+`EXPO_PACKAGER_PROXY_URL` keeps localhost and the declared port in manifests,
+bundle URLs, and deep links. Set it inline so it takes precedence over project dotenv
 values. Keep Metro and the detached tunnel running while the user iterates.
 Run Metro as a managed background process, or copy the printed `TUNNEL_URL` into
 a second terminal before launching the app.

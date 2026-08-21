@@ -23,31 +23,42 @@ lim ios tunnel --help
 lim ios launch-app --help
 ```
 
-Typical sequence:
+Run the long-lived mediator, tester, and tunnel from separate terminals.
+
+Terminal 1:
 
 ```bash
-# Start the Detox mediator locally.
 npx detox run-server -p 8099 -l verbose
+```
 
-# Expose the mediator to the simulator and capture its allocated endpoint.
-TUNNEL_JSON="$(lim ios tunnel \
+Terminal 2:
+
+```bash
+lim ios tunnel \
   --route localhost:8099 \
   --detach \
-  --json \
-  --id <ios-id>)"
-DETOX_SERVER_URL="$(node -e 'const x=JSON.parse(process.argv[1]); const e=x.bindings[0].endpoint; console.log(`ws://${e.host}:${e.port}`)' "$TUNNEL_JSON")"
+  --id <ios-id>
+DETOX_SERVER_URL="ws://localhost:8099"
+```
 
-# Relaunch the app with the managed Detox runtime.
-# --detox-version is optional when running from the project with node_modules/detox.
+Terminal 3 starts the tester before the app connects:
+
+```bash
+DETOX_SERVER="ws://localhost:8099" \
+DETOX_SESSION_ID=<session-id> \
+  npx detox test --no-start
+```
+
+Then relaunch the app from Terminal 2. `--detox-version` is optional when
+running from the project with `node_modules/detox`.
+
+```bash
 lim ios launch-app <bundle-id> \
   --id <ios-id> \
   --runtime detox \
   --detox-server-url "$DETOX_SERVER_URL" \
   --detox-session-id <session-id> \
   --detox-version <detox-version>
-
-# Run the tester with the same server/session.
-npx detox test --no-start
 ```
 
 Prefer starting the tester before the app connects, or use the maintained orchestration in [limrun-inc/typescript-sdk `examples/detox-ios`](https://github.com/limrun-inc/typescript-sdk/tree/main/examples/detox-ios), to avoid benign mediator "cannot forward" noise.
