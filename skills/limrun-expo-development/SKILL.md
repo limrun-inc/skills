@@ -195,6 +195,15 @@ DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
 lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 ```
 
+When Metro is already running, restart the tunnel and open the dev client in
+one command: `--open` substitutes a literal `{host}` with the simulator-facing
+host once the tunnel is ready, so no encoding step is needed. `lim xcode build`
+prints this exact command after a Debug Expo build:
+
+```bash
+lim ios reverse 57090:57090 --id <ios-instance-id> --open "${SCHEME}://expo-development-client/?url=http%3A%2F%2F{host}%3A57090"
+```
+
 Tunnel lifecycle: only traffic flowing through the tunnel counts as instance activity, so an open idle tunnel does not stop the instance's inactivity timeout. If the port is `already in use`, first kill any leftover `lim ios reverse` process from an earlier attempt; a port whose session died uncleanly frees on its own within about two minutes, so wait and retry rather than switching ports.
 
 ## Launch Dev Client
