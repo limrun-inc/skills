@@ -195,19 +195,6 @@ DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
 lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 ```
 
-When Metro is already running, start the tunnel and open the dev client in one
-command: `lim ios reverse --detach` starts the tunnel in the background session
-daemon and prints only a URL, and with `--scheme` that URL is the dev-client
-deep link, so no encoding step is needed. `lim xcode build` prints this exact
-command after a Debug Expo build:
-
-```bash
-lim ios open-url --id <ios-instance-id> "$(lim ios reverse 57090:57090 --detach --scheme "$SCHEME" --id <ios-instance-id>)"
-```
-
-The detached tunnel lives until `lim session stop --id <ios-instance-id>` or
-the instance ends.
-
 Tunnel lifecycle: only traffic flowing through the tunnel counts as instance activity, so an open idle tunnel does not stop the instance's inactivity timeout. If the port is `already in use`, first kill any leftover `lim ios reverse` process from an earlier attempt; a port whose session died uncleanly frees on its own within about two minutes, so wait and retry rather than switching ports.
 
 ## Launch Dev Client
