@@ -101,6 +101,28 @@ lim xcode build . --include '^ios/GeneratedKit/'
 To reach files under a directory that is ignored as a whole, the pattern must
 also match the directory path itself, as above.
 
+## React Native / Expo projects
+
+The sandbox auto-detects whether `expo prebuild` is needed and runs it
+server-side before the build; don't run it locally and don't treat a
+gitignored missing `.xcodeproj` as an error. If detection gets it wrong (a
+build failing with `found client-synced files under ... but no .xcodeproj`),
+force it:
+
+```bash
+lim xcode build . --expo-force-prebuild
+```
+
+Gitignored `.env` files always sync, and `--env KEY=VALUE` (repeatable) adds
+environment variables to every remote build command; server-managed variables
+like PATH cannot be overridden. The CLI also propagates your shell's
+`NODE_ENV` automatically. If the app config needs production-scoped variables
+(Expo loads `.env.production` only under `NODE_ENV=production`), run:
+
+```bash
+lim xcode build . --configuration Release --env NODE_ENV=production
+```
+
 ## Run on a simulator
 
 `lim xcode build` is build-and-install. Don't attach a simulator until the user
