@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, screenshot, record video, play a video file as the camera, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'mock the camera', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, screenshot, record video, connect the app to local services, play a video file as the camera, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'connect localhost', 'mock the camera', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -99,6 +99,39 @@ lim ios element-tree --id <that-id>    # pass --id to EVERY lim ios command
 all `lim ios` calls for the rest of the session (screenshot, tap, type,
 element-tree, record). Alternatively, `git init` the project so the workspace
 resolves on its own. When controlling multiple instances, always pass `--id`.
+
+## Reaching services on the local machine
+
+Destination tunnels let an iPhone simulator app keep calling exact localhost
+or literal-IP TCP destinations while the CLI connects those destinations from
+the machine running `lim`:
+
+```bash
+lim ios tunnel \
+  --id <ios-instance-id> \
+  --route localhost:3000 \
+  --route localhost:8081 \
+  --detach
+```
+
+Use the app's normal URLs, such as `http://localhost:3000`. Declaring
+`localhost:3000` also captures loopback forms such as `127.0.0.1:3000` and
+`[::1]:3000`, plus `[::ffff:127.0.0.1]:3000`. This release supports TCP and up
+to ten exact routes. Port 53, hostnames other than `localhost`, CIDRs, and UDP
+are not supported.
+
+One instance accepts one active destination tunnel, and its route set is
+immutable. To add or remove a destination, stop the tunnel and start it again
+with the complete route list:
+
+```bash
+lim ios tunnel status --id <ios-instance-id> --json
+lim ios tunnel stop --id <ios-instance-id>
+```
+
+If the simulator attempts a route while its local service is stopped, the
+tunnel remains active and reports `connection_refused`; restart the service
+without recreating the simulator or tunnel.
 
 ## Launching the app
 
