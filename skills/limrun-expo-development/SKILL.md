@@ -138,11 +138,11 @@ After the attach, every successful `lim xcode build` installs and launches the a
 
 ## Start Metro Through Limrun on iOS
 
+This flow is for iOS. Android uses `adb reverse`; skip to **Start Metro on
+Android** instead of running the `lim ios` commands.
+
 Start one destination tunnel after the Debug app is installed. Metro can keep
 its normal local port; Expo advertises localhost:
-
-This flow is for iOS. For Android, skip to the `adb reverse` workflow under
-**Fallback: Reverse Tunnel**; do not run the `lim ios` commands below.
 
 ```bash
 METRO_PORT=8081
@@ -172,6 +172,20 @@ Only add `--offline` in a genuinely network-isolated environment after
 dependencies are installed. Offline mode disables network checks and dependency
 validation, so do not use it to compensate for ordinary Expo authentication.
 
+### Launch the iOS dev client
+
+Open the Debug app through the dev-client URL:
+
+```bash
+ENCODED_URL="$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "$TUNNEL_URL")"
+DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
+lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
+```
+
+If opening fails and the primary scheme came from `scheme`, retry once with
+`exp+${SLUG}`. On a fresh instance, the iOS dev-menu onboarding sheet can
+consume the first deep link; tap through it and open the URL again.
+
 For Expo Go, replace `--dev-client` with `--go`, then open:
 
 ```bash
@@ -196,7 +210,31 @@ active and status records a correlated `connection_refused`. Restart Metro with
 the same proxy URL and reopen the dev-client URL; do not recreate the simulator
 or tunnel.
 
-### Fallback: Expo Tunnel
+## Start Metro on Android
+
+Android uses `adb reverse` over the CLI's ADB tunnel. Metro stays on its default
+port 8081, no packager hostname override is needed, and the emulator reaches
+Metro at `http://127.0.0.1:8081`:
+
+```bash
+lim android connect --id <android-instance-id>   # background shell; prints "Tunnel started on 127.0.0.1:<port>."
+adb -s 127.0.0.1:<port> reverse tcp:8081 tcp:8081
+
+npx expo start --dev-client --port 8081
+
+DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081"
+lim android open-url "$DEV_CLIENT_URL" --id <android-instance-id>
+```
+
+The ADB tunnel dies with the shell that started it, and the port changes on
+every reconnect; re-run `adb reverse` with the new serial after any reconnect.
+See **limrun-android-emulator** for tunnel details.
+
+On the first launch, tap through the dev-menu onboarding sheet
+(`lim android tap-element --text Continue`) and close the dev menu. The bundle
+loads behind the native sheet.
+
+## Fallback: Expo Tunnel
 
 If the Limrun endpoint cannot be used, start Expo's public tunnel:
 
@@ -213,31 +251,12 @@ lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 lim android open-url "$DEV_CLIENT_URL" --id <android-instance-id>
 ```
 
-### Fallback: Reverse Tunnel
+## Legacy iOS fixed-port reverse tunnel
 
-If Expo's `--tunnel` repeatedly fails, expose the local Metro to the device
-through a reverse tunnel. The mechanism differs per platform.
-
-**Android** uses plain `adb reverse` over the CLI's ADB tunnel and is simpler
-than iOS: Metro stays on its default port 8081, no packager hostname override
-is needed, and after the reverse the device reaches Metro at
-`http://127.0.0.1:8081`:
-
-```bash
-lim android connect --id <android-instance-id>   # background shell; prints "Tunnel started on 127.0.0.1:<port>."
-adb -s 127.0.0.1:<port> reverse tcp:8081 tcp:8081
-
-npx expo start --dev-client --port 8081
-
-DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081"
-lim android open-url "$DEV_CLIENT_URL" --id <android-instance-id>
-```
-
-The ADB tunnel dies with the shell that started it, and the port changes on
-every reconnect; re-run `adb reverse` with the new serial after any
-reconnect. See **limrun-android-emulator** for tunnel details.
-
-**iOS** uses `lim ios reverse` with a matched remote/local port. Expo dev-client can derive or advertise multiple packager URLs, so mismatched mappings like `57090:8081` can leave some URLs pointing at the local Metro port instead of the simulator-facing tunnel port.
+`lim ios reverse` remains available for workflows that already use the reserved
+57090–57099 range. Expo dev-client can derive or advertise multiple packager
+URLs, so mismatched mappings like `57090:8081` can leave some URLs pointing at
+the local Metro port instead of the simulator-facing reverse endpoint.
 
 Use the simulator-facing host printed by `lim ios reverse` in both `REACT_NATIVE_PACKAGER_HOSTNAME` and the encoded dev-client URL. Keep the reverse command running in a separate or background terminal while Metro is running:
 
@@ -251,26 +270,6 @@ ENCODED_URL="$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "http:
 DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
 lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
 ```
-
-## Launch Dev Client
-
-Open the Debug app through the dev-client URL, using the `TUNNEL_URL` collected
-above:
-
-```bash
-ENCODED_URL="$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "$TUNNEL_URL")"
-DEV_CLIENT_URL="${SCHEME}://expo-development-client/?url=${ENCODED_URL}"
-lim ios open-url --id <ios-instance-id> "$DEV_CLIENT_URL"
-```
-
-If opening fails and the primary scheme came from `scheme`, retry once with `exp+${SLUG}`.
-
-Platform difference on the first launch: on iOS the dev-menu onboarding sheet
-consumes the first deep link, so you reopen the URL after tapping through it.
-On Android the bundle loads behind the sheet; tap through it
-(`lim android tap-element --text Continue`, the dev menu is native UI and
-exposes accessibility nodes even when the app does not), close the dev menu,
-and the app is already connected.
 
 ## Verify
 

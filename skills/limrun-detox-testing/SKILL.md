@@ -25,6 +25,17 @@ lim ios launch-app --help
 ```
 
 Run the long-lived mediator, tester, and tunnel from separate terminals.
+Before using this quick path, ensure the project's `.detoxrc` reads the session
+environment. Detox does not consume these variables automatically:
+
+```js
+session: {
+  server: process.env.DETOX_SERVER || 'ws://localhost:8099',
+  sessionId: process.env.DETOX_SESSION_ID || 'limrun-detox',
+}
+```
+
+The complete configuration appears under **Detox Test Setup** below.
 
 Terminal 1:
 
@@ -66,6 +77,8 @@ Prefer starting the tester before the app connects, or use the maintained orches
 If you manually launch the app before `npx detox test --no-start`, that mediator message is expected until the tester connects.
 
 If tunnel start reports an active session, inspect it with `lim ios tunnel status --id <ios-id> --json`. Stop an obsolete session with `lim ios tunnel stop --id <ios-id>`, then start the declared mediator route again.
+An open idle tunnel does not count as instance activity, so it does not prevent
+the simulator's inactivity timeout between test runs.
 
 ## Detox Test Setup
 
