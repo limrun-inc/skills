@@ -6,7 +6,8 @@ user-invocable: true
 
 # Limrun Detox
 
-Use this for Detox runtime work on Limrun iOS. Keep build concerns separate unless the user explicitly asks for a native build.
+Use this for Detox runtime work on Limrun iOS. Keep build concerns separate
+unless the user explicitly asks for a native build.
 
 ## Components
 
@@ -80,8 +81,16 @@ Use [limrun-inc/typescript-sdk `examples/detox-ios`](https://github.com/limrun-i
 For native SwiftUI apps, a minimal Detox configuration usually looks like:
 
 ```js
+const server = process.env.DETOX_SERVER || 'ws://localhost:8099';
+const sessionId = process.env.DETOX_SESSION_ID || 'limrun-detox';
+
 module.exports = {
   testRunner: { args: { $0: 'jest' }, jest: { setupTimeout: 120000 } },
+  session: {
+    server,
+    sessionId,
+    debugSynchronization: 0,
+  },
   apps: { ios: { type: 'ios.app', binaryPath: 'unused-by-limrun' } },
   devices: {
     limrun: {

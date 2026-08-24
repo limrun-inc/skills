@@ -136,13 +136,16 @@ lim xcode attach-simulator <ios-instance-id> --id <xcode-instance-id>
 
 After the attach, every successful `lim xcode build` installs and launches the app on the attached simulator.
 
-## Start Metro Through Limrun
+## Start Metro Through Limrun on iOS
 
 Start one destination tunnel after the Debug app is installed. Metro can keep
 its normal local port; Expo advertises localhost:
 
+This flow is for iOS. For Android, skip to the `adb reverse` workflow under
+**Fallback: Reverse Tunnel**; do not run the `lim ios` commands below.
+
 ```bash
-METRO_PORT="$(node -e 'const s=require("node:net").createServer(); s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
+METRO_PORT=8081
 lim ios tunnel \
   --route "localhost:${METRO_PORT}" \
   --detach \
@@ -159,6 +162,11 @@ bundle URLs, and deep links. Set it inline so it takes precedence over project d
 values. Keep Metro and the detached tunnel running while the user iterates.
 Run Metro as a managed background process, or copy the printed `TUNNEL_URL` into
 a second terminal before launching the app.
+
+If port 8081 is already occupied, choose another explicit port and use the same
+value for the tunnel route, `TUNNEL_URL`, and Expo's `--port`. Route sets are
+immutable: stop and recreate the tunnel with the complete route list when the
+port changes.
 
 Only add `--offline` in a genuinely network-isolated environment after
 dependencies are installed. Offline mode disables network checks and dependency
@@ -179,9 +187,14 @@ lim ios tunnel status --id <ios-instance-id> --json
 lim ios tunnel stop --id <ios-instance-id>
 ```
 
-If Metro stops, the tunnel remains active and status reports a correlated
-`connection_refused`. Restart Metro with the same proxy URL and reopen the
-dev-client URL; do not recreate the simulator or tunnel.
+One instance accepts one active destination tunnel. Stop the current tunnel
+before starting another route set. When iteration ends, stop Metro with
+`Ctrl+C` and stop the detached tunnel with the command above.
+
+If the simulator attempts a route while Metro is stopped, the tunnel remains
+active and status records a correlated `connection_refused`. Restart Metro with
+the same proxy URL and reopen the dev-client URL; do not recreate the simulator
+or tunnel.
 
 ### Fallback: Expo Tunnel
 
