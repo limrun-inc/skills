@@ -141,8 +141,9 @@ Signing methods:
 - `release-testing`: distribution-signed IPA for registered test devices.
 - `app-store-connect`: distribution-signed IPA for App Store Connect.
 
-Cloud signing requires `--sdk iphoneos`, a team API key with an issuer ID, and
-`--team-id` matching that key's Apple Developer team. For distribution methods,
+Cloud signing requires a device SDK (`--sdk iphoneos` or `--sdk watchos`), a
+team API key with an issuer ID, and `--team-id` matching that key's Apple
+Developer team. For distribution methods,
 the API key must be an Admin key or have **Access to cloud-managed distribution
 certificates** enabled. A `Cloud signing permission error` means that permission
 is missing. `No Account for Team` means the team ID and API key do not match.
