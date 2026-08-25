@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, test, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -120,6 +120,50 @@ Markdown link, such as [Live simulator](<signed-stream-url>).
 When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
 the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
+
+## Run tests (XCTest)
+
+`lim xcode test` builds the scheme's test targets on the sandbox, runs them on
+an attached simulator (unit and UI targets alike), and streams one line per
+test case. The exec exits non-zero when any test fails, so it works as a CI
+gate.
+
+```bash
+lim xcode test .
+lim xcode test ./MyProject --scheme MyApp
+```
+
+It auto-acquires a simulator-backed target like `lim xcode build --ios` and
+reuses the instances on repeat runs, so iterating is fast. The scheme must
+have a test action configured (shared schemes from Xcode have one when the
+project has test targets).
+
+Select a subset with xcodebuild's identifier format
+`Target[/Class[/method]]`; repeat the flag for multiple entries. The two flags
+are mutually exclusive:
+
+```bash
+lim xcode test . --only-testing MyAppTests/LoginTests/testValidLogin
+lim xcode test . --skip-testing MyAppUITests
+```
+
+A bare target name selects or skips that whole target. An `--only-testing`
+entry naming a target the build did not produce fails the run instead of
+silently running everything.
+
+For machine consumption, `--json` streams the raw per-case events as NDJSON
+and ends with a `{"exitCode": N}` record:
+
+```bash
+lim xcode test . --json > results.ndjson
+```
+
+`--build-only` compiles the test targets without acquiring a simulator; the
+products stay on the sandbox for a later run.
+
+If UI tests fail at the very first interaction on an instance that has run
+many suites back to back, prefer fresh instances with
+`--inactivity-timeout 30m` on the next run.
 
 ## Signed device builds (IPA)
 
