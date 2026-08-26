@@ -103,29 +103,12 @@ also match the directory path itself, as above.
 
 ## Run project commands
 
-Use `lim xcode run [relative-cwd] -- <command>` for remote macOS commands
-outside the managed build:
+`lim xcode run` is the escape hatch for project commands outside the managed
+build:
 
 ```bash
 lim xcode run -- make generate
-lim xcode run apps/api -- npm run codegen
 ```
-
-The sandbox includes Homebrew for formula installs. Its prefix, Cellar, taps,
-and caches live in the synced workspace's sandbox home and remain available to
-later commands on the same workspace:
-
-```bash
-lim xcode run -- brew install tree
-lim xcode run -- tree --version
-lim xcode run -- 'brew tap owner/tap && brew trust owner/tap'
-```
-
-Homebrew itself is pinned by the limbuild image, so `brew update` is disabled.
-Formulae and trusted third-party taps work, but casks and services do not.
-Homebrew's custom workspace prefix is best-effort: a formula whose bottle
-requires `/opt/homebrew` may not install. Commands are one-shot and
-non-interactive.
 
 ## Run on a simulator
 
