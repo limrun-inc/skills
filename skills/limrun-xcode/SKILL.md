@@ -42,6 +42,17 @@ lim xcode build .
 This creates or reuses the remembered Xcode target, syncs the current directory,
 and streams the build logs through stdout and stderr.
 
+For tvOS or visionOS, pass the device SDK and scheme explicitly:
+
+```bash
+lim xcode build . --scheme TVApp --sdk appletvos
+lim xcode build . --scheme VisionApp --sdk xros
+```
+
+These platforms support device builds, IPA packaging, signing, and App Store
+Connect upload. Do not use `appletvsimulator` or `xrsimulator`: simulator
+builds, attachment, installation, and XCTest are not supported yet.
+
 Use `--scheme` and `--workspace` if the project has multiple schemes or uses a
 workspace file:
 
@@ -185,9 +196,9 @@ Signing methods:
 - `release-testing`: distribution-signed IPA for registered test devices.
 - `app-store-connect`: distribution-signed IPA for App Store Connect.
 
-Cloud signing requires a device SDK (`--sdk iphoneos` or `--sdk watchos`), a
-team API key with an issuer ID, and `--team-id` matching that key's Apple
-Developer team. For distribution methods,
+Cloud signing requires a device SDK (`--sdk iphoneos`, `--sdk watchos`,
+`--sdk appletvos`, or `--sdk xros`), a team API key with an issuer ID, and
+`--team-id` matching that key's Apple Developer team. For distribution methods,
 the API key must be an Admin key or have **Access to cloud-managed distribution
 certificates** enabled. A `Cloud signing permission error` means that permission
 is missing. `No Account for Team` means the team ID and API key do not match.
@@ -271,6 +282,8 @@ lim xcode build . --sdk iphoneos --configuration Release \
 `--upload-to-appstore` requires either cloud signing or the manual signing
 flags, plus `--asc-key-id` and `--asc-key`. Combine it with `--upload
 <asset-name>` when the user also wants the IPA in Asset Storage.
+The supported upload SDKs are `iphoneos`, `appletvos`, and `xros`; existing
+watchOS upload behavior is unchanged.
 
 Collect from the user (all three live in App Store Connect under Users and
 Access, Integrations tab, App Store Connect API):
