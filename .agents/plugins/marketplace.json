@@ -1,0 +1,15 @@
+{
+  "interface": {
+    "displayName": "Limrun"
+  },
+  "plugins": [
+    {
+      "name": "limrun",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "category": "Coding"
+    }
+  ]
+}

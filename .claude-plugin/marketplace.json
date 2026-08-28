@@ -1,0 +1,32 @@
+{
+  "name": "limrun",
+  "description": "Cloud iOS simulators and Android emulators your agent can create, drive, and throw away.",
+  "owner": {
+    "name": "Limrun",
+    "url": "https://limrun.com"
+  },
+  "plugins": [
+    {
+      "name": "limrun",
+      "source": "./",
+      "displayName": "Limrun",
+      "description": "Cloud iOS simulators and Android emulators your agent can create, drive, and throw away.",
+      "version": "0.1.0",
+      "homepage": "https://limrun.com",
+      "license": "MIT",
+      "keywords": [
+        "ios",
+        "android",
+        "simulator",
+        "emulator",
+        "mobile",
+        "testing",
+        "xcode",
+        "gradle",
+        "expo",
+        "mcp"
+      ],
+      "category": "development"
+    }
+  ]
+}
