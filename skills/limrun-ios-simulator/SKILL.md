@@ -49,7 +49,7 @@ lim ios create --attach
 
 If the create (or `lim xcode rbe --ios`) output includes a signed stream URL,
 share it with the user as a Markdown link, like
-[Live simulator](<signed-stream-url>). If you have a browser the user can see,
+`[Live simulator](<signed-stream-url>)`. If you have a browser the user can see,
 open the URL there and tell them. Otherwise pass `--no-open` to `create`: it
 skips opening the URL locally and still prints it for sharing.
 
@@ -66,7 +66,7 @@ lim ios create
 ```
 
 Share the signed stream URL with the user as a Markdown link, like
-[Live simulator](<signed-stream-url>). If you have a browser the user can see,
+`[Live simulator](<signed-stream-url>)`. If you have a browser the user can see,
 open the URL there and tell them.
 
 You can then run the following command to upload a bundle from local:

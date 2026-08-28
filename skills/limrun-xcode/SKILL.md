@@ -115,7 +115,7 @@ Add `--no-open` when you have no browser to show the user; it skips opening
 the stream URL locally and still prints it for sharing.
 
 If the attach output includes a signed stream URL, share it with the user as a
-Markdown link, such as [Live simulator](<signed-stream-url>).
+Markdown link, such as `[Live simulator](<signed-stream-url>)`.
 
 When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
