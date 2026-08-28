@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "validate": "node scripts/validate-skills.mjs",
-    "smoke:npx": "npx --yes skills add . --list"
+    "smoke:npx": "npx --yes skills add . --list",
+    "generate": "node scripts/generate-manifests.mjs",
+    "generate:check": "node scripts/generate-manifests.mjs --check"
   },
   "devDependencies": {
     "js-yaml": "^4.1.0"
