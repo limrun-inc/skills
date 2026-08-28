@@ -83,7 +83,7 @@ to 14 days from that upload. Pass `--upload-ttl` with a Go duration (e.g.
 `720h`; `1d` is invalid) to change it.
 
 Share the signed stream URL from the create output with the user as a
-Markdown link, such as [Live emulator](<signed-stream-url>). For rebuild
+Markdown link, such as `[Live emulator](<signed-stream-url>)`. For rebuild
 iterations, patch the installed APK in place instead of recreating the
 instance:
 

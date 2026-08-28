@@ -44,7 +44,7 @@ lim android create --install-asset myapp.apk --no-open --no-connect
 
 Create blocks until the instance is ready to drive; no boot wait is needed.
 The create output includes a signed stream URL; share it with the user as a
-Markdown link, like [Live emulator](<signed-stream-url>). If you have a
+Markdown link, like `[Live emulator](<signed-stream-url>)`. If you have a
 browser the user can see, open the URL there and tell them. Create also
 prints a console URL: it opens the same live view but requires a console
 login, so prefer the signed stream URL for sharing.

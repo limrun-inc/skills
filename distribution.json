@@ -1,13 +1,27 @@
 {
   "name": "limrun",
   "displayName": "Limrun",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cloud iOS simulators and Android emulators your agent can create, drive, and throw away.",
-  "author": { "name": "Limrun", "url": "https://limrun.com" },
+  "author": {
+    "name": "Limrun",
+    "url": "https://limrun.com"
+  },
   "homepage": "https://limrun.com",
   "repository": "https://github.com/limrun-inc/skills",
   "license": "MIT",
-  "keywords": ["ios", "android", "simulator", "emulator", "mobile", "testing", "xcode", "gradle", "expo", "mcp"],
+  "keywords": [
+    "ios",
+    "android",
+    "simulator",
+    "emulator",
+    "mobile",
+    "testing",
+    "xcode",
+    "gradle",
+    "expo",
+    "mcp"
+  ],
   "category": "Coding",
   "brandColor": "#0A84FF",
   "icon": "./assets/icon.png",
@@ -17,6 +31,11 @@
     "shortDescription": "Build and test mobile apps on cloud iOS simulators and Android emulators",
     "longDescription": "Limrun gives agents instant iOS simulators and Android emulators in the cloud. Create a device in seconds, pre-install apps by name or URL, drive it through screenshots and the accessibility tree, and delete it when done. Remote Xcode and Gradle build services compile your code for the cloud devices, and the bundled skills teach the exact CLI procedures.",
     "defaultPrompt": "Create a cloud iOS simulator or Android emulator, build my app for it, install it, and drive it through a test flow",
-    "capabilities": ["Interactive", "Read", "Write", "MCP"]
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write",
+      "MCP"
+    ]
   }
 }
