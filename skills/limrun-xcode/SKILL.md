@@ -213,10 +213,13 @@ lim xcode build . --sdk iphoneos --configuration Release \
 ```
 
 The plist values must be fully expanded (no `$(AppIdentifierPrefix)`; write
-the concrete prefix), must omit export-managed keys (`application-identifier`,
-`com.apple.developer.team-identifier`, `get-task-allow`,
-`beta-reports-active`), and every capability must be enabled on the App ID in
-the developer portal or the export fails naming it.
+the concrete prefix) and must omit export-managed keys
+(`application-identifier`, `com.apple.developer.team-identifier`,
+`get-task-allow`, `beta-reports-active`). The export auto-registers
+toggleable capabilities (HealthKit, push) on the App ID; capabilities
+needing extra configuration (app group assignments, special-agreement
+entitlements) must be set up in the developer portal first or the export
+fails naming them.
 
 Manual signing remains available when the user already has a p12 and profiles:
 
