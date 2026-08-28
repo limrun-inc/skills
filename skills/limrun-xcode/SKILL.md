@@ -194,6 +194,30 @@ is missing. `No Account for Team` means the team ID and API key do not match.
 `Failed Registering Bundle Identifier` means the bundle ID belongs to another
 team and cannot be registered automatically.
 
+Cloud signing takes entitlements only from `--entitlements`, never from the
+project's `.entitlements` file: the archive is unsigned and the export
+preserves entitlements only from an existing code signature. Any app using
+capabilities (HealthKit, CloudKit, app groups, push) MUST pass the flag or
+the capability is silently stripped from the IPA. A bare path targets the
+app; `<bundleId>=<path>` targets an embedded bundle (widget, watch app);
+repeat per bundle:
+
+```bash
+lim xcode build . --sdk iphoneos --configuration Release \
+  --signing-method release-testing --team-id VMBY3VYW4U \
+  --asc-key-id 2X9R4HXF34 --asc-issuer-id "$ASC_ISSUER_ID" \
+  --asc-key AuthKey.p8 \
+  --entitlements ./MyApp/MyApp.entitlements \
+  --entitlements com.example.myapp.widgets=./Widgets/Widgets.entitlements \
+  --upload myapp.ipa
+```
+
+The plist values must be fully expanded (no `$(AppIdentifierPrefix)`; write
+the concrete prefix), must omit export-managed keys (`application-identifier`,
+`com.apple.developer.team-identifier`, `get-task-allow`,
+`beta-reports-active`), and every capability must be enabled on the App ID in
+the developer portal or the export fails naming it.
+
 Manual signing remains available when the user already has a p12 and profiles:
 
 ```bash
