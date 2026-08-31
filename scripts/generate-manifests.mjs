@@ -123,6 +123,7 @@ function buildManifests() {
       },
     },
     '.agents/plugins/marketplace.json': {
+      name: dist.name,
       interface: { displayName: dist.displayName },
       plugins: [
         {
