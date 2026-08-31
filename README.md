@@ -41,5 +41,6 @@ npm run generate   # regenerate manifests after editing distribution.json or ski
 npm run validate   # skills + catalog validation
 ```
 
-CI fails if a manifest is stale. Bump `distribution.json`'s `version` when skills or
-metadata change.
+CI fails if a manifest is stale, and PRs that change skills or manifests must bump the
+version: `npm run bump` (patch) or `npm run bump minor`. Merges to main tag and release
+the new version automatically.
