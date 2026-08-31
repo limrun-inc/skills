@@ -117,14 +117,25 @@ lim android terminate-app com.example.app                        # stop it, e.g.
 Without `--detach`, `launch-app` blocks watching the app: when it crashes,
 ANRs, or is stopped, the command prints the exit reason, crash details with
 the stack trace, and a recent app log tail, then returns. That report is the
-way to see why an app died without adb; logs while the app is running still
-need adb (below). There is no `list-apps`; discover package names over adb
-with `pm list packages`, or take the application ID from the build.
+way to see why an app died without adb; for logs while the app is running,
+use `lim android app-log` (below). There is no `list-apps`; discover package
+names over adb with `pm list packages`, or take the application ID from the
+build.
 
-## Logs, files, and shell over adb
+## App logs
 
-Logcat, file transfer, and arbitrary shell go through plain `adb` over the
-CLI's tunnel. Start the tunnel in a background shell and keep it alive:
+One app's logs need no tunnel:
+
+```bash
+lim android app-log com.example.app --tail 100   # recent lines (app must be running)
+lim android app-log com.example.app --follow     # stream live lines until Ctrl+C; don't stream into context
+```
+
+## Files, shell, and full logcat over adb
+
+Full-device logcat, file transfer, and arbitrary shell go through plain
+`adb` over the CLI's tunnel. Start the tunnel in a background shell and keep
+it alive:
 
 ```bash
 lim android connect        # prints "Tunnel started on 127.0.0.1:<port>."
@@ -136,8 +147,7 @@ every adb call (`adb devices` also lists it):
 
 ```bash
 SERIAL=127.0.0.1:<port>
-adb -s $SERIAL logcat -d | tail -100                             # dump recent logs, don't stream into context
-adb -s $SERIAL logcat -d --pid=$(adb -s $SERIAL shell pidof -s com.example.app) | tail -50   # only the app's logs (app must be running)
+adb -s $SERIAL logcat -d | tail -100                             # dump recent full-device logs, don't stream into context
 adb -s $SERIAL shell pm list packages | grep example             # package name discovery
 adb -s $SERIAL push ./fixture.json /sdcard/Download/
 adb -s $SERIAL pull /sdcard/Download/out.json ./
