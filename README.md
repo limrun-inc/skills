@@ -23,7 +23,7 @@ If you prefer your agent's own plugin or skills mechanism:
 |---|---|
 | skills CLI (any agent) | `npx skills add limrun-inc/skills` |
 | Claude Code | `/plugin marketplace add limrun-inc/skills` then `/plugin install limrun@limrun` |
-| Codex CLI | `codex plugin marketplace add limrun-inc/skills` then `codex plugin install limrun` |
+| Codex CLI | `codex plugin marketplace add limrun-inc/skills` then `codex plugin add limrun@limrun` |
 | Gemini CLI | `gemini extensions install https://github.com/limrun-inc/skills` |
 | Cursor | Cursor Marketplace, or copy this repo to `~/.cursor/plugins/local/limrun` |
 
