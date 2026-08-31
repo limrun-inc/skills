@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -20,4 +22,6 @@ jobs:
       - run: npm ci
       - run: npm run validate
       - run: npm run generate:check
+      - if: github.event_name == 'pull_request'
+        run: node scripts/check-version-bump.mjs origin/${{ github.base_ref }}
       - run: npm run smoke:npx

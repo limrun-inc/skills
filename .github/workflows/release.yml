@@ -1,0 +1,29 @@
+# Tags and releases vX.Y.Z whenever main's distribution.json version has no
+# tag yet, so marketplace channels that track releases (Gemini CLI, external
+# listings pinning refs) update without manual tagging.
+name: Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag and release if version is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(node -p "require('./distribution.json').version")"
+          TAG="v${VERSION}"
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+            echo "${TAG} already exists; nothing to do."
+            exit 0
+          fi
+          gh release create "${TAG}" --target "${GITHUB_SHA}" --title "limrun plugin ${VERSION}" \
+            --notes "Generated release for distribution.json version ${VERSION}. See merged PRs for changes."
