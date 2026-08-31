@@ -7,9 +7,17 @@ agent platform.
 
 Sign up at [Limrun](https://lim.run) to get a `LIM_API_KEY`.
 
-Then get started!
-
 ## Install
+
+The `lim` CLI installs the skills into whichever agent you use and keeps them updated:
+
+```bash
+lim skills install
+```
+
+### Alternatives
+
+If you prefer your agent's own plugin or skills mechanism:
 
 | Agent | Command |
 |---|---|
@@ -18,7 +26,6 @@ Then get started!
 | Codex CLI | `codex plugin marketplace add limrun-inc/skills` then `codex plugin install limrun` |
 | Gemini CLI | `gemini extensions install https://github.com/limrun-inc/skills` |
 | Cursor | Cursor Marketplace, or copy this repo to `~/.cursor/plugins/local/limrun` |
-| lim CLI | `lim skills install` |
 
 The plugin bundles all skills plus the remote MCP server at `https://mcp.limrun.com/mcp`
 (OAuth sign-in on first use, or set an org API key as a bearer token).
