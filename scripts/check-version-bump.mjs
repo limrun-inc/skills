@@ -41,4 +41,11 @@ if (headVersion === baseVersion) {
   );
   process.exit(1);
 }
+// A concurrent PR may have already released this version; releases are
+// immutable, so a bump must land on a version with no tag yet.
+const existingTag = git('tag', '--list', `v${headVersion}`);
+if (existingTag) {
+  process.stderr.write(`v${headVersion} is already released; run: npm run bump again\n`);
+  process.exit(1);
+}
 process.stdout.write(`Version bumped ${baseVersion} -> ${headVersion}.\n`);

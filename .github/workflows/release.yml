@@ -22,8 +22,13 @@ jobs:
           VERSION="$(node -p "require('./distribution.json').version")"
           TAG="v${VERSION}"
           if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
-            echo "${TAG} already exists; nothing to do."
-            exit 0
+            git fetch origin "refs/tags/${TAG}:refs/tags/${TAG}" --no-tags
+            if git diff --quiet "${TAG}" HEAD -- skills/ assets/ distribution.json plugin.json mcp.json .mcp.json gemini-extension.json .claude-plugin .codex-plugin .agents; then
+              echo "${TAG} already exists with the same source; nothing to do."
+              exit 0
+            fi
+            echo "::error::${TAG} exists but main's content differs; a concurrent bump landed on a released version. Bump again." >&2
+            exit 1
           fi
           gh release create "${TAG}" --target "${GITHUB_SHA}" --title "limrun plugin ${VERSION}" \
             --notes "Generated release for distribution.json version ${VERSION}. See merged PRs for changes."
