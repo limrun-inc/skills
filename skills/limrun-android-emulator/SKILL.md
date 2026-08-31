@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', or 'record a video'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -305,6 +305,53 @@ Test slow-network behavior by capping the instance's Wi-Fi bandwidth:
 lim android set-wifi-bandwidth --down-kbps 1000 --up-kbps 500
 lim android set-wifi-bandwidth --down-kbps 0 --up-kbps 0       # 0 clears the limit
 ```
+
+## Tunnel the app's traffic through your machine
+
+When the app must reach a service only your machine can reach (a local dev
+server, a VPN-only staging API), or you need to see its HTTP traffic, start a
+destination tunnel. Only the destinations you select are rerouted through
+the machine running `lim`; everything else leaves the instance directly.
+
+```bash
+lim android tunnel --selector localhost:8080 --detach --id <android-instance-id>
+```
+
+- An exact selector (`localhost:port` or `IP:port`, port >= 1024) becomes a
+  listener on the emulator, also reachable as `10.0.2.2:<port>`; the app's
+  connections to it land on your machine and are dialed there.
+- Domain selectors (`api.example.com`, `"*.corp.example"`) are intercepted
+  on the emulator and dialed from your machine, so your DNS and VPN apply.
+  Apps that resolve DNS themselves over HTTPS bypass domain interception.
+- Start the tunnel **before** launching the app: connections opened earlier
+  keep their original route. One tunnel per instance; a second start fails.
+
+As an agent, always pass `--detach`: it returns once the tunnel is READY and
+keeps it alive in a background process. Manage it with:
+
+```bash
+lim android tunnel status --id <android-instance-id>   # state, per-selector binds, last dial failure
+lim android tunnel stop --id <android-instance-id>
+```
+
+### Inspect HTTP traffic, capture HAR, persist a network log
+
+Inspection is on by default: every HTTP and HTTPS request through the tunnel
+is decoded, printed as one summary line per request (in the tunnel log file
+when detached), and shown live in the console's network panel.
+
+```bash
+lim android tunnel --selector "*.api.example" --har ./traffic.har --detach   # write HAR 1.2 with bodies
+lim android tunnel --selector "*.api.example" --persist --detach             # network log survives the instance
+```
+
+`--persist` uploads a body-inclusive network log as a session artifact when
+the tunnel stops or the instance terminates; it appears on the instance's
+session page in the console with a HAR download (default lifetime 3 days,
+`--ttl <seconds>` up to 30 days). HTTPS is decoded with an emulator-trusted
+CA, so **apps with certificate pinning fail through inspected domain
+selectors**: leave the pinned host out of the selectors or pass
+`--no-inspect` to relay bytes opaquely (no summaries, HAR, or persistence).
 
 ## Preview URL for humans
 

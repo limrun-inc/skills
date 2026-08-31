@@ -147,7 +147,7 @@ its normal local port; Expo advertises localhost:
 ```bash
 METRO_PORT=8081
 lim ios tunnel \
-  --route "localhost:${METRO_PORT}" \
+  --selector "localhost:${METRO_PORT}" \
   --detach \
   --id <ios-instance-id>
 TUNNEL_URL="http://localhost:${METRO_PORT}"
@@ -164,9 +164,9 @@ Run Metro as a managed background process, or copy the printed `TUNNEL_URL` into
 a second terminal before launching the app.
 
 If port 8081 is already occupied, choose another explicit port and use the same
-value for the tunnel route, `TUNNEL_URL`, and Expo's `--port`. Route sets are
-immutable: stop and recreate the tunnel with the complete route list when the
-port changes.
+value for the tunnel selector, `TUNNEL_URL`, and Expo's `--port`. Selector sets
+are immutable: stop and recreate the tunnel with the complete selector list
+when the port changes.
 
 Only add `--offline` in a genuinely network-isolated environment after
 dependencies are installed. Offline mode disables network checks and dependency
