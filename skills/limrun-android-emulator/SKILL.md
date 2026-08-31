@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, and use adb over the CLI's tunnel for logcat, files, and shell. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', or 'record a video'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', or 'record a video'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -71,8 +71,8 @@ your machine. `install-app` returns as soon as the app is sent; the install
 finishes in the background within seconds. Newly installed apps land in the
 app drawer, not the home screen, so don't look for their icon; just launch
 the app with `lim android launch-app <package> --detach` (without `--detach`
-it blocks watching the app until it exits), or confirm over adb with
-`pm list packages | grep <name>`.
+it blocks watching the app until it exits), or confirm with
+`lim android adb-shell -- sh -c "pm list packages | grep <name>"`.
 
 Every time you need to install a new version of the APK, sync it instead of
 reinstalling:
@@ -119,8 +119,8 @@ ANRs, or is stopped, the command prints the exit reason, crash details with
 the stack trace, and a recent app log tail, then returns. That report is the
 way to see why an app died without adb; for logs while the app is running,
 use `lim android app-log` (below). There is no `list-apps`; discover package
-names over adb with `pm list packages`, or take the application ID from the
-build.
+names with `lim android adb-shell -- pm list packages`, or take the
+application ID from the build.
 
 ## App logs
 
@@ -131,11 +131,25 @@ lim android app-log com.example.app --tail 100   # recent lines (app must be run
 lim android app-log com.example.app --follow     # stream live lines until Ctrl+C; don't stream into context
 ```
 
-## Files, shell, and full logcat over adb
+## Shell and files
 
-Full-device logcat, file transfer, and arbitrary shell go through plain
-`adb` over the CLI's tunnel. Start the tunnel in a background shell and keep
-it alive:
+One-shot shell commands and file transfer need no tunnel either:
+
+```bash
+lim android adb-shell -- pm list packages -3                     # like adb shell; args go after --
+lim android adb-shell -- sh -c "dumpsys battery | grep level"    # pipes need an explicit shell
+lim android push-file ./fixture.json /sdcard/Download/fixture.json
+lim android pull-file /sdcard/Download/out.json ./out.json
+```
+
+They run with the same permissions the adb shell user has, and `adb-shell`
+exits with the command's exit code.
+
+## Full logcat and interactive adb over the tunnel
+
+Full-device logcat and anything interactive (Android Studio, scrcpy,
+streaming) go through plain `adb` over the CLI's tunnel. Start the tunnel in
+a background shell and keep it alive:
 
 ```bash
 lim android connect        # prints "Tunnel started on 127.0.0.1:<port>."
@@ -147,10 +161,7 @@ every adb call (`adb devices` also lists it):
 
 ```bash
 SERIAL=127.0.0.1:<port>
-adb -s $SERIAL logcat -d | tail -100                             # dump recent full-device logs, don't stream into context
-adb -s $SERIAL shell pm list packages | grep example             # package name discovery
-adb -s $SERIAL push ./fixture.json /sdcard/Download/
-adb -s $SERIAL pull /sdcard/Download/out.json ./
+adb -s $SERIAL logcat -d | tail -100    # dump recent full-device logs, don't stream into context
 ```
 
 The tunnel lives and dies with the process that started it: when that shell
