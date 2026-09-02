@@ -296,6 +296,11 @@ lim xcode build . --sdk iphoneos --configuration Release \
 flags, plus `--asc-key-id` and `--asc-key`. Combine it with `--upload
 <asset-name>` when the user also wants the IPA in Asset Storage.
 
+Device IPAs carry the app's symbols (`Symbols/` next to `Payload/`), so App
+Store Connect symbolicates crash reports without a separate dSYM upload. This
+needs the build to produce dSYMs: `--configuration Release` does by default;
+Debug does not, and the IPA then simply ships without symbols.
+
 Collect from the user (all three live in App Store Connect under Users and
 Access, Integrations tab, App Store Connect API):
 
