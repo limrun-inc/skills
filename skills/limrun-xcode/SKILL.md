@@ -101,6 +101,15 @@ lim xcode build . --include '^ios/GeneratedKit/'
 To reach files under a directory that is ignored as a whole, the pattern must
 also match the directory path itself, as above.
 
+## Run project commands
+
+`lim xcode run` is the escape hatch for project commands outside the managed
+build:
+
+```bash
+lim xcode run -- make generate
+```
+
 ## Run on a simulator
 
 `lim xcode build` is build-and-install. Don't attach a simulator until the user
