@@ -102,23 +102,30 @@ resolves on its own. When controlling multiple instances, always pass `--id`.
 
 ## Reaching services on the local machine
 
-Destination tunnels let an iPhone simulator app keep calling exact localhost
-or literal-IP TCP destinations while the CLI connects those destinations from
-the machine running `lim`:
+Destination tunnels let an iPhone simulator app keep calling its normal
+destinations while the CLI dials them from the machine running `lim`. Select
+exact `localhost:port` or literal `IP:port` destinations, or domains that only
+your machine or VPN can reach:
 
 ```bash
 lim ios tunnel \
   --id <ios-instance-id> \
   --selector localhost:3000 \
   --selector localhost:8081 \
+  --selector "*.staging.example" \
   --detach
 ```
 
 Use the app's normal URLs, such as `http://localhost:3000`. Declaring
 `localhost:3000` also captures loopback forms such as `127.0.0.1:3000` and
-`[::1]:3000`, plus `[::ffff:127.0.0.1]:3000`. This release supports TCP and up
-to ten exact selectors, each `localhost:port` or a literal `IP:port`. Port
-53, domain names, CIDRs, and UDP are not supported.
+`[::1]:3000`, plus `[::ffff:127.0.0.1]:3000`. Domain selectors (exact
+`api.corp.example` or label-bound wildcard `"*.staging.example"`) are
+intercepted on the simulator and dialed from your machine whether or not the
+name resolves on public DNS, so your DNS and VPN apply and TLS stays end to
+end. Apps that resolve DNS themselves over HTTPS bypass domain interception.
+A tunnel carries TCP only: up to ten exact selectors and 64 domain selectors,
+ports 1-65535 except 53; CIDRs and UDP are not supported. Start the tunnel
+before launching the app: connections opened earlier keep their original route.
 
 One instance accepts one active destination tunnel, and its selector set is
 immutable. To add or remove a destination, stop the tunnel and start it again
