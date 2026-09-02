@@ -278,8 +278,33 @@ lim android record stop -o /tmp/recording.mp4
 
 `record stop` accepts `--quality 5-10`. Recorded frames are half the
 screenshot resolution, so read tap coordinates from screenshots, never from
-video frames. For UI changes, include a demo video in the pull request so the
-user can see it.
+video frames.
+
+For UI changes, upload the clearest screenshot and any useful demo video
+directly into the pull request body. Do not leave local paths that reviewers
+cannot open. GitHub CLI v2.99.0 or newer supports repeatable `--attach`; editing
+without a body flag preserves the existing body and appends the rendered media:
+
+```bash
+gh pr edit <number-or-url> \
+  --attach './screenshot.png#The updated screen' \
+  --attach ./recording.mp4
+```
+
+To position media in a section when creating the PR, reference each local path
+in the body and pass the same path with `--attach`. GitHub rewrites the paths to
+uploaded assets while preserving image alt text:
+
+```markdown
+## Preview
+
+![The updated screen](./screenshot.png)
+
+![Demo](./recording.mp4)
+```
+
+Keep a video embed alone in its paragraph so it renders as an inline player.
+Unreferenced attachments are appended to the body automatically.
 
 ## Simulate the microphone with an audio file
 
