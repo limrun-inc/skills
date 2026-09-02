@@ -281,6 +281,29 @@ screenshot resolution, so read tap coordinates from screenshots, never from
 video frames. For UI changes, include a demo video in the pull request so the
 user can see it.
 
+## Persisted session captures
+
+Captures can be persisted to Limrun storage so they survive instance
+termination (default 3-day TTL, `--persist-ttl` up to 30 days). Start them at
+create time, or persist an ad-hoc recording with `record start --persist`:
+
+```bash
+lim android create --record --app-logs com.example.app --events --persist-ttl 24h
+lim android record start --persist --persist-ttl 24h
+```
+
+`--record` persists the full session video, `--app-logs <packageName>` a
+timestamped JSONL logcat capture of that app, and `--events` a JSONL log of
+coalesced user actions (taps, drags, commands). Captures run until stopped or
+the instance terminates. List them any time, even after termination; `--json`
+includes a short-lived `downloadUrl` per entry:
+
+```bash
+lim android recordings --id <instance-ID> --json
+lim android app-logs --id <instance-ID> --json
+lim android events --id <instance-ID> --json
+```
+
 ## Simulate the microphone with an audio file
 
 For voice-driven flows (assistants, speech-to-text, audio calls), play a local

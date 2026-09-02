@@ -257,6 +257,29 @@ lim ios record stop -o /tmp/recording.mp4
 
 For UI changes, include a demo video in the pull request so the user can see it.
 
+## Persisted session captures
+
+Captures can be persisted to Limrun storage so they survive instance
+termination (default 3-day TTL, `--persist-ttl` up to 30 days). Start them at
+create time, or persist an ad-hoc recording with `record start --persist`:
+
+```bash
+lim ios create --record --app-logs com.example.app --events --persist-ttl 24h
+lim ios record start --persist --persist-ttl 24h
+```
+
+`--record` persists the full session video, `--app-logs <bundleId>` a
+timestamped JSONL log of that app, and `--events` a JSONL log of coalesced
+user actions (taps, drags, commands). Captures run until stopped or the
+instance terminates. List them any time, even after termination; `--json`
+includes a short-lived `downloadUrl` per entry:
+
+```bash
+lim ios recordings --id <instance-ID> --json
+lim ios app-logs --id <instance-ID> --json
+lim ios events --id <instance-ID> --json
+```
+
 ## App container files
 
 List an app's data container before pulling a file so you use the exact path the
