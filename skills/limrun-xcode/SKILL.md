@@ -57,6 +57,24 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 lim xcode build . --configuration Debug
 ```
 
+### Pick the Xcode version
+
+A sandbox builds with its node's default Xcode. To build with another installed
+major (Xcode 27 beta is available beside the default), pass the major; the
+sandbox is switched if needed and stays on it for later builds:
+
+```bash
+lim xcode build . --xcode-version 27
+lim xcode set-xcode 27      # switch the remembered sandbox without building
+lim xcode get               # "Xcode: 27.0 (27A5252f)" shows the current binding
+```
+
+Switching resets the sandbox's DerivedData (next build is cold) and is refused
+while a build, sync or `lim xcode rbe` stack is running. A major the node does
+not have fails with the installed list; only majors are selectable. App Store
+uploads from a beta Xcode are rejected by Apple, so keep `--upload-to-appstore`
+on the default.
+
 `--dev-server-url` is only supported with `--configuration Debug` for React
 Native / Expo builds. It's a post-install launch URL: limbuild validates it is a
 parseable absolute URL, then opens it unchanged after installing on the attached
@@ -136,7 +154,9 @@ lim xcode test ./MyProject --scheme MyApp
 It auto-acquires a simulator-backed target like `lim xcode build --ios` and
 reuses the instances on repeat runs, so iterating is fast. The scheme must
 have a test action configured (shared schemes from Xcode have one when the
-project has test targets).
+project has test targets). `--xcode-version 27` builds the tests with that
+Xcode; the simulator keeps the fleet default runtime, so the run warns and
+proceeds (runtime-dependent failures are possible).
 
 Select a subset with xcodebuild's identifier format
 `Target[/Class[/method]]`; repeat the flag for multiple entries. The two flags
