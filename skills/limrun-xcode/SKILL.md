@@ -383,10 +383,11 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
   project files or run `lim ios list-apps` after a successful build.
 - **Auth errors** on an authenticated command mean the session expired or
   `LIM_API_KEY` is wrong; ask the user to run `lim login` or provide a key.
-- **Build settings are allowlisted.** Only `APP_CONFIG_*` keys and
-  `SWIFT_ACTIVE_COMPILATION_CONDITIONS` pass `--build-setting`; anything else
-  is rejected. Bump `CURRENT_PROJECT_VERSION` and friends in the Xcode project
-  file instead.
+- **Build settings override Limrun's defaults.** `--build-setting KEY=VALUE`
+  accepts any environment-style key and replaces the managed value with the
+  same key. Device builds already use standard architectures (an embedded
+  watch app keeps `arm64_32`) and disable coverage instrumentation, so App
+  Store uploads need no extra settings.
 - **Artifact not found after a successful build.** The server resolves the
   built .app on its own, including when the scheme name differs from the
   product name (scheme "MyApp Dev" building MyApp-dev.app). If an upload
