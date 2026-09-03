@@ -64,6 +64,7 @@ major (Xcode 27 beta is available beside the default), pass the major; the
 sandbox is switched if needed and stays on it for later builds:
 
 ```bash
+lim xcode list-xcode        # versions the sandbox can build with, and the current one
 lim xcode build . --xcode-version 27
 lim xcode set-xcode 27      # switch the remembered sandbox without building
 lim xcode get               # "Xcode: 27.0 (27A5252f)" shows the current binding
@@ -71,7 +72,7 @@ lim xcode get               # "Xcode: 27.0 (27A5252f)" shows the current binding
 
 Switching resets the sandbox's DerivedData (next build is cold) and is refused
 while a build, sync or `lim xcode rbe` stack is running. A major the node does
-not have fails with the installed list; only majors are selectable. App Store
+not have fails with the available list; only majors are selectable. App Store
 uploads from a beta Xcode are rejected by Apple, so keep `--upload-to-appstore`
 on the default.
 
