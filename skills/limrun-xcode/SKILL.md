@@ -60,21 +60,25 @@ lim xcode build . --configuration Debug
 ### Pick the Xcode version
 
 A sandbox builds with its node's default Xcode. To build with another installed
-major (Xcode 27 beta is available beside the default), pass the major; the
-sandbox is switched if needed and stays on it for later builds:
+major (Xcode 27 beta is available beside the default), set a preference once
+for the workspace; every later build, test, RBE session and new sandbox follows
+it, and the flag overrides it for one command:
 
 ```bash
-lim xcode list-xcode        # versions the sandbox can build with, and the current one
-lim xcode build . --xcode-version 27
-lim xcode set-xcode 27      # switch the remembered sandbox without building
-lim xcode get               # "Xcode: 27.0 (27A5252f)" shows the current binding
+lim xcode version list      # versions the sandbox can build with
+lim xcode version set 27    # prefer 27 for this workspace; switches the remembered sandbox now
+lim xcode build .           # builds with 27
+lim xcode version           # "27.0 (27A5252f)" shows the sandbox's current Xcode
+lim xcode build . --xcode-version 26   # one-off override, not remembered
+lim xcode version unset     # forget the preference; the sandbox keeps its Xcode
 ```
 
-Switching resets the sandbox's DerivedData (next build is cold) and is refused
-while a build, sync or `lim xcode rbe` stack is running. A major the node does
-not have fails with the available list; only majors are selectable. App Store
-uploads from a beta Xcode are rejected by Apple, so keep `--upload-to-appstore`
-on the default.
+When the sandbox is on another major than the workspace prefers, the next
+build says so and switches it first. Switching resets the sandbox's DerivedData
+(next build is cold) and is refused while a build, sync or `lim xcode rbe`
+stack is running. A major the node does not have fails with the available list;
+only majors are selectable. App Store uploads from a beta Xcode are rejected by
+Apple, so keep `--upload-to-appstore` on the default.
 
 `--dev-server-url` is only supported with `--configuration Debug` for React
 Native / Expo builds. It's a post-install launch URL: limbuild validates it is a

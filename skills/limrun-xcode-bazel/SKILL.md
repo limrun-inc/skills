@@ -31,9 +31,10 @@ verified, but if a flag errors or you need one not shown here, check
    `bazelisk --digest_function=sha256 build --config=limrun //App`.
 
 Don't hand-write `.limrun/` or the flags — the CLI generates them for the
-sandbox's Xcode and your OS. `lim xcode rbe --xcode-version 27` builds with
-another installed major. Re-run `lim xcode rbe` (after `--stop`) to refresh
-after a fleet Xcode upgrade or an Xcode switch.
+sandbox's Xcode and your OS. `lim xcode version set 27` (or the one-off
+`lim xcode rbe --xcode-version 27`) builds with another installed major. Re-run
+`lim xcode rbe` (after `--stop`) to refresh after a fleet Xcode upgrade or an
+Xcode switch.
 
 To add your own Bazel flags to the limrun path without editing the generated
 config, put them in **`user.limrun.bazelrc`** at the workspace root. The
