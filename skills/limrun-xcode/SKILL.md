@@ -70,7 +70,7 @@ lim xcode version set 27    # prefer 27 for this workspace; switches the remembe
 lim xcode build .           # builds with 27
 lim xcode version           # "27.0 (27A5252f)" shows the sandbox's current Xcode
 lim xcode build . --xcode-version 26   # one-off override, not remembered
-lim xcode version unset     # forget the preference; the sandbox keeps its Xcode
+lim xcode version unset     # forget the preference; the sandbox goes back to the node default
 ```
 
 When the sandbox is on another major than the workspace prefers, the next
