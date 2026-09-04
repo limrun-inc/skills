@@ -75,8 +75,7 @@ lim xcode version unset     # forget the preference; the sandbox goes back to th
 
 For scripting, `lim xcode version list --quiet` prints one selectable major per
 line and `--json` returns `{ installed, bound, preferred }` (`installed[].betaSeed`
-carries the beta seed). The table marks the Xcode in use with `*` and names the
-workspace preference under it.
+carries the beta seed). The table marks the Xcode in use with `*`.
 `lim xcode version set` does not record a major the node lacks (the error lists
 the available ones) but keeps it when the sandbox is merely busy.
 
