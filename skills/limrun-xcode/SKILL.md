@@ -65,7 +65,7 @@ for the workspace; every later build, test, RBE session and new sandbox follows
 it, and the flag overrides it for one command:
 
 ```bash
-lim xcode version list      # versions the sandbox can build with
+lim xcode version list      # versions the sandbox can build with; * marks the one in use
 lim xcode version set 27    # prefer 27 for this workspace; switches the remembered sandbox now
 lim xcode build .           # builds with 27
 lim xcode version           # "27.0 (27A5252f)" shows the sandbox's current Xcode
@@ -74,15 +74,15 @@ lim xcode version unset     # forget the preference; the sandbox goes back to th
 ```
 
 For scripting, `lim xcode version list --quiet` prints one selectable major per
-line and `--json` returns `{ installed, bound, preferred }`; the table's notes
-column marks `beta <seed>`, `selected`, `default` and `preferred`.
+line and `--json` returns `{ installed, bound, preferred }` (`installed[].betaSeed`
+carries the beta seed). The table marks the Xcode in use with `*`.
 `lim xcode version set` does not record a major the node lacks (the error lists
 the available ones) but keeps it when the sandbox is merely busy.
 
 When the sandbox is on another major than the workspace prefers, the next
-build says so and switches it first. Switching resets the sandbox's DerivedData
-(next build is cold) and is refused while a build, sync or `lim xcode rbe`
-stack is running. A major the node does not have fails with the available list;
+build says so and switches it first. Switching invalidates the build cache made
+with the other version (the next build starts cold) and is refused while a build,
+sync or `lim xcode rbe` stack is running. A major the node does not have fails with the available list;
 only majors are selectable. App Store uploads from a beta Xcode are rejected by
 Apple, so keep `--upload-to-appstore` on the default.
 

@@ -1,7 +1,7 @@
 {
   "name": "limrun",
   "displayName": "Limrun",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Cloud iOS simulators and Android emulators your agent can create, drive, and throw away.",
   "author": {
     "name": "Limrun",
