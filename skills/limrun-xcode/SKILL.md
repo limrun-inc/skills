@@ -81,8 +81,9 @@ workspace preference under it.
 the available ones) but keeps it when the sandbox is merely busy.
 
 When the sandbox is on another major than the workspace prefers, the next
-build says so and switches it first. Switching makes the next build start cold
-and is refused while a build, sync or `lim xcode rbe` stack is running. A major the node does not have fails with the available list;
+build says so and switches it first. Switching invalidates the build cache made
+with the other version (the next build starts cold) and is refused while a build,
+sync or `lim xcode rbe` stack is running. A major the node does not have fails with the available list;
 only majors are selectable. App Store uploads from a beta Xcode are rejected by
 Apple, so keep `--upload-to-appstore` on the default.
 
