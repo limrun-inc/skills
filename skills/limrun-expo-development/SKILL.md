@@ -113,6 +113,9 @@ lim xcode build . \
   --upload "$ASSET_NAME"
 ```
 
+Run `lim xcode version set <major>` once in the repo when the project needs a
+specific Xcode major (e.g. 27 for the beta); see `limrun-xcode` for the rules.
+
 Use `--expo-app-dir`, `--scheme`, or `--workspace` when the project layout requires it.
 
 Then create the simulator attached to that Xcode target; the attach installs

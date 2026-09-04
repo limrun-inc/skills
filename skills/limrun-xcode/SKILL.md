@@ -57,6 +57,35 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 lim xcode build . --configuration Debug
 ```
 
+### Pick the Xcode version
+
+A sandbox builds with its node's default Xcode. To build with another installed
+major (Xcode 27 beta is available beside the default), set a preference once
+for the workspace; every later build, test, RBE session and new sandbox follows
+it, and the flag overrides it for one command:
+
+```bash
+lim xcode version list      # versions the sandbox can build with
+lim xcode version set 27    # prefer 27 for this workspace; switches the remembered sandbox now
+lim xcode build .           # builds with 27
+lim xcode version           # "27.0 (27A5252f)" shows the sandbox's current Xcode
+lim xcode build . --xcode-version 26   # one-off override, not remembered
+lim xcode version unset     # forget the preference; the sandbox goes back to the node default
+```
+
+For scripting, `lim xcode version list --quiet` prints one selectable major per
+line and `--json` returns `{ installed, bound, preferred }`; the table's notes
+column marks `beta <seed>`, `selected`, `default` and `preferred`.
+`lim xcode version set` does not record a major the node lacks (the error lists
+the available ones) but keeps it when the sandbox is merely busy.
+
+When the sandbox is on another major than the workspace prefers, the next
+build says so and switches it first. Switching resets the sandbox's DerivedData
+(next build is cold) and is refused while a build, sync or `lim xcode rbe`
+stack is running. A major the node does not have fails with the available list;
+only majors are selectable. App Store uploads from a beta Xcode are rejected by
+Apple, so keep `--upload-to-appstore` on the default.
+
 `--dev-server-url` is only supported with `--configuration Debug` for React
 Native / Expo builds. It's a post-install launch URL: limbuild validates it is a
 parseable absolute URL, then opens it unchanged after installing on the attached
@@ -136,7 +165,9 @@ lim xcode test ./MyProject --scheme MyApp
 It auto-acquires a simulator-backed target like `lim xcode build --ios` and
 reuses the instances on repeat runs, so iterating is fast. The scheme must
 have a test action configured (shared schemes from Xcode have one when the
-project has test targets).
+project has test targets). `--xcode-version 27` builds the tests with that
+Xcode; the simulator keeps the fleet default runtime, so the run warns and
+proceeds (runtime-dependent failures are possible).
 
 Select a subset with xcodebuild's identifier format
 `Target[/Class[/method]]`; repeat the flag for multiple entries. The two flags
