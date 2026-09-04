@@ -73,6 +73,12 @@ lim xcode build . --xcode-version 26   # one-off override, not remembered
 lim xcode version unset     # forget the preference; the sandbox goes back to the node default
 ```
 
+For scripting, `lim xcode version list --quiet` prints one selectable major per
+line and `--json` returns `{ installed, bound, preferred }`; the table's notes
+column marks `beta <seed>`, `selected`, `default` and `preferred`.
+`lim xcode version set` does not record a major the node lacks (the error lists
+the available ones) but keeps it when the sandbox is merely busy.
+
 When the sandbox is on another major than the workspace prefers, the next
 build says so and switches it first. Switching resets the sandbox's DerivedData
 (next build is cold) and is refused while a build, sync or `lim xcode rbe`
