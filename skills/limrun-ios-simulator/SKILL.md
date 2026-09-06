@@ -15,6 +15,14 @@ concerns in those skills; this one is about driving the running simulator.
 
 Never use local Xcode, local simulators, or local macOS tools.
 
+## App isolation
+
+Use the app's writable data container for files and the documented tunnels for
+connections to development services. Do not connect directly to host Unix-domain
+sockets or modify Limrun-managed injectable libraries; the simulator sandbox
+blocks those operations. Use the supported camera, XCTest, and Safari debugging
+interfaces for those features.
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
