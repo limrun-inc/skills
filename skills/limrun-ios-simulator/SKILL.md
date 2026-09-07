@@ -246,6 +246,11 @@ Run `lim ios perform --help` for the full action grammar.
 
 ## Screenshots and video
 
+The live browser stream is capped at 30 fps. WebRTC adapts its video output to
+network conditions and encoder load without changing simulator display geometry
+or app layout. A lower-resolution stream alone does not indicate a layout bug;
+use a screenshot to check the rendered UI.
+
 Screenshot takes a **positional path** (not `-o`):
 
 ```bash
