@@ -403,6 +403,10 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 ## Gotchas
 
+- **Remote temporary files use `$TMPDIR`.** Build scripts and remote commands
+  must use Limrun's provided `TMPDIR`. Host temp paths such as `/tmp`,
+  `/var/tmp`, and `/var/folders` are inaccessible. If a tool reports
+  `Operation not permitted` there, configure its temp path under `$TMPDIR`.
 - **Build errors are your job to fix.** If a build fails, read the error output,
   fix the code, and rebuild. Don't ask the user to fix build errors.
 - **Instance ID for `lim ios` commands.** They resolve the current instance
