@@ -33,6 +33,12 @@ lim gradle --help
 lim gradle build --help
 ```
 
+For automatic placement, new instances use an explicit `ClientIP` scheduling
+clue first, then Cloudflare's `CF-Connecting-IP` header when the clue is missing
+or empty. Calls from CI or a remote agent therefore use that machine's public
+IP unless a clue is supplied. Availability, region preferences, jurisdiction,
+and organization routing policies still apply.
+
 ## Build an APK
 
 Instead of `./gradlew`, build with:

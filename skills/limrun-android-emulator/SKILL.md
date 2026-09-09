@@ -23,6 +23,12 @@ because it's missing from `.env` or the shell). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `lim android <subcommand> --help` instead of guessing.
 
+For automatic placement, new instances use an explicit `ClientIP` scheduling
+clue first, then Cloudflare's `CF-Connecting-IP` header when the clue is missing
+or empty. Calls from CI or a remote agent therefore use that machine's public
+IP unless a clue is supplied. Availability, region preferences, jurisdiction,
+and organization routing policies still apply.
+
 ## Installing an app
 
 You can build with Limrun's remote Gradle service and have the APK installed
