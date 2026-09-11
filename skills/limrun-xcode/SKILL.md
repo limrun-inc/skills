@@ -403,6 +403,10 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 ## Gotchas
 
+- Direct access to the host's `/Library/Preferences/com.apple.networkextension.plist`
+  and `com.apple.networkextension.uuidcache.plist` is denied, including through
+  `/System/Volumes/Data`. Treat these permission errors as expected. Keep project
+  settings in the workspace.
 - **Build errors are your job to fix.** If a build fails, read the error output,
   fix the code, and rebuild. Don't ask the user to fix build errors.
 - **Instance ID for `lim ios` commands.** They resolve the current instance

@@ -107,6 +107,10 @@ Stop with **`lim xcode rbe --stop`** (~20s to tear the remote stack down) and de
 
 ## Gotchas
 
+- Remote build actions cannot directly access the host's
+  `/Library/Preferences/com.apple.networkextension.plist` or
+  `com.apple.networkextension.uuidcache.plist`, including through
+  `/System/Volumes/Data`. Keep build inputs and settings in the workspace.
 - **Always pass `--digest_function=sha256` before `build`** (use the command the
   CLI prints verbatim). The Limrun cache is SHA256-only; Bazel 9 defaults to
   BLAKE3. It's a startup flag, so it can't live in `--config=limrun`. Symptoms:

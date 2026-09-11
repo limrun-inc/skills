@@ -333,6 +333,10 @@ lim ios delete
 
 ## Gotchas
 
+- Sandboxed simulator processes cannot directly access the host's
+  `/Library/Preferences/com.apple.networkextension.plist` or
+  `com.apple.networkextension.uuidcache.plist`, including through
+  `/System/Volumes/Data`. Use the app's own container for app data and preferences.
 - **Instance resolution can miss in a non-git dir.** See "Targeting the right
   instance" above; pass `--id` when in doubt.
 - **`element-tree` can be large.** Pipe through `grep` / `jq` to extract what you
