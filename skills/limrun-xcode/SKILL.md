@@ -152,6 +152,16 @@ the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
 
 ## Run tests (XCTest)
 
+Keep launch settings in the scheme or test plan. Limrun reads the generated
+`.xctestrun`: `CommandLineArguments` and `EnvironmentVariables` apply to the
+test host, while `UITargetAppCommandLineArguments` and
+`UITargetAppEnvironmentVariables` apply to the UI app. Arguments containing
+spaces stay intact. Each enabled test-plan configuration runs its targets.
+
+Tests can use `XCTContext.runActivity` and `XCTAttachment`. Results stream as
+case outcomes and a summary; attachment downloads and `.xcresult` export are
+not provided by this command.
+
 `lim xcode test` builds the scheme's test targets on the sandbox, runs them on
 an attached simulator (unit and UI targets alike), and streams one line per
 test case. The exec exits non-zero when any test fails, so it works as a CI
