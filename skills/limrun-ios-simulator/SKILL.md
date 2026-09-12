@@ -333,6 +333,8 @@ lim ios delete
 
 ## Gotchas
 
+- Where workload egress filtering is enabled, workload-owned off-host TCP/UDP connections to protected cluster, private, and link-local networks are blocked except approved services. There is no instance flag to disable it. Diagnose the destination and use a supported development tunnel when appropriate; do not treat repeated connection attempts as a fix. This policy does not cover raw protocols or host-owned delegated connections.
+
 - **Instance resolution can miss in a non-git dir.** See "Targeting the right
   instance" above; pass `--id` when in doubt.
 - **`element-tree` can be large.** Pipe through `grep` / `jq` to extract what you

@@ -403,6 +403,8 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 ## Gotchas
 
+- Where workload egress filtering is enabled, workload-owned off-host TCP/UDP connections to protected cluster, private, and link-local networks are blocked except approved services. There is no instance flag to disable it. Diagnose the destination and use a supported development tunnel when appropriate; do not treat repeated connection attempts as a fix. This policy does not cover raw protocols or host-owned delegated connections.
+
 - **Build errors are your job to fix.** If a build fails, read the error output,
   fix the code, and rebuild. Don't ask the user to fix build errors.
 - **Instance ID for `lim ios` commands.** They resolve the current instance
