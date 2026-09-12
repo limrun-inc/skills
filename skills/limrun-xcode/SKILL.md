@@ -57,6 +57,19 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 lim xcode build . --configuration Debug
 ```
 
+### Reuse a build cache
+
+Use a cache key to restore a saved workspace and publish it under that key when
+the instance terminates after a successful build:
+
+```bash
+lim xcode build . --cache-key=my-app
+```
+
+If no archive matches the key, or the saved archive no longer exists, the CLI
+reports `No cache restored` and continues with a cold workspace. Treat these as
+cache misses. Permission errors and other transfer failures still stop the build.
+
 ### Pick the Xcode version
 
 A sandbox builds with its node's default Xcode. To build with another installed
