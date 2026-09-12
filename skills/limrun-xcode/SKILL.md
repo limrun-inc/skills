@@ -403,6 +403,10 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 ## Gotchas
 
+- Keep generated files in the synced workspace and temporary files under
+  `$TMPDIR`. Host logs and unrelated host configuration under `/etc` or `/var`
+  are unavailable. Sync project configuration into the workspace instead of
+  depending on host files.
 - **Build errors are your job to fix.** If a build fails, read the error output,
   fix the code, and rebuild. Don't ask the user to fix build errors.
 - **Instance ID for `lim ios` commands.** They resolve the current instance
