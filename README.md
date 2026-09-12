@@ -7,6 +7,10 @@ agent platform.
 
 Sign up at [Limrun](https://lim.run) to get a `LIM_API_KEY`.
 
+When calling an instance endpoint directly, use its `status.token` as
+`Authorization: Bearer <token>` or `?token=<token>`. Android Playwright
+connections also require this token.
+
 ## Install
 
 The `lim` CLI installs the skills into whichever agent you use and keeps them updated:
