@@ -42,6 +42,12 @@ lim xcode build .
 This creates or reuses the remembered Xcode target, syncs the current directory,
 and streams the build logs through stdout and stderr.
 
+When creating a new Xcode instance, Limrun tries the next eligible region if
+forwarding to a remote region fails or returns `5xx`, within jurisdiction and
+enforced region restrictions. This does not retry a build or move an existing
+instance. A remote error can happen after creation succeeded, so a retry can
+leave an extra instance.
+
 Use `--scheme` and `--workspace` if the project has multiple schemes or uses a
 workspace file:
 

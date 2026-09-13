@@ -47,6 +47,12 @@ don't need to rebuild:
 lim ios create --attach
 ```
 
+During creation, Limrun tries the next eligible region if forwarding to a remote
+region fails or returns `5xx`, within jurisdiction and enforced region restrictions.
+This does not move an existing simulator. A remote error can happen after creation
+succeeded, so a retry can leave an extra instance. Check `lim ios list` before
+manually creating another simulator after an ambiguous failure.
+
 If the create (or `lim xcode rbe --ios`) output includes a signed stream URL,
 share it with the user as a Markdown link, like
 `[Live simulator](<signed-stream-url>)`. If you have a browser the user can see,
