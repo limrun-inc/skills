@@ -130,6 +130,11 @@ lim xcode build . --include '^ios/GeneratedKit/'
 To reach files under a directory that is ignored as a whole, the pattern must
 also match the directory path itself, as above.
 
+Explicit `--ignore` rules win over `--include` and built-in force-includes,
+including `.env` and `.xcconfig` files. Use `--ignore` when those files contain
+local secrets or settings that must not leave the machine. Hard safety
+exclusions cannot be overridden.
+
 ## Run on a simulator
 
 `lim xcode build` is build-and-install. Don't attach a simulator until the user
