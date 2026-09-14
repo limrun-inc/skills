@@ -66,12 +66,20 @@ it, and the flag overrides it for one command:
 
 ```bash
 lim xcode version list      # versions the sandbox can build with; * marks the one in use
-lim xcode version set 27    # prefer 27 for this workspace; switches the remembered sandbox now
+lim xcode use xcode@27      # prefer 27 for this workspace; switches the remembered sandbox now
 lim xcode build .           # builds with 27
 lim xcode version           # "27.0 (27A5252f)" shows the sandbox's current Xcode
 lim xcode build . --xcode-version 26   # one-off override, not remembered
 lim xcode version unset     # forget the preference; the sandbox goes back to the node default
 ```
+
+`lim xcode use xcode@27` is equivalent to `lim xcode version set 27`. It saves
+the workspace preference and switches the existing sandbox. With no sandbox,
+it saves the preference for the next one without creating an instance. An
+Xcode-only request does not sync or write mise configuration. You can combine
+requests: `lim xcode use xcode@27 node@24` puts only Node in mise. Xcode accepts
+only a bare major and rejects `--global`. `--cwd` applies only to mise tools;
+`--workspace` chooses the Limrun workspace preference.
 
 For scripting, `lim xcode version list --quiet` prints one selectable major per
 line and `--json` returns `{ installed, bound, preferred }` (`installed[].betaSeed`
@@ -116,7 +124,7 @@ lim xcode build .
 
 `lim xcode tools` inspects an existing sandbox without syncing or creating an instance. Use `lim xcode tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
 
-`use` updates the effective client mise file in that directory, syncs the
+For mise tools, `use` updates the effective client mise file in that directory, syncs the
 project and shows the selected versions. Install missing tools with
 `lim xcode run -- mise install`. It preserves configuration values but
 drops comments and rewrites formatting. `--global` updates personal defaults
