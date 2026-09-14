@@ -114,6 +114,8 @@ lim xcode tools
 lim xcode build .
 ```
 
+`lim xcode tools` inspects an existing sandbox without syncing or creating an instance. Use `lim xcode tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
+
 `use` updates the effective client mise file in that directory, syncs the
 project and shows the selected versions. Install missing tools with
 `lim xcode run -- mise install`. It preserves configuration values but
@@ -154,7 +156,7 @@ For an exact version, use an explicit sandbox override:
 ```bash
 lim xcode run -- mise install node@24.5.0
 lim xcode run -- mise use --pin node@24.5.0
-lim xcode tools --no-sync
+lim xcode tools
 ```
 
 `mise use` installs the requested version and writes `.limrun-runtime-mise.toml`

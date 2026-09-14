@@ -84,6 +84,8 @@ lim gradle run -- mise install
 lim gradle tools
 ```
 
+`lim gradle tools` inspects an existing sandbox without syncing or creating an instance. Use `lim gradle tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
+
 `use` saves client mise preferences, syncs, and shows the selection. It rewrites
 formatting and comments while preserving other configuration values. Use
 `--global` for personal defaults and `--cwd apps/mobile` for a nested project.
