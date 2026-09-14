@@ -124,6 +124,11 @@ cache transfer between instances. The built-in tools are separate from user
 installs; only pnpm 10 has a warmed image store, so other majors may download
 packages on their first install.
 
+Reuse the instance for warm builds. Builds and `run` preserve shared temporary
+files and dependency caches; do not clear them between commands. Unused missing
+tools in a shared mise file do not block commands or invalidate dependency
+caches. Install a missing tool explicitly when the build needs it.
+
 ## Run it on an emulator
 
 Upload the built APK as a named asset, then install it on an Android instance:
