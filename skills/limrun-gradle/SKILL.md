@@ -106,6 +106,9 @@ lim gradle run --env APP_ENV=staging -- npm run generate
 lim gradle build . --env APP_ENV=staging
 ```
 
+`--additional-file localPath=remotePath` adds a file outside the source tree to
+a path relative to the remote workspace.
+
 `run` syncs first; `--no-sync` uses the current remote workspace. The optional
 positional directory is relative to the sync root. `--timeout` is 1..21600
 seconds, default 3600. It shares the build slot, so a new build or command
