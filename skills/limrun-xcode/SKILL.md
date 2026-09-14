@@ -134,8 +134,11 @@ The image includes Node 22 with npm/npx, pnpm 9/10/11 with default 10,
 Yarn 1/4 with default 1, Bun 1, Ruby 3.3 with RubyGems, Bundler 4,
 CocoaPods 1 with its cocoapods-patch plugin, CMake 3, JBR and Corretto 21,
 Flutter 3.44 with Dart, Mint 0.18, XcodeGen 2, xcbeautify 3 and Limrun's
-zsign 1. Each run or build calls `mise env --json` once and injects that
-environment into its commands. It does not install missing versions. The managed pod
+zsign 1. Each run or build calls `mise env --json` once; dependency installation,
+project generation, builds and their child processes use the same environment.
+Tool selection requires a sandbox image with mise support. If the daemon reports
+missing image configuration, use an updated image instead of setting fixed tool paths.
+It does not install missing versions. The managed pod
 resolver uses the selected CocoaPods tool and does not honor a Gemfile.
 Homebrew, Xcode and Apple SDKs/runtimes are managed separately.
 
