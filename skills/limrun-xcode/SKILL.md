@@ -108,13 +108,15 @@ Use mise tool preferences when a build needs another runtime or package manager:
 
 ```bash
 lim xcode use node@24 pnpm@10 ruby@3.3
+lim xcode run -- mise install
 lim xcode use --cwd apps/mobile yarn@4
 lim xcode tools
 lim xcode build .
 ```
 
 `use` updates the effective client mise file in that directory, syncs the
-project and prepares tools remotely. It preserves configuration values but
+project and shows the selected versions. Install missing tools with
+`lim xcode run -- mise install`. It preserves configuration values but
 drops comments and rewrites formatting. `--global` updates personal defaults
 in the client global mise file, normally `~/.config/mise/config.toml`.
 Project requests override personal defaults. Both override image defaults;
@@ -130,31 +132,37 @@ environment or settings.
 
 The image includes Node 22 with npm/npx, pnpm 9/10/11 with default 10,
 Yarn 1/4 with default 1, Bun 1, Ruby 3.3 with RubyGems, Bundler 4,
-CocoaPods 1 and cocoapods-patch 1, CMake 3, JBR and Corretto 21,
+CocoaPods 1 with its cocoapods-patch plugin, CMake 3, JBR and Corretto 21,
 Flutter 3.44 with Dart, Mint 0.18, XcodeGen 2, xcbeautify 3 and Limrun's
-zsign 1. Mise installs missing requested lines remotely. The managed pod
+zsign 1. Each run or build calls `mise env --json` once and injects that
+environment into its commands. It does not install missing versions. The managed pod
 resolver uses the selected CocoaPods tool and does not honor a Gemfile.
 Homebrew, Xcode and Apple SDKs/runtimes are managed separately.
 
 For an exact version, use an explicit sandbox override:
 
 ```bash
-lim xcode run -- mise exec node@24.5.0 -- node --version
+lim xcode run -- mise install node@24.5.0
 lim xcode run -- mise use --pin node@24.5.0
 lim xcode tools --no-sync
 ```
 
-`mise use` writes `.limrun-runtime-mise.toml` remotely and takes precedence
+`mise use` installs the requested version and writes `.limrun-runtime-mise.toml`
+remotely. That selection takes precedence
 on later operations. `lim xcode use node@24` clears Node's override in the
 selected directory. A running shell keeps its old PATH; `mise exec` selects
 tools immediately for its child command.
 
-Do not add image tools to cache paths. They stay outside the workspace.
+Image tools stay outside the workspace and its cache. Mise can select compatible
+versions from the image or from restored user installations.
 User installs under `.limbuild-sandbox/home/.mise/` can be cached when those
 paths are covered, subject to the existing successful-build publication
 rule. `lim xcode run` alone does not publish a cache. Tool version changes
 invalidate dependency-install stamps, and Xcode switches still invalidate
 the workspace cache.
+If a restored user gem reports a missing path from its previous sandbox home,
+run `lim xcode run -- mise install --force bundler` (or the affected gem tool).
+Native mise gem wrappers need explicit reinstallation after that move.
 
 ## Generated Xcode projects (XcodeGen)
 
