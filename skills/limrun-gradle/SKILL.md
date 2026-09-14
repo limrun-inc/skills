@@ -1,6 +1,6 @@
 ---
 name: limrun-gradle
-description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, or prepare a Play Store publish, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
+description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
 user-invocable: true
 effort: high
 ---
@@ -68,6 +68,56 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
+
+## Tool versions and shell commands
+
+Use mise to select Node, package managers, Java, or bundletool. The image
+includes Node 22 (npm/npx), pnpm 9/10/11 (default 10), Yarn 1/4 (default 1),
+stable Bun 1, Temurin Java 17, and bundletool 1. Builds keep the project's
+`gradlew`; Android SDK, NDK, and CMake packages use `sdkmanager`.
+
+Select compatibility lines, then install missing versions explicitly:
+
+```bash
+lim gradle use node@24 java@temurin-17 pnpm@10
+lim gradle run -- mise install
+lim gradle tools
+```
+
+`use` saves client mise preferences, syncs, and shows the selection. It rewrites
+formatting and comments while preserving other configuration values. Use
+`--global` for personal defaults and `--cwd apps/mobile` for a nested project.
+Install from that directory with `lim gradle run apps/mobile -- mise install`.
+Project `[tools]` entries override client global defaults, which override image
+and package-manager detection defaults. Only tools are imported; client tasks,
+environment settings, and lockfile pins do not run remotely.
+
+Limrun guarantees compatibility lines: normally major, but major.minor for
+Ruby, Python, Go, Flutter, Dart, and pre-1.0 tools. Patch releases can change with
+image updates. Do not promise an exact version from the client configuration.
+For an exact remote override, use `lim gradle run -- mise use --pin node@24.5.0`.
+`lim gradle use node@24` clears that tool's override in the selected directory.
+
+Run diagnostics and generation commands in the sandbox:
+
+```bash
+lim gradle run -- node --version
+lim gradle run --env APP_ENV=staging -- npm run generate
+lim gradle build . --env APP_ENV=staging
+```
+
+`run` syncs first; `--no-sync` uses the current remote workspace. The optional
+positional directory is relative to the sync root. `--timeout` is 1..21600
+seconds, default 3600. It shares the build slot, so a new build or command
+cancels the active operation. Each operation resolves mise once; it never
+installs missing tools automatically. Run `mise install` explicitly after
+selecting a missing line. `NODE_BINARY` and `JAVA_HOME` follow the selection.
+Sandbox HOME, PATH, and Android SDK paths remain managed.
+
+User-installed versions last for the instance lifetime. Gradle has no workspace
+cache transfer between instances. The built-in tools are separate from user
+installs; only pnpm 10 has a warmed image store, so other majors may download
+packages on their first install.
 
 ## Run it on an emulator
 
