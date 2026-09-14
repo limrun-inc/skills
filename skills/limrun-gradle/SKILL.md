@@ -86,13 +86,14 @@ lim gradle tools
 
 `lim gradle tools` inspects an existing sandbox without syncing or creating an instance. Use `lim gradle tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
 
-`use` saves client mise preferences, syncs, and shows the selection. It rewrites
+`use` saves project mise preferences, syncs, and shows the selection. It rewrites
 formatting and comments while preserving other configuration values. Use
-`--global` for personal defaults and `--cwd apps/mobile` for a nested project.
+`--cwd apps/mobile` for a nested project.
 Install from that directory with `lim gradle run apps/mobile -- mise install`.
-Project `[tools]` entries override client global defaults, which override image
-and package-manager detection defaults. Only tools are imported; client tasks,
-environment settings, and lockfile pins do not run remotely.
+Project `[tools]` entries override package-manager detection and image defaults.
+Personal mise configuration on the client is not read or forwarded. Only tools
+are imported; client tasks, environment settings, and lockfile pins do not run
+remotely.
 
 Limrun guarantees compatibility lines: normally major, but major.minor for
 Ruby, Python, Go, Flutter, Dart, and pre-1.0 tools. Patch releases can change with

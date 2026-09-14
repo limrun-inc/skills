@@ -78,7 +78,7 @@ the workspace preference and switches the existing sandbox. With no sandbox,
 it saves the preference for the next one without creating an instance. An
 Xcode-only request does not sync or write mise configuration. You can combine
 requests: `lim xcode use xcode@27 node@24` puts only Node in mise. Xcode accepts
-only a bare major and rejects `--global`. `--cwd` applies only to mise tools;
+only a bare major. `--cwd` applies only to mise tools;
 `--workspace` chooses the Limrun workspace preference.
 
 For scripting, `lim xcode version list --quiet` prints one selectable major per
@@ -124,13 +124,12 @@ lim xcode build .
 
 `lim xcode tools` inspects an existing sandbox without syncing or creating an instance. Use `lim xcode tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
 
-For mise tools, `use` updates the effective client mise file in that directory, syncs the
+For mise tools, `use` updates the effective project mise file in that directory, syncs the
 project and shows the selected versions. Install missing tools with
 `lim xcode run -- mise install`. It preserves configuration values but
-drops comments and rewrites formatting. `--global` updates personal defaults
-in the client global mise file, normally `~/.config/mise/config.toml`.
-Project requests override personal defaults. Both override image defaults;
-without a mise preference, the detected package-manager major still applies.
+drops comments and rewrites formatting. Project requests override the detected
+package-manager major and image defaults. Personal mise configuration on the
+client is not read or forwarded.
 
 Use numeric compatibility lines. `latest` opts out of a fixed line. Node, pnpm, Yarn, Bun, Bundler, CocoaPods,
 CMake, Java, XcodeGen, xcbeautify and zsign follow the major. Ruby, Python,
