@@ -139,6 +139,13 @@ environment into its commands. It does not install missing versions. The managed
 resolver uses the selected CocoaPods tool and does not honor a Gemfile.
 Homebrew, Xcode and Apple SDKs/runtimes are managed separately.
 
+`NODE_BINARY` follows mise's selected Node in runs and builds. For React Native
+and Expo, Limrun rewrites `ios/.xcode.env.local` with that binary and the full tool
+PATH for Xcode phases. Do not replace it with a client path or a fixed image path.
+When investigating a Node mismatch, compare `NODE_BINARY` with `command -v node`
+inside the sandbox and inspect the failing phase, since Xcode can change PATH.
+For a monorepo, the file lives under the detected app's `ios/` directory.
+
 For an exact version, use an explicit sandbox override:
 
 ```bash
