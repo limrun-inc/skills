@@ -472,7 +472,7 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 The instance's **Build logs** page groups **Cache restoration** and
 **Cache publication** entries under **Cache activity**, separate from **Build activity**.
-Each cache entry shows its outcome, duration, and downloadable output.
+Each cache entry shows its outcome, duration, and downloadable timestamped progress messages.
 Publication happens at termination. Completed cache logs remain available after
 build completion and instance termination, subject to build-log retention.
 Operations from older macnode versions without persisted cache logs cannot be
