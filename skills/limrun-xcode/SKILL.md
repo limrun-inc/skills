@@ -467,3 +467,18 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
   p12 lacks its CA chain, so re-export it with the chain; `code signature
   verification failed` means the platform's post-sign check rejected the
   artifact, which is not a code problem, so retry or report it.
+
+## Cache logs in the console
+
+The instance's **Build logs** page groups **Cache restoration** and
+**Cache publication** entries under **Cache activity**, separate from **Build activity**.
+Each cache entry shows its outcome, duration, and downloadable timestamped progress messages.
+Publication happens at termination. Completed cache logs remain available after
+build completion and instance termination, subject to build-log retention.
+Operations from older macnode versions without persisted cache logs cannot be
+recovered.
+
+For API inspection, `GET /v1/xcode_instances/{id}/build_logs` includes these
+records under `cache-restore-` and `cache-publish-` IDs. Treat their uppercase
+`status` as a cache phase, not a build verdict. `buildDurationMs` measures the
+cache operation and excludes the log upload.
