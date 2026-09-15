@@ -66,12 +66,14 @@ it, and the flag overrides it for one command:
 
 ```bash
 lim xcode version list      # versions the sandbox can build with; * marks the one in use
-lim xcode version set 27    # prefer 27 for this workspace; switches the remembered sandbox now
+lim xcode use xcode@27      # prefer 27 for this workspace; switches the remembered sandbox now
 lim xcode build .           # builds with 27
 lim xcode version           # "27.0 (27A5252f)" shows the sandbox's current Xcode
 lim xcode build . --xcode-version 26   # one-off override, not remembered
 lim xcode version unset     # forget the preference; the sandbox goes back to the node default
 ```
+
+Combine Xcode and mise selections with `lim xcode use xcode@27 node@24`.
 
 For scripting, `lim xcode version list --quiet` prints one selectable major per
 line and `--json` returns `{ installed, bound, preferred }` (`installed[].betaSeed`
@@ -100,6 +102,25 @@ separate build/install issues from URL routing:
 
 ```bash
 lim ios open-url --id <ios-instance-id> '<absolute-url>'
+```
+
+## Developer tool versions
+
+`lim xcode use` saves project mise requests; the sandbox selects compatible major
+versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
+Project tools install once per sandbox; run `lim xcode tools install` after changes
+or failures, or use `mise use --pin` for an exact version ([details](https://docs.limrun.com/docs/ios/build-with-xcode)).
+
+```bash
+lim xcode tools
+# Node includes npm/npx, Ruby includes gem, Flutter includes Dart, CocoaPods includes cocoapods-patch.
+lim xcode use node@24 pnpm@10 yarn@4 bun@1 ruby@3.3 bundler@4 cocoapods@1 \
+  cmake@3 java@jetbrains-21 corretto@21 flutter@3.44 mint@0.18 \
+  xcodegen@2 xcbeautify@3 zsign@1
+lim xcode tools install
+lim xcode use --cwd apps/mobile node@24
+lim xcode tools install --cwd apps/mobile
+lim xcode run -- mise use --pin node@24.5.0
 ```
 
 ## Generated Xcode projects (XcodeGen)

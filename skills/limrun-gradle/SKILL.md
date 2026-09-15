@@ -1,6 +1,6 @@
 ---
 name: limrun-gradle
-description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, or prepare a Play Store publish, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
+description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
 user-invocable: true
 effort: high
 ---
@@ -68,6 +68,23 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
+
+## Tool versions and shell commands
+
+`lim gradle use` saves project mise requests and selects compatible major versions;
+builds keep the project's `gradlew`, while Android SDK/NDK/CMake use `sdkmanager`.
+Project tools install once per sandbox; run `lim gradle tools install` after changes
+or failures, or use `mise use --pin` for an exact version ([details](https://docs.limrun.com/docs/android/build-with-gradle)).
+
+```bash
+lim gradle tools
+# Node includes npm/npx.
+lim gradle use node@24 pnpm@10 yarn@4 bun@1 java@temurin-17 bundletool@1
+lim gradle tools install
+lim gradle run -- mise use --pin node@24.5.0
+lim gradle run --env APP_ENV=staging -- npm run generate
+lim gradle build . --env APP_ENV=staging
+```
 
 ## Run it on an emulator
 
