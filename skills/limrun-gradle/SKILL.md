@@ -72,15 +72,15 @@ builds, use **`limrun-expo-development`**.
 ## Tool versions and shell commands
 
 Use mise to select Node, package managers, Java, or bundletool. The image
-includes Node 22/24 with default 22 and npm/npx, pnpm 9/10/11 with default 10,
-Yarn 1/4 with default 1,
+includes Node 22/24 with default 22 (npm/npx), pnpm 9/10/11 (default 10), Yarn 1/4 (default 1),
 stable Bun 1, Temurin Java 17, and bundletool 1. Builds keep the project's
 `gradlew`; Android SDK, NDK, and CMake packages use `sdkmanager`.
 
-Select compatibility lines:
+Select compatibility lines, then install missing versions explicitly:
 
 ```bash
 lim gradle use node@24 java@temurin-17 pnpm@10
+lim gradle run -- mise install
 lim gradle tools
 ```
 
@@ -89,7 +89,7 @@ lim gradle tools
 `use` saves project mise preferences, syncs, and shows the selection. It rewrites
 formatting and comments while preserving other configuration values. Use
 `--cwd apps/mobile` for a nested project.
-Runs and builds in that directory automatically install missing selected tools.
+Install from that directory with `lim gradle run apps/mobile -- mise install`.
 Project `[tools]` entries override package-manager detection and image defaults.
 Personal mise configuration on the client is not read or forwarded. Only tools
 are imported; client tasks, environment settings, and lockfile pins do not run
@@ -115,9 +115,9 @@ a path relative to the remote workspace.
 `run` syncs first; `--no-sync` uses the current remote workspace. The optional
 positional directory is relative to the sync root. `--timeout` is 1..21600
 seconds, default 3600. It shares the build slot, so a new build or command
-cancels the active operation. Each operation automatically installs missing
-selected tools, then resolves `mise env --json` once. It reuses compatible
-installations. `NODE_BINARY` and `JAVA_HOME` follow the selection.
+cancels the active operation. Each operation resolves mise once; it never
+installs missing tools automatically. Run `mise install` explicitly after
+selecting a missing line. `NODE_BINARY` and `JAVA_HOME` follow the selection.
 Sandbox HOME, PATH, and Android SDK paths remain managed.
 
 User-installed versions last for the instance lifetime. Gradle has no workspace
@@ -126,10 +126,9 @@ installs; only pnpm 10 has a warmed image store, so other majors may download
 packages on their first install.
 
 Reuse the instance for warm builds. Builds and `run` preserve shared temporary
-files and dependency caches; do not clear them between commands.
-An unavailable tool or failed download stops the operation, even if the command
-does not use that tool. Fix its project request and sync again to retry.
-Resolved tool versions control dependency cache invalidation.
+files and dependency caches; do not clear them between commands. Unused missing
+tools in a shared mise file do not block commands or invalidate dependency
+caches. Install a missing tool explicitly when the build needs it.
 
 ## Run it on an emulator
 
