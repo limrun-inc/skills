@@ -116,7 +116,6 @@ Use mise tool preferences when a build needs another runtime or package manager:
 
 ```bash
 lim xcode use node@24 pnpm@10 ruby@3.3
-lim xcode run -- mise install
 lim xcode use --cwd apps/mobile yarn@4
 lim xcode tools
 lim xcode build .
@@ -125,8 +124,8 @@ lim xcode build .
 `lim xcode tools` inspects an existing sandbox without syncing or creating an instance. Use `lim xcode tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
 
 For mise tools, `use` updates the effective project mise file in that directory, syncs the
-project and shows the selected versions. Install missing tools with
-`lim xcode run -- mise install`. It preserves configuration values but
+project and shows the selected versions. Runs and builds automatically install
+missing selected tools. It preserves configuration values but
 drops comments and rewrites formatting. Project requests override the detected
 package-manager major and image defaults. Personal mise configuration on the
 client is not read or forwarded.
@@ -139,7 +138,7 @@ Ruby 3.3. Automatic resolution does not rewrite client files and ignores
 `mise.lock`. Only tool declarations are imported, not client tasks, hooks,
 environment or settings.
 
-The image includes Node 22 with npm/npx, pnpm 9/10/11 with default 10,
+The image includes Node 22/24 with default 22 and npm/npx, pnpm 9/10/11 with default 10,
 Yarn 1/4 with default 1, Bun 1, Ruby 3.3 with RubyGems, Bundler 4,
 CocoaPods 1 with its cocoapods-patch plugin, CMake 3, JBR and Corretto 21,
 Flutter 3.44 with Dart, Mint 0.18, XcodeGen 2, xcbeautify 3 and Limrun's
@@ -147,8 +146,11 @@ zsign 1. Each run or build calls `mise env --json` once; dependency installation
 project generation, builds and their child processes use the same environment.
 Tool selection requires a sandbox image with mise support. If the daemon reports
 missing image configuration, use an updated image instead of setting fixed tool paths.
-It does not install missing versions. The managed pod
-resolver uses the selected CocoaPods tool and does not honor a Gemfile.
+Mise installs missing selected tools in the sandbox home and reuses compatible
+installations.
+An unavailable tool or failed download stops the operation, even if the command
+does not use that tool. Fix its project request and sync again to retry.
+The managed pod resolver uses the selected CocoaPods tool and does not honor a Gemfile.
 Homebrew, Xcode and Apple SDKs/runtimes are managed separately.
 
 `NODE_BINARY` follows mise's selected Node in runs and builds. For React Native
