@@ -116,7 +116,7 @@ Use mise tool preferences when a build needs another runtime or package manager:
 
 ```bash
 lim xcode use node@24 pnpm@10 ruby@3.3
-lim xcode run -- mise install
+lim xcode tools install
 lim xcode use --cwd apps/mobile yarn@4
 lim xcode tools
 lim xcode build .
@@ -124,9 +124,12 @@ lim xcode build .
 
 `lim xcode tools` inspects an existing sandbox without syncing or creating an instance. Use `lim xcode tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
 
+`lim xcode tools install` syncs the project and runs `mise install` in that sandbox. Use `--no-sync` to install its current selections without syncing, `--cwd apps/mobile` for a nested project, and `--id` to choose an existing sandbox. The command never creates or replaces an instance.
+
 For mise tools, `use` updates the effective project mise file in that directory, syncs the
-project and shows the selected versions. Install missing tools with
-`lim xcode run -- mise install`. It preserves configuration values but
+project and shows the selected versions. The first sandbox operation with project
+mise configuration installs its selected tools once. Use `lim xcode tools install`
+after later changes or to retry a failed initial install. It preserves configuration values but
 drops comments and rewrites formatting. Project requests override the detected
 package-manager major and image defaults. Personal mise configuration on the
 client is not read or forwarded.
@@ -147,7 +150,8 @@ zsign 1. Each run or build calls `mise env --json` once; dependency installation
 project generation, builds and their child processes use the same environment.
 Tool selection requires a sandbox image with mise support. If the daemon reports
 missing image configuration, use an updated image instead of setting fixed tool paths.
-It does not install missing versions. The managed pod
+A sandbox without project mise configuration uses image defaults. Later operations
+do not run the installer, even after project configuration changes. The managed pod
 resolver uses the selected CocoaPods tool and does not honor a Gemfile.
 Homebrew, Xcode and Apple SDKs/runtimes are managed separately.
 

@@ -80,16 +80,18 @@ Select compatibility lines, then install missing versions explicitly:
 
 ```bash
 lim gradle use node@24 java@temurin-17 pnpm@10
-lim gradle run -- mise install
+lim gradle tools install
 lim gradle tools
 ```
 
 `lim gradle tools` inspects an existing sandbox without syncing or creating an instance. Use `lim gradle tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
 
+`lim gradle tools install` syncs the project and runs `mise install` in that sandbox. Use `--no-sync` to install its current selections without syncing, `--cwd apps/mobile` for a nested project, and `--id` to choose an existing sandbox. The command never creates or replaces an instance.
+
 `use` saves project mise preferences, syncs, and shows the selection. It rewrites
 formatting and comments while preserving other configuration values. Use
 `--cwd apps/mobile` for a nested project.
-Install from that directory with `lim gradle run apps/mobile -- mise install`.
+Install from that directory with `lim gradle tools install --cwd apps/mobile`.
 Project `[tools]` entries override package-manager detection and image defaults.
 Personal mise configuration on the client is not read or forwarded. Only tools
 are imported; client tasks, environment settings, and lockfile pins do not run
@@ -115,9 +117,10 @@ a path relative to the remote workspace.
 `run` syncs first; `--no-sync` uses the current remote workspace. The optional
 positional directory is relative to the sync root. `--timeout` is 1..21600
 seconds, default 3600. It shares the build slot, so a new build or command
-cancels the active operation. Each operation resolves mise once; it never
-installs missing tools automatically. Run `mise install` explicitly after
-selecting a missing line. `NODE_BINARY` and `JAVA_HOME` follow the selection.
+cancels the active operation. The first operation with project mise configuration
+runs `mise install` once before resolving the environment. Without a project file,
+commands use image defaults. Later changes and failed initial installations require
+`lim gradle tools install`. Each operation still resolves `mise env --json` once. `NODE_BINARY` and `JAVA_HOME` follow the selection.
 Sandbox HOME, PATH, and Android SDK paths remain managed.
 
 User-installed versions last for the instance lifetime. Gradle has no workspace
@@ -126,9 +129,9 @@ installs; only pnpm 10 has a warmed image store, so other majors may download
 packages on their first install.
 
 Reuse the instance for warm builds. Builds and `run` preserve shared temporary
-files and dependency caches; do not clear them between commands. Unused missing
-tools in a shared mise file do not block commands or invalidate dependency
-caches. Install a missing tool explicitly when the build needs it.
+files and dependency caches; do not clear them between commands. After the first
+installation attempt, unused missing tools do not block commands or invalidate
+dependency caches. Install later selections with `lim gradle tools install`.
 
 ## Run it on an emulator
 
