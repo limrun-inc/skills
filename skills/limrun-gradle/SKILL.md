@@ -1,6 +1,6 @@
 ---
 name: limrun-gradle
-description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
+description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, inspect build logs, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
 user-invocable: true
 effort: high
 ---
@@ -68,6 +68,18 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
+
+## Detached builds and logs
+
+Use `--detach` to return once the build is accepted; a webhook is optional.
+`logs` reads the latest build without an exec ID, including persisted logs after
+instance deletion; add `--follow` to wait for completion.
+
+```bash
+lim gradle build . --detach
+lim gradle logs
+lim gradle logs --follow
+```
 
 ## Tool versions and shell commands
 

@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, test, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -55,6 +55,18 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 
 ```bash
 lim xcode build . --configuration Debug
+```
+
+### Detached builds and logs
+
+Use `--detach` to return once the build is accepted; a webhook is optional.
+`logs` reads the latest build without an exec ID, including persisted logs after
+instance deletion; add `--follow` to wait for completion.
+
+```bash
+lim xcode build . --detach
+lim xcode logs
+lim xcode logs --follow
 ```
 
 ### Pick the Xcode version
