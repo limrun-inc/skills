@@ -1,6 +1,6 @@
 ---
 name: limrun-gradle
-description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, inspect build logs, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
+description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, inspect build logs, sync source files, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
 user-invocable: true
 effort: high
 ---
@@ -31,6 +31,7 @@ not shown here, check `--help` instead of guessing:
 ```bash
 lim gradle --help
 lim gradle build --help
+lim gradle sync --help
 ```
 
 ## Build an APK
@@ -68,6 +69,29 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
+
+## Sync source without building
+
+Use `lim gradle sync [path]` to upload source files without running Gradle or
+installing dependencies. It defaults to the current directory and creates or
+reuses the remembered Gradle instance. Pass `--id` to choose a target.
+
+```bash
+lim gradle sync
+lim gradle sync ./my-app --id <gradle-instance-id>
+lim gradle sync ./my-app --watch
+lim gradle sync ./my-app --additional-file ~/.npmrc=.npmrc
+```
+
+`--watch` pushes later source changes until Ctrl+C. Use `--basis-cache-dir` for
+a custom delta cache, repeat `--ignore <regex>` or `--include <regex>` to
+control which paths sync, and repeat `--additional-file localPath=remotePath`
+for files outside the source tree. Remote paths are workspace-relative.
+Additional files sync on every pass but are not watched directly.
+
+`lim gradle build` already syncs once before building, so skip a separate sync
+when the next step is a build. If `sync` is missing from help, update `lim` to a
+release that includes it before using these commands.
 
 ## Detached builds and logs
 
