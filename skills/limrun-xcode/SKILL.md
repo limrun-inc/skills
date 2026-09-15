@@ -309,8 +309,9 @@ lim xcode build . --sdk iphoneos --configuration Release \
 ```
 
 With multiple profiles, every profile must carry an explicit (non-wildcard)
-bundle id. A `signing preflight failed: no provisioning profile covers ...`
-error names the embedded bundle that lacks a profile; ask the user for a
+bundle id. A `no provisioning profile covers ...` error names the embedded
+bundle that lacks a profile, and Xcode may report the same gap as
+`... requires a provisioning profile` for that target; ask the user for a
 profile with exactly that bundle id.
 
 Use a p12 that includes its full CA chain, not just the leaf certificate. If
@@ -322,8 +323,10 @@ openssl pkcs12 -export -inkey dist.key -in dist.pem -certfile wwdr.pem -out dist
 
 Failure strings to recognize in the build output:
 
-- `Unknown issuer hash`: the p12 lacks its CA chain; re-export it with the
-  chain as above.
+- `Unknown issuer hash` or `not a valid code-signing identity`: the p12 does
+  not hold an Apple Distribution or Apple Development certificate with its
+  private key and a CA chain Apple trusts; re-export it with the chain as
+  above.
 - `code signature verification failed`: the platform's post-sign check rejected
   the artifact. Not a problem in the user's code; retry, and report it if it
   persists.
@@ -463,7 +466,8 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
   absolute path is skipped with a warning; recreate it with a relative target
   if the build needs it. A relative link escaping the synced folder fails the
   sync; `--ignore` it or sync from the repo root that contains the target.
-- **Signing failures are loud and specific.** `Unknown issuer hash` means the
-  p12 lacks its CA chain, so re-export it with the chain; `code signature
+- **Signing failures are loud and specific.** `Unknown issuer hash` or `not a
+  valid code-signing identity` means the p12 lacks a trusted Apple identity or
+  its CA chain, so re-export it with the chain; `code signature
   verification failed` means the platform's post-sign check rejected the
   artifact, which is not a code problem, so retry or report it.
