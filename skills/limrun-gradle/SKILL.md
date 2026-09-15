@@ -83,10 +83,8 @@ lim gradle logs --follow
 
 ## Tool versions and shell commands
 
-`lim gradle use` saves project mise requests and selects compatible major versions;
-builds keep the project's `gradlew`, while Android SDK/NDK/CMake use `sdkmanager`.
-Project tools install once per sandbox; run `lim gradle tools install` after changes
-or failures, or use `mise use --pin` for an exact version ([details](https://docs.limrun.com/docs/android/build-with-gradle)).
+After syncing, `lim gradle use` selects tools in the sandbox and installs missing versions; it does not edit local files or sync them.
+Run `lim gradle tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/android/build-with-gradle)). Builds keep the project's `gradlew`; Android SDK/NDK/CMake use `sdkmanager`.
 
 ```bash
 lim gradle tools

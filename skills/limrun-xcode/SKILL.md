@@ -118,10 +118,8 @@ lim ios open-url --id <ios-instance-id> '<absolute-url>'
 
 ## Developer tool versions
 
-`lim xcode use` saves project mise requests; the sandbox selects compatible major
-versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
-Project tools install once per sandbox; run `lim xcode tools install` after changes
-or failures, or use `mise use --pin` for an exact version ([details](https://docs.limrun.com/docs/ios/build-with-xcode)).
+After syncing, `lim xcode use` selects tools in the sandbox and installs missing versions; it does not edit local files or sync them.
+Run `lim xcode tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/ios/build-with-xcode)). Use major versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
 
 ```bash
 lim xcode tools
