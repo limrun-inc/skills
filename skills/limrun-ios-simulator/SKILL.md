@@ -244,6 +244,24 @@ lim ios perform --file ./actions.yaml
 
 Run `lim ios perform --help` for the full action grammar.
 
+For two-finger gestures, supply both `x2` and `y2` on every `touchDown`,
+`touchMove`, and `touchUp`. Each event applies to both fingers together.
+Keep the same finger ordering and lift both with `touchUp`. Both fingers share
+the optional `screenWidth` and `screenHeight` coordinate space. Omit `x2` and
+`y2` for a single-finger gesture. One or two fingers are supported.
+
+This taps with two fingers:
+
+```bash
+lim ios perform \
+  --action type=touchDown,x=100,y=300,x2=200,y2=300 \
+  --action type=wait,durationMs=100 \
+  --action type=touchUp,x=100,y=300,x2=200,y2=300
+```
+
+For a pinch, add `touchMove` actions with both coordinate pairs between the
+down and up events. Alternate moves with `wait` actions to control timing.
+
 ## Screenshots and video
 
 Screenshot takes a **positional path** (not `-o`):
