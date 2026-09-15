@@ -18,6 +18,16 @@ For driving the app once it's running (tap, type, element tree, screenshot,
 record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
 **`limrun-xcode-bazel`** instead of this skill.
 
+## Instance lifetime and billing
+
+A reused build instance still costs credits while idle. Where phase billing is
+enabled, metered idle time costs a quarter of active work; a missing report
+retains wall-clock pricing. Do not assume that leaving a build instance alive
+is free or that phase pricing is enabled everywhere. Delete it when finished,
+or use an explicit inactivity timeout for a fresh build instance. The existing
+build inactivity default is ten minutes; Xcode follows the organization's
+configured default. See [build billing](https://docs.limrun.com/docs/ios/build-with-xcode#build-time-and-idle-time).
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or

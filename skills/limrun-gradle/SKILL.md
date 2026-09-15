@@ -20,6 +20,16 @@ dev-client loop (Metro, hot reload) on either platform, use
 **`limrun-expo-development`**; it comes back here for the Android Debug
 build.
 
+## Instance lifetime and billing
+
+A reused build instance still costs credits while idle. Where phase billing is
+enabled, metered idle time costs a quarter of active work; a missing report
+retains wall-clock pricing. Do not assume that leaving a build instance alive
+is free or that phase pricing is enabled everywhere. Delete it when finished,
+or use an explicit inactivity timeout for a fresh build instance. The existing
+build inactivity default is ten minutes; Xcode follows the organization's
+configured default. See [build billing](https://docs.limrun.com/docs/android/build-with-gradle#build-time-and-idle-time).
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
