@@ -73,13 +73,7 @@ lim xcode build . --xcode-version 26   # one-off override, not remembered
 lim xcode version unset     # forget the preference; the sandbox goes back to the node default
 ```
 
-`lim xcode use xcode@27` is equivalent to `lim xcode version set 27`. It saves
-the workspace preference and switches the existing sandbox. With no sandbox,
-it saves the preference for the next one without creating an instance. An
-Xcode-only request does not sync or write mise configuration. You can combine
-requests: `lim xcode use xcode@27 node@24` puts only Node in mise. Xcode accepts
-only a bare major. `--cwd` applies only to mise tools;
-`--workspace` chooses the Limrun workspace preference.
+Combine Xcode and mise selections with `lim xcode use xcode@27 node@24`.
 
 For scripting, `lim xcode version list --quiet` prints one selectable major per
 line and `--json` returns `{ installed, bound, preferred }` (`installed[].betaSeed`
@@ -112,81 +106,22 @@ lim ios open-url --id <ios-instance-id> '<absolute-url>'
 
 ## Developer tool versions
 
-Use mise tool preferences when a build needs another runtime or package manager:
+`lim xcode use` saves project mise requests; the sandbox selects compatible major
+versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
+Project tools install once per sandbox; run `lim xcode tools install` after changes
+or failures, or use `mise use --pin` for an exact version ([details](https://docs.limrun.com/docs/ios/build-with-xcode)).
 
 ```bash
-lim xcode use node@24 pnpm@10 ruby@3.3
+lim xcode tools
+# Node includes npm/npx, Ruby includes gem, Flutter includes Dart, CocoaPods includes cocoapods-patch.
+lim xcode use node@24 pnpm@10 yarn@4 bun@1 ruby@3.3 bundler@4 cocoapods@1 \
+  cmake@3 java@jetbrains-21 corretto@21 flutter@3.44 mint@0.18 \
+  xcodegen@2 xcbeautify@3 zsign@1
 lim xcode tools install
-lim xcode use --cwd apps/mobile yarn@4
-lim xcode tools
-lim xcode build .
-```
-
-`lim xcode tools` inspects an existing sandbox without syncing or creating an instance. Use `lim xcode tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
-
-`lim xcode tools install` syncs the project and runs `mise install` in that sandbox. Use `--no-sync` to install its current selections without syncing, `--cwd apps/mobile` for a nested project, and `--id` to choose an existing sandbox. The command never creates or replaces an instance.
-
-For mise tools, `use` writes the requested names and versions unchanged to the effective
-project mise file, syncs, and shows the selected versions. The sandbox applies the
-compatibility rules below. The first sandbox operation with project
-mise configuration installs its selected tools once. Use `lim xcode tools install`
-after later changes or to retry a failed initial install. It preserves configuration values but
-drops comments and rewrites formatting. Project requests override the detected
-package-manager major and image defaults. Personal mise configuration on the
-client is not read or forwarded.
-
-Use numeric compatibility lines. `latest` opts out of a fixed line. Node, pnpm, Yarn, Bun, Bundler, CocoaPods,
-CMake, Java, XcodeGen, xcbeautify and zsign follow the major. Ruby, Python,
-Go, Flutter, Dart and pre-1.0 tools follow `major.minor`. For example, a
-client `node = "24.5.0"` requests Node 24, while `ruby = "3.3.7"` requests
-Ruby 3.3. Automatic resolution does not rewrite client files and ignores
-`mise.lock`. Only tool declarations are imported, not client tasks, hooks,
-environment or settings.
-
-The image includes Node 22/24 with default 22 and npm/npx, pnpm 9/10/11 with default 10,
-Yarn 1/4 with default 1, Bun 1, Ruby 3.3 with RubyGems, Bundler 4,
-CocoaPods 1 with its cocoapods-patch plugin, CMake 3, JBR and Corretto 21,
-Flutter 3.44 with Dart, Mint 0.18, XcodeGen 2, xcbeautify 3 and Limrun's
-zsign 1. Each run or build calls `mise env --json` once; dependency installation,
-project generation, builds and their child processes use the same environment.
-Tool selection requires a sandbox image with mise support. If the daemon reports
-missing image configuration, use an updated image instead of setting fixed tool paths.
-A sandbox without project mise configuration uses image defaults. Later operations
-do not run the installer, even after project configuration changes. The managed pod
-resolver uses the selected CocoaPods tool and does not honor a Gemfile.
-Homebrew, Xcode and Apple SDKs/runtimes are managed separately.
-
-`NODE_BINARY` follows mise's selected Node in runs and builds. For React Native
-and Expo, Limrun rewrites `ios/.xcode.env.local` with that binary and the full tool
-PATH for Xcode phases. Do not replace it with a client path or a fixed image path.
-When investigating a Node mismatch, compare `NODE_BINARY` with `command -v node`
-inside the sandbox and inspect the failing phase, since Xcode can change PATH.
-For a monorepo, the file lives under the detected app's `ios/` directory.
-
-For an exact version, use an explicit sandbox override:
-
-```bash
-lim xcode run -- mise install node@24.5.0
+lim xcode use --cwd apps/mobile node@24
+lim xcode tools install --cwd apps/mobile
 lim xcode run -- mise use --pin node@24.5.0
-lim xcode tools
 ```
-
-`mise use` installs the requested version and writes `.limrun-runtime-mise.toml`
-remotely. That selection takes precedence
-on later operations. `lim xcode use node@24` clears Node's override in the
-selected directory. A running shell keeps its old PATH; `mise exec` selects
-tools immediately for its child command.
-
-Image tools stay outside the workspace and its cache. Mise can select compatible
-versions from the image or from restored user installations.
-User installs under `.limbuild-sandbox/home/.mise/` can be cached when those
-paths are covered, subject to the existing successful-build publication
-rule. `lim xcode run` alone does not publish a cache. Tool version changes
-invalidate dependency-install stamps, and Xcode switches still invalidate
-the workspace cache.
-If a restored user gem reports a missing path from its previous sandbox home,
-run `lim xcode run -- mise install --force bundler` (or the affected gem tool).
-Native mise gem wrappers need explicit reinstallation after that move.
 
 ## Generated Xcode projects (XcodeGen)
 

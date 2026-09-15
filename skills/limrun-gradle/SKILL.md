@@ -71,68 +71,20 @@ builds, use **`limrun-expo-development`**.
 
 ## Tool versions and shell commands
 
-Use mise to select Node, package managers, Java, or bundletool. The image
-includes Node 22/24 with default 22 (npm/npx), pnpm 9/10/11 (default 10), Yarn 1/4 (default 1),
-stable Bun 1, Temurin Java 17, and bundletool 1. Builds keep the project's
-`gradlew`; Android SDK, NDK, and CMake packages use `sdkmanager`.
-
-Select compatibility lines, then install missing versions explicitly:
+`lim gradle use` saves project mise requests and selects compatible major versions;
+builds keep the project's `gradlew`, while Android SDK/NDK/CMake use `sdkmanager`.
+Project tools install once per sandbox; run `lim gradle tools install` after changes
+or failures, or use `mise use --pin` for an exact version ([details](https://docs.limrun.com/docs/android/build-with-gradle)).
 
 ```bash
-lim gradle use node@24 java@temurin-17 pnpm@10
-lim gradle tools install
 lim gradle tools
-```
-
-`lim gradle tools` inspects an existing sandbox without syncing or creating an instance. Use `lim gradle tools --sync` to upload local changes first, and `--cwd apps/mobile` to inspect a nested project. Both forms require an existing sandbox; use `--id` to choose one.
-
-`lim gradle tools install` syncs the project and runs `mise install` in that sandbox. Use `--no-sync` to install its current selections without syncing, `--cwd apps/mobile` for a nested project, and `--id` to choose an existing sandbox. The command never creates or replaces an instance.
-
-`use` saves the requested tool names and versions unchanged, syncs, and shows the selection.
-The sandbox applies the compatibility rules below. The CLI rewrites
-formatting and comments while preserving other configuration values. Use
-`--cwd apps/mobile` for a nested project.
-Install from that directory with `lim gradle tools install --cwd apps/mobile`.
-Project `[tools]` entries override package-manager detection and image defaults.
-Personal mise configuration on the client is not read or forwarded. Only tools
-are imported; client tasks, environment settings, and lockfile pins do not run
-remotely.
-
-Limrun guarantees compatibility lines: normally major, but major.minor for
-Ruby, Python, Go, Flutter, Dart, and pre-1.0 tools. Patch releases can change with
-image updates. Do not promise an exact version from the client configuration.
-For an exact remote override, use `lim gradle run -- mise use --pin node@24.5.0`.
-`lim gradle use node@24` clears that tool's override in the selected directory.
-
-Run diagnostics and generation commands in the sandbox:
-
-```bash
-lim gradle run -- node --version
+# Node includes npm/npx.
+lim gradle use node@24 pnpm@10 yarn@4 bun@1 java@temurin-17 bundletool@1
+lim gradle tools install
+lim gradle run -- mise use --pin node@24.5.0
 lim gradle run --env APP_ENV=staging -- npm run generate
 lim gradle build . --env APP_ENV=staging
 ```
-
-`--additional-file localPath=remotePath` adds a file outside the source tree to
-a path relative to the remote workspace.
-
-`run` syncs first; `--no-sync` uses the current remote workspace. The optional
-positional directory is relative to the sync root. `--timeout` is 1..21600
-seconds, default 3600. It shares the build slot, so a new build or command
-cancels the active operation. The first operation with project mise configuration
-runs `mise install` once before resolving the environment. Without a project file,
-commands use image defaults. Later changes and failed initial installations require
-`lim gradle tools install`. Each operation still resolves `mise env --json` once. `NODE_BINARY` and `JAVA_HOME` follow the selection.
-Sandbox HOME, PATH, and Android SDK paths remain managed.
-
-User-installed versions last for the instance lifetime. Gradle has no workspace
-cache transfer between instances. The built-in tools are separate from user
-installs; only pnpm 10 has a warmed image store, so other majors may download
-packages on their first install.
-
-Reuse the instance for warm builds. Builds and `run` preserve shared temporary
-files and dependency caches; do not clear them between commands. After the first
-installation attempt, unused missing tools do not block commands or invalidate
-dependency caches. Install later selections with `lim gradle tools install`.
 
 ## Run it on an emulator
 
