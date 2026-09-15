@@ -78,6 +78,24 @@ lim ios sync <path to .ipa file or .app folder>
 You can run the same command every time you need to install a new version of the
 bundle. It will patch with the difference and reload it in the simulator.
 
+## iPhone Duo preview
+
+Use `spec.model: 'iphone-duo-preview'` only when the user requests the preview
+and their environment has an enabled preview pool. It runs real iOS 27 with
+Limrun's custom display profile, not Apple's official Duo simulator. Do not
+substitute an ordinary iPhone when the preview pool is unavailable.
+
+With a TypeScript SDK that supports the preview, connect through
+`Ios.createInstanceClient(...)`, check `client.deviceInfo.duo`, and call
+`await client.setDuoPose('closed')` or `await client.setDuoPose('open')`.
+The embedded viewer also provides Fold/Unfold. Do not invent a CLI `fold` flag.
+
+Closed is 466 × 678 points; open is 890 × 626 points, both at 3× scale.
+The same simulator and app remain running. Refresh the screenshot and element
+tree after folding. Finish gestures and stop recording first; orientation
+changes are disabled. A failed native transition makes the instance unavailable
+and requires a new preview instance. Reconnecting only refreshes viewport state.
+
 ## Targeting the right instance
 
 Most `lim ios` commands default to the last created instance and resolve the
