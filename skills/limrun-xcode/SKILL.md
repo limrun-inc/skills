@@ -126,8 +126,9 @@ lim xcode build .
 
 `lim xcode tools install` syncs the project and runs `mise install` in that sandbox. Use `--no-sync` to install its current selections without syncing, `--cwd apps/mobile` for a nested project, and `--id` to choose an existing sandbox. The command never creates or replaces an instance.
 
-For mise tools, `use` updates the effective project mise file in that directory, syncs the
-project and shows the selected versions. The first sandbox operation with project
+For mise tools, `use` writes the requested names and versions unchanged to the effective
+project mise file, syncs, and shows the selected versions. The sandbox applies the
+compatibility rules below. The first sandbox operation with project
 mise configuration installs its selected tools once. Use `lim xcode tools install`
 after later changes or to retry a failed initial install. It preserves configuration values but
 drops comments and rewrites formatting. Project requests override the detected
