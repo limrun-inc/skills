@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, test, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -56,6 +56,35 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 ```bash
 lim xcode build . --configuration Debug
 ```
+
+### Detached builds and logs
+
+Use `--detach` to return once the build is accepted. A webhook is optional.
+The output includes the exec ID and the exact command for reading its logs.
+
+```bash
+lim xcode build . --detach
+lim xcode logs
+lim xcode logs --follow
+```
+
+Run `logs` without an exec ID to read the latest build on the remembered
+instance, including one still running. Do not ask the user for an exec ID to
+inspect the latest build. Use `--follow` to wait for that build to finish;
+stopping it leaves the remote build running. A `RUNNING` snapshot is not success.
+Check the reported build status before declaring success.
+
+The CLI reads the daemon's latest retained stream and falls back to persisted
+S3/R2 logs on a 404, including after instance deletion. Other errors are reported
+without showing an older log. Reading logs never creates a replacement instance.
+Use `--id <instance-id>` to select another instance. To track one detached build
+after newer builds start, copy its printed `logsCommand`, which already includes
+the optional exec ID.
+
+SDK `observeBuildLogs('latest')` reads only the retained daemon stream; it does
+not fetch from S3/R2. For persisted logs, SDK callers use `listBuildLogs(instanceId)`
+and download the selected record's `downloadUrl`. For an iOS-backed build, pass
+the attached Xcode sandbox ID rather than the simulator ID.
 
 ### Pick the Xcode version
 
