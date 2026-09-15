@@ -116,6 +116,8 @@ function buildManifests() {
         category: dist.category,
         capabilities: dist.interface.capabilities,
         websiteURL: dist.homepage,
+        privacyPolicyURL: dist.interface.privacyPolicyURL,
+        termsOfServiceURL: dist.interface.termsOfServiceURL,
         defaultPrompt: [dist.interface.defaultPrompt],
         brandColor: dist.brandColor,
         logo: dist.icon,

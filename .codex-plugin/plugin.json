@@ -1,6 +1,6 @@
 {
   "name": "limrun",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Cloud iOS simulators and Android emulators your agent can create, drive, and throw away.",
   "author": {
     "name": "Limrun",
@@ -36,6 +36,8 @@
       "MCP"
     ],
     "websiteURL": "https://limrun.com",
+    "privacyPolicyURL": "https://limrun.com/privacy",
+    "termsOfServiceURL": "https://limrun.com/terms",
     "defaultPrompt": [
       "Create a cloud iOS simulator or Android emulator, build my app for it, install it, and drive it through a test flow"
     ],
