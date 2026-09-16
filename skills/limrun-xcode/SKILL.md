@@ -472,7 +472,9 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 The instance's **Build logs** page groups **Cache restoration** and
 **Cache publication** entries under **Cache activity**, separate from **Build activity**.
-Each cache entry shows its outcome, duration, and downloadable timestamped progress messages.
+Each cache entry shows its outcome, duration, and downloadable progress messages.
+The CLI and console show the same cache transcript. Its size describes the
+transferred archive, not the expanded workspace.
 Publication happens at termination. Completed cache logs remain available after
 build completion and instance termination, subject to build-log retention.
 Operations from older macnode versions without persisted cache logs cannot be
@@ -482,3 +484,6 @@ For API inspection, `GET /v1/xcode_instances/{id}/build_logs` includes these
 records under `cache-restore-` and `cache-publish-` IDs. Treat their uppercase
 `status` as a cache phase, not a build verdict. `buildDurationMs` measures the
 cache operation and excludes the log upload.
+The live cache status endpoint exposes the same cumulative text in `restore.log`
+and `save.log`. Print newly appended lines when following updates. Older server
+versions may omit these fields.
