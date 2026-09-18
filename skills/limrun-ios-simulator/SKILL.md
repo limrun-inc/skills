@@ -78,6 +78,26 @@ lim ios sync <path to .ipa file or .app folder>
 You can run the same command every time you need to install a new version of the
 bundle. It will patch with the difference and reload it in the simulator.
 
+## Placement through the REST API
+
+For an integration that creates instances through the REST API, pass the end
+user's coordinates in `spec.clues` when available:
+
+```json
+{"kind":"ClientLocation","clientLocation":{"latitude":37.7749,"longitude":-122.4194}}
+```
+
+Both coordinates are required in decimal degrees: latitude -90 to 90,
+longitude -180 to 180, inclusive. Zero is valid. Missing or invalid
+coordinates return HTTP 400. `ClientLocation` takes precedence over
+`ClientIP` regardless of clue order. Without either clue, placement uses
+available visitor coordinates, then the connecting IP. Jurisdiction and
+capacity still apply; a specific `spec.region` overrides location clues.
+
+This clue also applies to Android, Xcode, and Gradle creates. It is a REST
+field, not a CLI flag. See the [API location-clue documentation](https://docs.limrun.com/docs/reference/sdk#client-location-clues)
+for the complete request shape.
+
 ## Targeting the right instance
 
 Most `lim ios` commands default to the last created instance and resolve the
