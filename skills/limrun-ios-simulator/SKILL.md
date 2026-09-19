@@ -93,7 +93,10 @@ lim ios tap 300 200 --display inner --id <instance-ID>
 The hinge accepts fractional angles from **0° (closed)** to **180° (flat)**.
 This changes the native simulator hinge, so apps receive Apple's hinge and
 layout updates. The browser stream includes a 3D device with a hinge slider,
-rotation controls, and touch input on its cover and inner display.
+rotation controls, and touch input on its cover and inner display. The frame's
+Sleep/Wake and volume buttons accept clicks and holds even when position is locked.
+For automation, pair `buttonDown` and `buttonUp` actions with `button` set to
+`side`, `volumeUp`, or `volumeDown` in `client.performActions`.
 
 With an already connected TypeScript device client:
 
