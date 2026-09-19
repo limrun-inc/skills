@@ -78,6 +78,45 @@ lim ios sync <path to .ipa file or .app folder>
 You can run the same command every time you need to install a new version of the
 bundle. It will patch with the difference and reload it in the simulator.
 
+## Fold an iPhone Duo
+
+Create a Duo instance in a region that offers it:
+
+```bash
+lim ios create --model iphone-duo
+lim ios fold 90 --id <instance-ID>
+lim ios fold 180 --id <instance-ID>
+lim ios screenshot ./inner.png --display inner --id <instance-ID>
+lim ios tap 300 200 --display inner --id <instance-ID>
+```
+
+The hinge accepts fractional angles from **0° (closed)** to **180° (flat)**.
+This changes the native simulator hinge, so apps receive Apple's hinge and
+layout updates. The browser stream includes a 3D device with a hinge slider,
+rotation controls, and touch input on its cover and inner display.
+
+With an already connected TypeScript device client:
+
+```ts
+const fold = await client.getFoldState(); // null on an ordinary simulator
+await client.setHingeAngle(110);
+await client.setDuoOrientation('landscape-left');
+const inner = await client.screenshotDisplay('inner');
+await client.tapDisplay('inner', inner.width / 2, inner.height / 2);
+```
+
+`setDuoOrientation` accepts `portrait`, `landscape-left`, `landscape-right`,
+and `pud` (upside down). Display screenshots are upright and report dimensions
+in points; `tapDisplay` uses those coordinates. Use `outer` for the cover or
+`inner` for the unfolding display. A display that iOS has turned off returns a
+black image.
+
+Use these display-specific methods for Duo automation. Existing screenshot,
+recording, and accessibility commands do not automatically follow the inner
+display. The 3D viewer supports single-finger touch and drag. Rotating the view
+changes the camera; **Rotate device** changes native orientation. **Laptop view**
+sets the hinge and orientation; it does not enable Apple's separate Table Mode.
+
 ## Targeting the right instance
 
 Most `lim ios` commands default to the last created instance and resolve the
