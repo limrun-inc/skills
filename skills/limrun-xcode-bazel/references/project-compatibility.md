@@ -12,7 +12,7 @@ setup, not a Limrun bug. Symptom → cause → what to do.
   Bazel 9 (where they're no longer native globals) and omits them on Bazel 8
   (where loading them fails). Driven off the workspace `.bazelversion`.
 - **Xcode pinned to the sandbox's, both remote and local** — the `.limrun/BUILD`
-  declares the sandbox's Xcode (the fleet default, or the major picked with
+  declares the sandbox's Xcode (the fleet default, or the version picked with
   `lim xcode rbe --xcode-version`) as both the remote AND local version and sets
   `--xcode_version` to it, so the build uses only that Xcode and resolves
   cleanly (no apple_support "…not available locally" notice). This is the
@@ -41,9 +41,10 @@ A repo may lock the Xcode version for a sub-build with a `transition` outputting
 `//command_line_option:xcode_version`. **A transition output overrides
 `--xcode_version`** — no flag or bazelrc can win against it. If the pinned
 version isn't the sandbox's, analysis fails in `host_xcodes`. Fix: pick the
-matching major with `lim xcode rbe --xcode-version <major>` when the fleet has
-it, otherwise edit the transition to drop the `xcode_version` output (or set it
-to the sandbox's).
+matching Xcode with `lim xcode rbe --xcode-version <major|major.minor>` when the
+fleet has it (a bare major binds that major's GA release; a major.minor such as
+`27.1` pins the exact version a project locks to), otherwise edit the
+transition to drop the `xcode_version` output (or set it to the sandbox's).
 
 ### Custom `remote_default_exec_properties`
 Limrun's worker matches actions by an **exact** platform-property set

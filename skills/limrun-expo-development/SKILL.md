@@ -113,8 +113,9 @@ lim xcode build . \
   --upload "$ASSET_NAME"
 ```
 
-Run `lim xcode version set <major>` once in the repo when the project needs a
-specific Xcode major (e.g. 27 for the beta); see `limrun-xcode` for the rules.
+Run `lim xcode version set <major|major.minor>` once in the repo when the
+project needs a specific Xcode (`27` for the Xcode 27 GA, `27.1` for the beta);
+see `limrun-xcode` for the rules.
 
 Use `--expo-app-dir`, `--scheme`, or `--workspace` when the project layout requires it.
 
