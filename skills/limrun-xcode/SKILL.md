@@ -112,7 +112,8 @@ A major.minor pin lasts until the fleet retires that version; then
 `lim xcode build` fails with the daemon's message and a hint to run
 `lim xcode version set 27` or `lim xcode version unset`. When a beta becomes GA
 it replaces the beta under the same major.minor selector (one cold build); the
-bare major moves to the new release when the fleet retires the older GA.
+bare major follows the newest released Xcode of its major, so it moves to 27.1
+as soon as 27.1 is GA on the node.
 
 App Store uploads from a beta Xcode are rejected by Apple, so keep
 `--upload-to-appstore` on a bare-major pin (`27`, not `27.1`). Gate on
