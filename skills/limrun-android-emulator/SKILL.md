@@ -379,11 +379,14 @@ lim android delete <android-instance-id>
 
 ## Gotchas
 
-- **The fleet is x86_64.** Emulators report `x86_64,arm64-v8a` ABIs and run
-  arm64 code through translation, but an APK whose native libraries are
-  arm64-only for some vendor SDKs installs fine and then crashes with
-  `UnsatisfiedLinkError` when that code first loads. Build with x86_64 native
-  libs included.
+- **Ship one ABI, not a mix.** Emulators are x86_64 hosts that report
+  `x86_64,arm64-v8a` and run arm64 native libraries through translation. An
+  APK with only `arm64-v8a` libs installs and runs; x86_64 libs run natively
+  and fastest. An APK that mixes ABIs, some vendor SDK libs arm64-only and the
+  rest x86_64, installs as x86_64 and then crashes with `UnsatisfiedLinkError`
+  when the arm64-only code first loads. `armeabi-v7a`-only APKs are rejected
+  with `INSTALL_FAILED_NO_MATCHING_ABIS`, and apps that exec their own bundled
+  ARM command-line binaries are not supported under translation.
 - **Selectors match exactly.** `tap-element --text` and `find-element --text`
   need the full, exact string from `element-tree`; substrings match nothing.
 - **`install-app` returns before the install finishes.** The app lands a few
