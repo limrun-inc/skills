@@ -21,8 +21,7 @@ record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
-`LIM_API_KEY` (it may be set outside the project, so don't ask for it just
-because it's missing from `.env` or the shell). The CLI is the source of truth:
+`LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `--help` instead of guessing:
 
@@ -453,8 +452,7 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 ## Gotchas
 
-- **Build errors are your job to fix.** If a build fails, read the error output,
-  fix the code, and rebuild. Don't ask the user to fix build errors.
+- **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
 - **Instance ID for `lim ios` commands.** They resolve the current instance
   from the git worktree of your cwd and can fail with `No instance ID provided
   and no recent ios instance found`. Get the ID from `lim xcode get` and pass
