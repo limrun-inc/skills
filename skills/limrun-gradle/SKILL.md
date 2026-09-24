@@ -10,10 +10,9 @@ effort: high
 Build Android projects on Limrun's remote Gradle sandboxes, from any
 environment (Linux, Windows, macOS, VM, container). `lim gradle build` syncs
 your sources to a remote instance, runs the project's own Gradle wrapper
-there, and streams the build output. Never fall back to local Gradle, a local
-Android SDK, or a local emulator. Your job doesn't end at a green build: get
-the app running or the artifact delivered, and iterate until the user is
-satisfied.
+there, and streams the build output. This workflow builds on the remote instance; local Gradle, a local Android
+SDK, and local emulators are not part of it. A finished run has the app
+running on a Limrun emulator or the artifact delivered.
 
 For iOS builds, use **`limrun-xcode`** instead of this skill. For the Expo
 dev-client loop (Metro, hot reload) on either platform, use
@@ -165,7 +164,8 @@ All four flags travel together; the passwords can come from
 use plain `--sign`. `--save-key` refuses to overwrite: if a DIFFERENT key is
 already escrowed for the app it fails before any instance is created.
 
-Collect from the user:
+The user provides these on their own machine, as a file path and environment
+variables the CLI reads locally; they are not pasted into the conversation:
 
 - the keystore file path (`.jks` or `.p12`); never commit it or paste its
   bytes into files,

@@ -10,8 +10,8 @@ effort: high
 Build Bazel Apple projects on Limrun's remote Mac workers — from any environment
 (Linux, Windows, macOS, VM, container), no local Xcode. `lim xcode rbe` brings up
 a remote RBE stack, tunnels it to a local port, and writes a `.limrun/` config so
-`bazelisk build --config=limrun` runs Apple actions remotely. Never fall back to
-local Xcode or build tools.
+`bazelisk build --config=limrun` runs Apple actions remotely. Local Xcode and
+local build tools are not part of this workflow.
 
 ## Auth and CLI
 

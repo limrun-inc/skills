@@ -31,13 +31,13 @@ Derive:
 
 ## Ensure Dev Client
 
-Expo development builds require `expo-dev-client`. If it is missing from `package.json`, install it automatically:
+Expo development builds require `expo-dev-client`. If it is missing from `package.json`, add it:
 
 ```bash
 npx expo install expo-dev-client
 ```
 
-Installing `expo-dev-client`, adding/removing/updating native dependencies, or changing native app config means the uploaded Debug asset is stale. Build a fresh Debug app before starting the dev loop. Do not merely warn the user that a rebuild may be needed; perform the rebuild.
+Installing `expo-dev-client`, adding/removing/updating native dependencies, or changing native app config means the uploaded Debug asset is stale. Build a fresh Debug app before starting the dev loop. A changed native dependency makes the uploaded Debug asset stale, so the rebuild comes before the dev loop.
 
 ## Debug Build Asset
 
