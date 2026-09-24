@@ -15,8 +15,7 @@ no local Xcode.
 ## Prerequisites
 
 - `lim` CLI 0.22.0 or newer: `npm install --global lim`. Auth is `lim login` or
-  `LIM_API_KEY` (it may be set outside the project, so don't ask for it just
-  because it's missing from `.env` or the shell).
+  `LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it).
 - Maestro CLI on PATH: `curl -fsSL https://get.maestro.mobile.dev | bash`.
   Maestro needs Java 17+ (`java -version` to check). Both Maestro 2.5.x and
   2.6+ work; `lim` adapts to the installed version automatically.

@@ -10,14 +10,14 @@ effort: high
 Build Bazel Apple projects on Limrun's remote Mac workers — from any environment
 (Linux, Windows, macOS, VM, container), no local Xcode. `lim xcode rbe` brings up
 a remote RBE stack, tunnels it to a local port, and writes a `.limrun/` config so
-`bazelisk build --config=limrun` runs Apple actions remotely. Never fall back to
-local Xcode or build tools.
+`bazelisk build --config=limrun` runs Apple actions remotely. Local Xcode and
+local build tools are not part of this workflow.
 
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
-`LIM_API_KEY` (may be set outside the project — don't ask for it just because
-it's absent). The CLI is the source of truth: the commands in this skill are
+`LIM_API_KEY` (it may already be set in the user's environment even when the
+shell does not show it; check before asking for it). The CLI is the source of truth: the commands in this skill are
 verified, but if a flag errors or you need one not shown here, check
 `lim xcode rbe --help` instead of guessing.
 

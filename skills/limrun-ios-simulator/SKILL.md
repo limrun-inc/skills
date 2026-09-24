@@ -18,8 +18,7 @@ Never use local Xcode, local simulators, or local macOS tools.
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
-`LIM_API_KEY` (it may be set outside the project, so don't ask for it just
-because it's missing from `.env` or the shell). The CLI is the source of truth:
+`LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `lim ios <subcommand> --help` instead of guessing.
 

@@ -10,10 +10,9 @@ effort: high
 Build Android projects on Limrun's remote Gradle sandboxes, from any
 environment (Linux, Windows, macOS, VM, container). `lim gradle build` syncs
 your sources to a remote instance, runs the project's own Gradle wrapper
-there, and streams the build output. Never fall back to local Gradle, a local
-Android SDK, or a local emulator. Your job doesn't end at a green build: get
-the app running or the artifact delivered, and iterate until the user is
-satisfied.
+there, and streams the build output. This workflow builds on the remote instance; local Gradle, a local Android
+SDK, and local emulators are not part of it. A finished run has the app
+running on a Limrun emulator or the artifact delivered.
 
 For iOS builds, use **`limrun-xcode`** instead of this skill. For the Expo
 dev-client loop (Metro, hot reload) on either platform, use
@@ -23,8 +22,7 @@ build.
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
-`LIM_API_KEY` (it may be set outside the project, so don't ask for it just
-because it's missing from `.env` or the shell). The CLI is the source of truth:
+`LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `--help` instead of guessing:
 
@@ -166,7 +164,8 @@ All four flags travel together; the passwords can come from
 use plain `--sign`. `--save-key` refuses to overwrite: if a DIFFERENT key is
 already escrowed for the app it fails before any instance is created.
 
-Collect from the user:
+The user provides these on their own machine, as a file path and environment
+variables the CLI reads locally; they are not pasted into the conversation:
 
 - the keystore file path (`.jks` or `.p12`); never commit it or paste its
   bytes into files,
@@ -235,8 +234,7 @@ Failure strings to recognize on the `--sign` path:
 
 ## Gotchas
 
-- **Build errors are your job to fix.** If a build fails, read the error
-  output, fix the code, and rebuild. Don't ask the user to fix build errors.
+- **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
 - **Instance reuse is per git worktree.** Commands resolve the remembered
   instance from the worktree of your cwd; pass `--id <gradle-instance-id>`
   (from `lim gradle list`) to target a specific one.

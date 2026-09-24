@@ -10,9 +10,9 @@ effort: high
 Build Apple projects on Limrun's remote Xcode, from any environment (Linux,
 Windows, macOS, VM, container). `lim xcode build` syncs your sources to a remote
 Xcode instance, builds there, and (when a simulator is attached) installs and
-relaunches the app. Never fall back to local Xcode, local simulators, or local
-build tools. Your job doesn't end at a green build: get the app running, verify
-it works, and iterate until the user is satisfied.
+relaunches the app. This workflow builds on the remote instance; local Xcode, local simulators,
+and local build tools are not part of it. A finished run has the app running
+and verified on a Limrun simulator.
 
 For driving the app once it's running (tap, type, element tree, screenshot,
 record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
@@ -21,8 +21,7 @@ record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
-`LIM_API_KEY` (it may be set outside the project, so don't ask for it just
-because it's missing from `.env` or the shell). The CLI is the source of truth:
+`LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `--help` instead of guessing:
 
@@ -382,8 +381,10 @@ Store Connect symbolicates crash reports without a separate dSYM upload. This
 needs the build to produce dSYMs: `--configuration Release` does by default;
 Debug does not, and the IPA then simply ships without symbols.
 
-Collect from the user (all three live in App Store Connect under Users and
-Access, Integrations tab, App Store Connect API):
+The user provides these on their own machine, as flags or environment variables
+the CLI reads locally; they are not pasted into the conversation. All three live
+in App Store Connect under Users and Access, Integrations tab, App Store Connect
+API:
 
 - `--asc-key-id`: the Key ID next to their API key. If they don't have one,
   point them at Team Keys with the **Developer** role: the least-privileged
@@ -453,8 +454,7 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 
 ## Gotchas
 
-- **Build errors are your job to fix.** If a build fails, read the error output,
-  fix the code, and rebuild. Don't ask the user to fix build errors.
+- **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
 - **Instance ID for `lim ios` commands.** They resolve the current instance
   from the git worktree of your cwd and can fail with `No instance ID provided
   and no recent ios instance found`. Get the ID from `lim xcode get` and pass
@@ -463,7 +463,7 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 - **Bundle ID discovery.** If you don't know the bundle ID, check the Xcode
   project files or run `lim ios list-apps` after a successful build.
 - **Auth errors** on an authenticated command mean the session expired or
-  `LIM_API_KEY` is wrong; ask the user to run `lim login` or provide a key.
+  `LIM_API_KEY` is wrong; `lim login` on the user's machine renews the session.
 - **Build settings override Limrun's defaults.** `--build-setting KEY=VALUE`
   accepts any environment-style key and replaces the managed value with the
   same key. Device builds already use standard architectures (an embedded
