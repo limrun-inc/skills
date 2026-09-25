@@ -218,6 +218,14 @@ project has test targets). `--xcode-version 27` builds the tests with that
 major's GA (`27.1` selects the beta); the simulator keeps the fleet default
 runtime, so the run warns and proceeds (runtime-dependent failures are possible).
 
+StoreKit UI tests support both a `.storekit` selected in a shared scheme or
+test plan and `SKTestSession` created by the UI test. Keep selected files in
+the synced workspace. For `SKTestSession(configurationFileNamed:)`, also add
+the file to the UI test target's resources and link `StoreKitTest`. No extra
+CLI flag is needed. Test-plan configuration overrides are honored, and app
+relaunches preserve session changes. Clear transactions in test setup and
+teardown when methods need independent purchase state.
+
 Select a subset with xcodebuild's identifier format
 `Target[/Class[/method]]`; repeat the flag for multiple entries. The two flags
 are mutually exclusive:
