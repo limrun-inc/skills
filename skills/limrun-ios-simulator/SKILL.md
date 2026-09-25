@@ -172,7 +172,9 @@ name resolves on public DNS, so your DNS and VPN apply and TLS stays end to
 end. Apps that resolve DNS themselves over HTTPS bypass domain interception.
 A tunnel carries TCP only: up to ten exact selectors and 64 domain selectors,
 ports 1-65535 except 53; CIDRs and UDP are not supported. Start the tunnel
-before launching the app: connections opened earlier keep their original route.
+before launching the app or opening the page: connections opened earlier keep
+their original route, so relaunch the app if it connected first. HTTP
+inspection (`--har`, `--persist`) is Android-only for now.
 
 One instance accepts one active destination tunnel, and its selector set is
 immutable. To add or remove a destination, stop the tunnel and start it again
