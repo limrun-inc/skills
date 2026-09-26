@@ -168,13 +168,12 @@ Use the app's normal URLs, such as `http://localhost:3000`. Declaring
 `[::1]:3000`, plus `[::ffff:127.0.0.1]:3000`. Domain selectors (exact
 `api.corp.example` or label-bound wildcard `"*.staging.example"`) are
 intercepted on the simulator and dialed from your machine whether or not the
-name resolves on public DNS, so your DNS and VPN apply and TLS stays end to
-end. Apps that resolve DNS themselves over HTTPS bypass domain interception.
+name resolves on public DNS, so your DNS and VPN apply. Apps that resolve DNS
+themselves over HTTPS bypass domain interception.
 A tunnel carries TCP only: up to ten exact selectors and 64 domain selectors,
 ports 1-65535 except 53; CIDRs and UDP are not supported. Start the tunnel
 before launching the app or opening the page: connections opened earlier keep
-their original route, so relaunch the app if it connected first. HTTP
-inspection (`--har`, `--persist`) is Android-only for now.
+their original route, so relaunch the app if it connected first.
 
 One instance accepts one active destination tunnel, and its selector set is
 immutable. To add or remove a destination, stop the tunnel and start it again
@@ -188,6 +187,25 @@ lim ios tunnel stop --id <ios-instance-id>
 If the simulator attempts a route while its local service is stopped, the
 tunnel remains active and reports `connection_refused`; restart the service
 without recreating the simulator or tunnel.
+
+### Inspect HTTP traffic, capture HAR, persist a network log
+
+Inspection is on by default: every HTTP and HTTPS request through the tunnel
+is decoded, printed as one summary line per request (in the tunnel log file
+when detached), and shown live in the console's network panel.
+
+```bash
+lim ios tunnel --selector "*.api.example" --har ./traffic.har --detach   # write HAR 1.2 with bodies
+lim ios tunnel --selector "*.api.example" --persist --detach             # network log survives the instance
+```
+
+`--persist` uploads a body-inclusive network log as a session artifact when
+the tunnel stops or the instance terminates; it appears on the instance's
+session page in the console with a HAR download (default lifetime 3 days,
+`--ttl <seconds>` up to 30 days). HTTPS is decoded with a simulator-trusted
+CA, so **apps with certificate pinning fail through inspected selectors**:
+leave the pinned host out of the selectors or pass `--no-inspect` to keep TLS
+end to end (no summaries, HAR, or persistence).
 
 ## Launching the app
 
