@@ -7,7 +7,7 @@ agent platform.
 
 Sign up at [Limrun](https://lim.run) to get a `LIM_API_KEY`.
 
-If your work email domain has SSO configured and verified, use **Continue with SSO** in the console, including for your first signup. Other sign-in methods are blocked for that domain. See the [SSO setup guide](https://docs.limrun.com/docs/reference/single-sign-on). If the organization enforces SCIM, the administrator must provision the user and assign a group mapped to a Limrun role before sign-in. Invitations and domain auto-join cannot grant access. See [SCIM provisioning](https://docs.limrun.com/docs/reference/single-sign-on/scim).
+If your work email domain has SSO configured and verified, use **Continue with SSO** in the console, including for your first signup. Other sign-in methods are blocked for that domain. See the [SSO setup guide](https://docs.limrun.com/docs/reference/single-sign-on). If the organization uses SCIM, provisioning creates the account, and the administrator must activate SCIM and assign the user to a group mapped to a Limrun role before their first sign-in. Invitations, domain auto-join, and manual membership changes are disabled as soon as SCIM setup begins. Activation is permanent; directory assignments then control access. See [SCIM provisioning](https://docs.limrun.com/docs/reference/single-sign-on/scim).
 
 ## Install
 
