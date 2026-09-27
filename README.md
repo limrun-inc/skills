@@ -7,6 +7,8 @@ agent platform.
 
 Sign up at [Limrun](https://lim.run) to get a `LIM_API_KEY`.
 
+If your work email domain has SSO configured and verified, use **Continue with SSO** in the console, including for your first signup. Other sign-in methods are blocked for that domain. See the [SSO setup guide](https://docs.limrun.com/docs/reference/single-sign-on).
+
 ## Install
 
 The `lim` CLI installs the skills into whichever agent you use and keeps them updated:
