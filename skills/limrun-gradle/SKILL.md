@@ -149,28 +149,20 @@ Expect one of these lines before the build starts and relay its meaning:
 ## Bring your own upload key
 
 When the app already has a registered upload key (an existing Play listing),
-sign with the user's keystore instead:
-
-```bash
-lim gradle build . \
-  --keystore upload.jks --keystore-password "$KS_PASS" \
-  --key-alias upload --key-password "$KEY_PASS" \
-  --upload myapp.aab
-```
-
-All four flags travel together; the passwords can come from
-`LIM_KEYSTORE_PASSWORD` and `LIM_KEY_PASSWORD` instead of argv. Add
+the user can sign with their own keystore instead. The keystore path, key alias
+and both passwords are supplied by the user on their own machine, as the
+`--keystore`, `--key-alias`, `--keystore-password` and `--key-password` flags or
+the `LIM_KEYSTORE_PASSWORD` and `LIM_KEY_PASSWORD` environment variables
+(`lim gradle build --help` lists them). Never ask for or handle these values in
+the conversation; if one is missing, name the flag or variable to set. All four
+travel together. Add
 `--save-key` to escrow the provided key so later builds can drop the flags and
 use plain `--sign`. `--save-key` refuses to overwrite: if a DIFFERENT key is
 already escrowed for the app it fails before any instance is created.
 
-The user provides these on their own machine, as a file path and environment
-variables the CLI reads locally; they are not pasted into the conversation:
-
-- the keystore file path (`.jks` or `.p12`); never commit it or paste its
-  bytes into files,
-- the keystore password and the key password (often the same value),
-- the key alias (`keytool -list -keystore <file>` shows it if unknown).
+The keystore file itself stays on the user's machine: never commit it or paste
+its bytes into files. `keytool -list -keystore <file>` shows the alias when the
+user does not know it.
 
 Failure strings to recognize on the bring-your-own path:
 
@@ -187,10 +179,11 @@ Failure strings to recognize on the bring-your-own path:
 
 ## Publish to Play Store
 
-With Play credentials (a service-account JSON via
-`--playstore-service-account`, or an access token via
-`--playstore-access-token`), the build publishes the signed release AAB
-directly, no browser involved:
+When the user has Play credentials configured on their own machine (a
+service-account JSON file or an access token, passed through the
+`--playstore-service-account` or `--playstore-access-token` flag), the build
+publishes the signed release AAB directly, no browser involved. Never ask for
+these credentials in the conversation:
 
 ```bash
 lim gradle build . --sign --upload-to-playstore --playstore-service-account sa.json --auto-version-code
