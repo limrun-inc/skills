@@ -137,6 +137,11 @@ lim ios open-url --id <ios-instance-id> '<absolute-url>'
 ## Disk snapshots
 
 Reuse source files, dependencies, and DerivedData across Xcode instances.
+
+Check `lim xcode create --help` first. If it lists `--cache-key` instead of
+`--snapshot-key`, replace `--snapshot-*` with `--cache-*` and `--wait-snapshot`
+with `--wait-cache` below. Newer CLIs accept both spellings.
+
 From the project directory, create with a snapshot key, build, then delete:
 
 ```bash
@@ -163,8 +168,7 @@ Configure snapshots at creation. Restore keys and paths stay fixed.
 On an existing instance, `build --snapshot-key` can only bind an unassigned
 save key if snapshots were already enabled; it does not restore or enable them.
 
-Existing `--cache-*` flags and `--wait-cache` remain supported. See the
-[disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots) for skipped
+See the [disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots) for skipped
 saves, cold builds, and SDK usage.
 
 ## Developer tool versions
