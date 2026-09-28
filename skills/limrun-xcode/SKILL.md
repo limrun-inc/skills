@@ -181,6 +181,12 @@ also match the directory path itself, as above.
 
 ## Run on a simulator
 
+When the user already has a simulator open in console onboarding, use
+`lim run --ios-id <ios-instance-id>` with the ID they provide. It attaches that
+simulator before syncing and compiling, so the console can show live build logs.
+The supplied simulator stays running after build or install failures for retries.
+Without `--ios-id`, `lim run` creates a simulator after the build succeeds.
+
 `lim xcode build` is build-and-install. Don't attach a simulator until the user
 needs to see or interact with the app. Check / attach:
 
