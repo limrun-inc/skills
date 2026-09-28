@@ -136,8 +136,14 @@ lim ios open-url --id <ios-instance-id> '<absolute-url>'
 
 ## Disk snapshots
 
-To reuse a workspace across instances, create it with a disk snapshot key, build,
-then delete it with `--wait-snapshot` to wait for publication:
+Use a disk snapshot to carry source files, dependencies, and DerivedData into
+future Xcode instances. Keep building on the same running instance while
+iterating. Save a snapshot when you finish with it.
+
+### Save and reuse
+
+From the project directory, create an instance with a snapshot key, build, then
+delete it to save the snapshot. Replace `MyApp` with the project's scheme:
 
 ```bash
 XCODE_ID=$(lim xcode create --snapshot-key myapp-main --quiet)
@@ -145,11 +151,62 @@ lim xcode build . --id "$XCODE_ID" --scheme MyApp
 lim xcode delete "$XCODE_ID" --wait-snapshot
 ```
 
-Use `--snapshot-restore-keys "myapp-pr51,myapp-main"` at creation to try ordered
-fallbacks. Each entry tries an exact key, then the newest matching literal prefix.
-Leave `--snapshot-paths` unset to save the whole workspace. Publication requires
-a successful build with no later sync and happens at termination. Existing
-`--cache-*` flags and `--wait-cache` remain supported as compatibility aliases.
+The first run builds from scratch. Repeat the sequence to restore the saved
+snapshot. Each successful save replaces the previous snapshot under that key.
+Snapshots belong to your organization.
+
+Saving happens only when the instance terminates. `--wait-snapshot` waits for
+publication and prints the result. Wait for it before starting an instance that
+needs the new snapshot. In CI, put deletion in a cleanup step that runs even if
+the build fails.
+
+Leave `--snapshot-paths` unset to save the whole workspace, including source
+sync state and DerivedData. `--basis-cache-dir` is a separate local cache for
+source uploads.
+
+### Restore from another branch
+
+Set the save destination with `--snapshot-key` and the restore order with
+`--snapshot-restore-keys`:
+
+```bash
+XCODE_ID=$(lim xcode create \
+  --snapshot-key myapp-pr51 \
+  --snapshot-restore-keys "myapp-pr51,myapp-main" \
+  --quiet)
+```
+
+Build and delete this instance as above. For each restore key, Limrun tries an
+exact match, then the newest snapshot whose key starts with that literal prefix.
+It tries the next key only if neither matches. With no match, the build starts
+cold.
+
+Without a restore list, the destination key is also the restore key. With an
+explicit list, include the destination key first to reuse the branch's previous
+snapshot. To restore without saving, pass only `--snapshot-restore-keys`.
+
+### Configure before building
+
+Set snapshot options on `lim xcode create`. Restore keys and paths stay fixed
+for that instance, including when using `--reuse-if-exists`.
+`build --snapshot-key` on an existing instance only binds a save key if it was
+created with snapshots enabled. It does not restore or enable snapshots, and
+an assigned save key cannot change.
+
+- Use keys that identify the project and Xcode version. Keep fallbacks within
+  that version, and use separate save keys for concurrent CI jobs.
+- Keep the synced project folder's name unchanged between runs so Xcode can
+  reuse its build state. Use a new key if you change the snapshot path set.
+- Saving requires successful compilation with no later sync. Test failures
+  still allow saving if compilation succeeds. A failed compile, cancelled
+  build, or `lim xcode run` alone does not qualify the workspace for saving.
+- Check the restore output and the `--wait-snapshot` result. Concurrent instances
+  using the same restored workspace on one host can cause a cold build with
+  saving disabled.
+
+Existing `--cache-*` flags and `--wait-cache` remain supported. Use snapshot
+names in new commands. See the [disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots)
+for the full workflow and TypeScript SDK usage.
 
 ## Developer tool versions
 
