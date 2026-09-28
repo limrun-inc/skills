@@ -139,8 +139,8 @@ lim ios open-url --id <ios-instance-id> '<absolute-url>'
 Reuse source files, dependencies, and DerivedData across Xcode instances.
 
 CLI **0.35.1 and earlier** use `--cache-*` instead of `--snapshot-*`, and
-`--wait-cache` instead of `--wait-snapshot`. Check the installed version with
-`lim --version`. The snapshot rename preserves the old flags as aliases.
+`--wait-cache` instead of `--wait-snapshot`. The snapshot rename preserves
+the old flags as aliases.
 
 From the project directory, create with a snapshot key, build, then delete:
 
