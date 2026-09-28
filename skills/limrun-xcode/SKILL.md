@@ -282,7 +282,9 @@ many suites back to back, prefer fresh instances with
 
 Prefer Apple cloud signing when the user has an App Store Connect team API key.
 Apple creates or reuses a cloud-managed certificate and provisioning profile,
-so the user does not need to supply a p12 or `.mobileprovision`:
+so the user does not need to supply a p12 or `.mobileprovision`. The key ID,
+issuer ID and `.p8` file are configured by the user on their own machine as
+flags or environment variables; never ask for their values in the conversation:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
@@ -378,8 +380,8 @@ Failure strings to recognize in the build output:
 - `code signature verification failed`: the platform's post-sign check rejected
   the artifact. Not a problem in the user's code; retry, and report it if it
   persists.
-- p12 password errors: `--certificate-password` doesn't match the file; ask the
-  user for the right password.
+- p12 password errors: `--certificate-password` doesn't match the file; the
+  user corrects the value on their machine.
 
 ## Upload to App Store Connect
 
