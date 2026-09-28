@@ -102,7 +102,7 @@ error lists the available ones) but keeps it when the sandbox is merely busy.
 When the sandbox is on another Xcode than the workspace prefers, the next
 build says so and switches it first. Switching invalidates the build cache made
 with the other version (the next build starts cold) and is refused while a build,
-sync or `lim xcode rbe` stack is running. With persistent workspace snapshots
+sync or `lim xcode rbe` stack is running. With persistent disk snapshots
 (`--snapshot-key`), use a separate key per Xcode lane, for example `myapp-27` and
 `myapp-27.1`: archives are stored per key and a restore under a different Xcode
 is wiped.
@@ -134,9 +134,9 @@ separate build/install issues from URL routing:
 lim ios open-url --id <ios-instance-id> '<absolute-url>'
 ```
 
-## Workspace snapshots
+## Disk snapshots
 
-To reuse a workspace across instances, create it with a snapshot key, build,
+To reuse a workspace across instances, create it with a disk snapshot key, build,
 then delete it with `--wait-snapshot` to wait for publication:
 
 ```bash
