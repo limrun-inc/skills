@@ -125,7 +125,10 @@ For gestures, use `client.performActions(actions, { display: 'inner' })` with
 the same display. Omitting `display` keeps coordinate input on the primary panel.
 
 `tapElement`, its scroll search, and batched element taps follow the active
-display. The element-tree root and children use upright screenshot points.
+display. The element tree preserves native accessibility frames. On the open Duo, the
+root can report portrait bounds while child frames match the upright screenshot.
+Use screenshot dimensions for the capture canvas; do not rescale child frames
+from the root bounds.
 Read `(await client.getFoldState())?.displays.find(display => display.active)`
 to identify the active panel. The flag respects fold hysteresis and is absent
 on older servers and on other fold-state responses. Default screenshots and
