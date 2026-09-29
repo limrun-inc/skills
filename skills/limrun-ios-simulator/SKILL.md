@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, screenshot, record video, connect the app to local services, play a video file as the camera, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'connect localhost', 'reach my local server from the simulator', 'mock the camera', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services, play a video file as the camera, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'mock the camera', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -221,8 +221,26 @@ lim ios terminate-app <bundle-id>                         # stop it, e.g. to res
 
 If you don't know the bundle ID, run `lim ios list-apps`.
 
-The `lim ios launch-app` will stream the logs from the app in realtime for you
-to debug. If you'd like to launch and forget, you can use `--detach` flag.
+`launch-app` streams the app's logs and returns when the app exits or the
+command is interrupted. Pass `--detach` to launch and return immediately.
+
+## App logs
+
+Log commands print recent lines and exit. Pass `--follow` only to keep
+streaming until interrupted.
+
+```bash
+lim ios launch-app <bundle-id> --detach   # launch and return, no log stream
+lim ios app-log <bundle-id>               # last 100 lines, then exit
+lim ios app-log <bundle-id> --tail 100    # last N lines
+lim ios app-log <bundle-id> --follow      # stream until interrupted
+lim ios syslog                            # up to 100 captured syslog lines, then exit
+lim ios syslog --follow                   # stream simulator syslog
+```
+
+Syslog snapshots read the buffer filled by the current or an earlier syslog
+stream. An empty buffer returns no lines. Snapshot reads need a runtime with
+`syslogTail` support.
 
 ## Testing changes
 

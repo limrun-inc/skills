@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, run project commands with `lim xcode run`, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, run code generation or Make targets, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -28,6 +28,7 @@ not shown here, check `--help` instead of guessing:
 ```bash
 lim xcode --help
 lim xcode build --help
+lim xcode run --help
 ```
 
 ## Build
@@ -187,6 +188,40 @@ lim xcode use --cwd apps/mobile node@24
 lim xcode tools install --cwd apps/mobile
 lim xcode run -- mise use --pin node@24.5.0
 ```
+
+## Run project commands
+
+Use `lim xcode run [relative-cwd] -- <command>` when the repository needs a
+remote macOS command before or outside `xcodebuild`. The CLI syncs the current
+directory first. The working directory is relative to that synced root and
+defaults to `.`:
+
+```bash
+lim xcode run -- make api
+lim xcode run apps/api -- make generate
+```
+
+Pass environment variables before the delimiter. Use `--no-sync` only when the
+same instance already has the source state you need:
+
+```bash
+lim xcode run --env API_ENV=development -- npm run generate
+lim xcode run --no-sync -- make api
+```
+
+The sandbox includes Node, Ruby, CMake, Mint, and mise. Tool installs made with
+mise or Mint stay in the instance's sandbox home and remain available on later
+commands on that instance:
+
+```bash
+lim xcode run -- 'mise trust && mise install'
+lim xcode run -- 'mint install apollographql/apollo-ios-cli'
+```
+
+Homebrew is not available. Do not install it into the shared system prefix or
+assume `/opt/homebrew` exists. Use mise, Mint, SwiftPM, or a project-local
+download instead. Commands are one-shot and non-interactive. There is no TTY or
+stdin channel.
 
 ## Generated Xcode projects (XcodeGen)
 
