@@ -209,19 +209,17 @@ lim xcode run --env API_ENV=development -- npm run generate
 lim xcode run --no-sync -- make api
 ```
 
-The sandbox includes Node, Ruby, CMake, Mint, and mise. Tool installs made with
-mise or Mint stay in the instance's sandbox home and remain available on later
-commands on that instance:
+The sandbox includes Node, Ruby, CMake, Mint, mise, and Homebrew. Tool installs
+made with mise, Mint, or Homebrew stay in the instance's sandbox home and
+remain available on later commands on that instance:
 
 ```bash
 lim xcode run -- 'mise trust && mise install'
 lim xcode run -- 'mint install apollographql/apollo-ios-cli'
+lim xcode run -- brew install tree
 ```
 
-Homebrew is not available. Do not install it into the shared system prefix or
-assume `/opt/homebrew` exists. Use mise, Mint, SwiftPM, or a project-local
-download instead. Commands are one-shot and non-interactive. There is no TTY or
-stdin channel.
+Commands are one-shot and non-interactive. There is no TTY or stdin channel.
 
 ## Generated Xcode projects (XcodeGen)
 
