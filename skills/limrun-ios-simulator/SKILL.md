@@ -119,9 +119,17 @@ in points; `tapDisplay` uses those coordinates. Use `outer` for the cover or
 `inner` for the unfolding display. A display that iOS has turned off returns a
 black image.
 
-Use these display-specific methods for Duo automation. Existing screenshot,
-recording, and accessibility commands do not automatically follow the inner
-display. The 3D viewer supports single-finger touch and drag. Rotating the view
+For gestures, use `client.performActions(actions, { display: 'inner' })` with
+`touchDown`, `touchMove`, and `touchUp` in upright screenshot points. Insert a
+`wait` to hold a touch. `client.scroll('down', 300, { display: 'inner' })` uses
+the same display. Omitting `display` keeps coordinate input on the primary panel.
+
+`tapElement`, its scroll search, and batched element taps follow the active
+display. The element-tree root and children use upright screenshot points.
+Read `(await client.getFoldState())?.displays.find(display => display.active)`
+to identify the active panel. The flag respects fold hysteresis and is absent
+on older servers and on other fold-state responses. Default screenshots and
+recordings still capture the primary display. The 3D viewer supports single-finger touch and drag. Rotating the view
 changes the camera; **Rotate device** changes native orientation. **Laptop view**
 sets the hinge and orientation; it does not enable Apple's separate Table Mode.
 
