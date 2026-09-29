@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services, play a video file as the camera, set the clipboard, change the device language, simulate Face ID, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services, play a video file as the camera, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -387,21 +387,25 @@ Any AVFoundation-decodable file works (H.264/HEVC in `.mp4`/`.mov`). Use
 `--no-loop` when the app must observe the end of the clip exactly once (the
 feed freezes on the last frame rather than stalling).
 
-## Clipboard, language, and Face ID
+## Clipboard
 
-Set or read the simulator clipboard, for example to paste a one-time code:
+Set or read the simulator clipboard. Apps paste it like text copied inside the
+simulator, so the edit menu's Paste shows no permission prompt. For example, to
+paste a one-time code into a login form:
 
 ```bash
 lim ios clipboard set "123456"                  # or pipe it: echo 123456 | lim ios clipboard set
 lim ios clipboard get
 ```
 
-Apps paste it like text copied inside the simulator, so the edit menu's Paste
-shows no permission prompt.
+`lim ios simctl -- pbcopy booted` and `pbpaste booted` do the same.
 
-Change the device language and region through the simulator's user defaults.
-Pass the arguments after `--`. Apps launched afterwards use the new language,
-so relaunch the app under test:
+## User defaults
+
+Read, write, or delete the simulator's user defaults with its `defaults` tool.
+Pass the arguments after `--`. Apps read defaults at launch, so relaunch the app
+under test after a change. For example, to switch the device language and
+region without UI automation:
 
 ```bash
 lim ios defaults -- write -g AppleLanguages -array fr-FR
@@ -409,19 +413,32 @@ lim ios defaults -- write -g AppleLocale -string fr_FR
 lim ios defaults -- read -g AppleLanguages
 ```
 
-Simulate Face ID with notifications. Enroll once, then answer each Face ID
-prompt with a match or a non-match:
+`lim ios simctl -- spawn booted defaults ...` does the same. Only `read`,
+`write`, and `delete` are available.
+
+## Darwin notifications
+
+Post a notification, or set and read a notification's state, inside the
+simulator with its `notifyutil` tool:
+
+```bash
+lim ios notify post <name>
+lim ios notify set <name> <state>
+lim ios notify get <name>
+```
+
+For example, the simulator drives Face ID through these notifications. Enroll
+once, then answer each Face ID prompt with a match or a non-match (Touch ID
+devices use `fingerTouch` in place of `pearl`):
 
 ```bash
 lim ios notify set com.apple.BiometricKit.enrollmentChanged 1
-lim ios notify post com.apple.BiometricKit.enrollmentChanged      # enrolled
-lim ios notify post com.apple.BiometricKit_Sim.pearl.match        # next scan succeeds
-lim ios notify post com.apple.BiometricKit_Sim.pearl.nomatch      # next scan fails
+lim ios notify post com.apple.BiometricKit.enrollmentChanged
+lim ios notify post com.apple.BiometricKit_Sim.pearl.match      # the next scan succeeds
+lim ios notify post com.apple.BiometricKit_Sim.pearl.nomatch    # the next scan fails
 ```
 
-Touch ID devices use `fingerTouch` in place of `pearl`. The same operations
-are available as `lim ios simctl -- pbcopy booted`, `pbpaste booted`,
-`spawn booted defaults ...` and `spawn booted notifyutil ...`.
+`lim ios simctl -- spawn booted notifyutil -p|-s|-g ...` does the same.
 
 ## Preview URL for humans
 
