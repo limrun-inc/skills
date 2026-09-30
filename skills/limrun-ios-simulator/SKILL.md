@@ -15,6 +15,21 @@ concerns in those skills; this one is about driving the running simulator.
 
 Never use local Xcode, local simulators, or local macOS tools.
 
+## Context from the live device extension
+
+When the user shares an area or captured flow from the Limrun extension, use the
+instance ID in that context. Keep subsequent inspection, interaction, and app
+installation on that device unless the user asks for another. Do not create a
+replacement because a screenshot or CLI call failed; first check the account,
+environment, and instance status.
+
+Captured flows contain up to six historical screenshots and action descriptions,
+not continuous video. Tap and drag positions in flow descriptions are percentages,
+not device pixels. Inspect the current screenshot and element tree before acting;
+do not use historical coordinates as a current interaction target. The extension
+supplies device context; source edits and builds still require the project's build
+skill and an authenticated CLI in the agent's execution environment.
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or

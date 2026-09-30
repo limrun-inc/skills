@@ -18,6 +18,28 @@ For driving the app once it's running (tap, type, element tree, screenshot,
 record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
 **`limrun-xcode-bazel`** instead of this skill.
 
+## Building with the live device extension
+
+When a Limrun live-device panel is open, its context owns the target device and
+API environment. Before looking up or creating a builder, set `LIM_API_ENDPOINT`
+to the endpoint in that context and verify the CLI credentials work there.
+Do not reuse a production builder for a staging panel or silently switch
+credentials/environments after an error.
+
+Reuse the panel's ready `instanceId`. If it is empty or terminated, create the
+device through `create-ios-simulator` or `create-android-emulator`, passing the
+`panelId` from the context. The panel follows that device. Do not use the CLI to
+create a separate simulator/emulator in this workflow. CLI commands still own
+source sync and builds; use the explicit builder and device IDs for installation.
+Use `--no-open` on commands that open a browser, and do not open a console or
+signed-stream URL when the user is already using the live panel.
+
+For Xcode, attach the ready simulator with
+`lim xcode attach-simulator <instanceId> --id <builderId>` before rebuilding.
+For a new builder, `lim xcode create --simulator-id <instanceId>` starts it with
+the panel's simulator attached. Subsequent successful builds reinstall there.
+
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
