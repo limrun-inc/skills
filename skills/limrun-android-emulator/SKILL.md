@@ -17,7 +17,7 @@ Never use a local emulator, a local Android SDK, or Android Studio.
 
 ## Context from the live device extension
 
-When the user shares an area or captured flow from the Limrun extension, use the
+When the user sends an annotated area, its comment, or a captured flow from the Limrun extension, use the
 instance ID in that context. Keep subsequent inspection, interaction, and app
 installation on that device unless the user asks for another. Do not create a
 replacement because a screenshot or CLI call failed; first check the account,
