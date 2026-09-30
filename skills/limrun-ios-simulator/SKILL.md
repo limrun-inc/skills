@@ -121,7 +121,8 @@ black image.
 
 For gestures, use `client.performActions(actions, { display: 'inner' })` with
 `touchDown`, `touchMove`, and `touchUp` in upright screenshot points. Insert a
-`wait` to hold a touch. `client.scroll('down', 300, { display: 'inner' })` uses
+`wait` to hold a touch. For two fingers, supply `x2` and `y2` together on
+each down, move, and up action. `client.scroll('down', 300, { display: 'inner' })` uses
 the same display. Omitting `display` keeps coordinate input on the primary panel.
 
 `tapElement`, its scroll search, and batched element taps follow the active
