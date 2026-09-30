@@ -17,6 +17,11 @@ Never use a local emulator, a local Android SDK, or Android Studio.
 
 ## Context from the live device extension
 
+When a Limrun live-device panel is open, keep using it. Do not call
+`stream-device`, `open-device`, or `open-device-panel` to add a second preview.
+Use the screenshot-and-element-tree tool for background inspection; those results
+do not need another user-facing card.
+
 When the user sends an annotated area, its comment, or a captured flow from the Limrun extension, use the
 instance ID in that context. Keep subsequent inspection, interaction, and app
 installation on that device unless the user asks for another. Do not create a
