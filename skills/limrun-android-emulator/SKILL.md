@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -351,6 +351,29 @@ session page in the console with a HAR download (default lifetime 3 days,
 CA, so **apps with certificate pinning fail through inspected domain
 selectors**: leave the pinned host out of the selectors or pass
 `--no-inspect` to relay bytes opaquely (no summaries, HAR, or persistence).
+
+## Trust a CA certificate
+
+Add a PEM CA certificate to the emulator's trust stores, for example the CA
+of an intercepting proxy that records app traffic (Android 15, the default
+`--os-version`):
+
+```bash
+lim android ca add ./proxy-ca.pem --id <android-instance-id>
+```
+
+Apps, WebViews, and Chrome trust it on their next connection, with no
+restart, for the life of the instance. Only one CA certificate per file;
+leaf certificates are rejected. Apps that pin certificates still reject it.
+
+To record through a proxy on the user's machine, trust its CA, reach it
+with a `--no-inspect` destination tunnel, then point the system proxy at the
+tunneled port. Start the tunnel first:
+
+```bash
+lim android tunnel --selector localhost:8888 --no-inspect --detach --id <android-instance-id>
+lim android adb-shell --id <android-instance-id> -- settings put global http_proxy 127.0.0.1:8888
+```
 
 ## Preview URL for humans
 
