@@ -128,11 +128,15 @@ the same display. Omitting `display` keeps coordinate input on the primary panel
 display. The element tree preserves Apple's reported accessibility frames. The
 application root can report portrait bounds while its windows and descendants
 match the upright screenshot. Use `screenshotDisplay`'s `width` and `height` for
-the capture canvas, and use descendant coordinates directly. Any root resizing
-for rendering belongs in a separate presentation copy of the tree.
-Read `(await client.getFoldState())?.displays.find(display => display.active)`
-to identify the active panel. The flag respects fold hysteresis and is absent
-on older servers and on other fold-state responses. Default screenshots and
+the capture canvas. Do not infer a coordinate transform from the root size.
+Full-screen descendants can already match the capture; compatibility-mode apps
+can report app-local frames inside a centered window. Any root resizing for
+rendering belongs in a separate presentation copy of the tree.
+Read `(await client.getFoldState())?.displays.filter(display => display.active)`
+to identify active panels. Selector actions require exactly one active panel;
+retry after the fold settles if both report active. The flag comes from native
+state and is absent when the query fails, on older servers, and on other
+fold-state responses. Geometry remains available when the activity query fails. Default screenshots and
 recordings still capture the primary display. The 3D viewer supports single-finger touch and drag. Rotating the view
 changes the camera; **Rotate device** changes native orientation. **Laptop view**
 sets the hinge and orientation; it does not enable Apple's separate Table Mode.
