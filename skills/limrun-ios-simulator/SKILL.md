@@ -28,6 +28,10 @@ installation on that device unless the user asks for another. Do not create a
 replacement because a screenshot or CLI call failed; first check the account,
 environment, and instance status.
 
+Annotations can arrive together as numbered comments and cropped images. Match
+each comment to the crop and device context with the same number. Each image
+shows its selection time; the user may have navigated between annotations.
+
 Captured flows contain up to six historical screenshots and action descriptions,
 not continuous video. Tap and drag positions in flow descriptions are percentages,
 not device pixels. Inspect the current screenshot and element tree before acting;
