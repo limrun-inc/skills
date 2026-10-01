@@ -46,8 +46,8 @@ For a local APK, use
 
 When the project uses the Limrun MCP extension, reuse its account and environment:
 
-1. Call `get-cli-auth-context`. It returns `apiEndpoint`, `consoleEndpoint`, and `organizationId`, never a key.
-2. In the project directory, run `lim login --mcp --api-endpoint <apiEndpoint> --console-endpoint <consoleEndpoint> --organization-id <organizationId>`.
+1. Call `get-cli-auth-context`. It returns `apiEndpoint`, `authEndpoint`, `consoleEndpoint`, and `organizationId`, never a key.
+2. In the project directory, run `lim login --mcp --api-endpoint <apiEndpoint> --auth-endpoint <authEndpoint> --console-endpoint <consoleEndpoint> --organization-id <organizationId>`.
 3. Call `approve-cli-login` with the returned `sessionId` and `phrase`.
 4. In the same directory, run `lim login --complete <sessionId>`.
 
