@@ -36,9 +36,10 @@ Use `--no-open` on commands that open a browser, and do not open a console or
 signed-stream URL when the user is already using the live panel.
 
 Build with the explicit Gradle builder ID and install the resulting app onto the
-panel's existing Android instance. After `lim gradle build . --id <builderId>
---upload myapp.apk`, use the MCP `install-app` tool with that asset and the
-panel's `instanceId`. For a local APK, use
+panel's existing Android instance. Run
+`lim gradle build . --id <builderId> --upload myapp.apk`, then install its returned
+download URL with `lim android install-app <downloadUrl> --id <instanceId>`.
+For a local APK, use
 `lim android sync ./path/to/app-debug.apk --id <instanceId>`.
 
 ## Authenticate through the active MCP connection
