@@ -40,9 +40,30 @@ For a new builder, `lim xcode create --simulator-id <instanceId>` starts it with
 the panel's simulator attached. Subsequent successful builds reinstall there.
 
 
+## Authenticate through the active MCP connection
+
+When the project uses the Limrun MCP extension, reuse its account and environment:
+
+1. Call `get-cli-auth-context`. It returns `apiEndpoint`, `consoleEndpoint`, and `organizationId`, never a key.
+2. In the project directory, run `lim login --mcp --api-endpoint <apiEndpoint> --console-endpoint <consoleEndpoint> --organization-id <organizationId>`.
+3. Call `approve-cli-login` with the returned `sessionId` and `phrase`.
+4. In the same directory, run `lim login --complete <sessionId>`.
+
+The CLI stores the credential and endpoints for that workspace. No second browser
+login is needed. Do not read or print private pairing files or ask for an API key.
+An older OAuth connection needs the user to reconnect Limrun once to authorize
+builds. If these flags are unavailable, update the CLI; do not invent a command.
+Paired access lasts up to one hour and depends on the MCP connection remaining
+valid. On expiry, repeat pairing instead of browser login or another account.
+If inherited `LIM_API_KEY`, `LIM_API_ENDPOINT`, or `LIM_CONSOLE_ENDPOINT` conflicts
+with the paired workspace, remove the conflicting override in the build shell;
+never copy the MCP credential into those variables. Use the panel's explicit
+simulator and builder IDs. Pairing to another account/environment clears remembered
+devices for this workspace.
+
 ## Auth and CLI
 
-Install if needed: `npm install --global lim`. Auth is `lim login` or
+Install if needed: `npm install --global lim`. Outside an MCP-paired workspace, auth is `lim login` or
 `LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `--help` instead of guessing:
