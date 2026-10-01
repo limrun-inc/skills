@@ -355,8 +355,7 @@ selectors**: leave the pinned host out of the selectors or pass
 ## Trust a CA certificate
 
 Add a PEM CA certificate to the emulator's trust stores, for example the CA
-of an intercepting proxy that records app traffic (Android 15, the default
-`--os-version`):
+of an intercepting proxy that records app traffic:
 
 ```bash
 lim android ca add ./proxy-ca.pem --id <android-instance-id>
