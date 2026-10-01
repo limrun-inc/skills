@@ -125,8 +125,8 @@ For gestures, use `client.performActions(actions, { display: 'inner' })` with
 each down, move, and up action. `client.scroll('down', 300, { display: 'inner' })` uses
 the same display. Omitting `display` follows the active panel for taps, scrolls,
 and raw gestures. The CLI follows the same default: `lim ios tap`, `scroll`,
-`swipe`, and `perform` accept `--display inner|outer` as an override. A gesture
-batch selects one panel so touch-down and touch-up share the same target.
+`swipe`, and `perform` accept `--display inner|outer` as an override. Each new action resolves
+the active panel. A held raw touch keeps its original panel until touch-up.
 
 `tapElement`, its scroll search, and batched element taps follow the active
 display. The element tree preserves Apple's reported accessibility frames. The
