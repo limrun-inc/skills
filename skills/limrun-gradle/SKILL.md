@@ -35,11 +35,11 @@ source sync and builds; use the explicit builder and device IDs for installation
 Use `--no-open` on commands that open a browser, and do not open a console or
 signed-stream URL when the user is already using the live panel.
 
-For Xcode, attach the ready simulator with
-`lim xcode attach-simulator <instanceId> --id <builderId>` before rebuilding.
-For a new builder, `lim xcode create --simulator-id <instanceId>` starts it with
-the panel's simulator attached. Subsequent successful builds reinstall there.
-
+Build with the explicit Gradle builder ID and install the resulting app onto the
+panel's existing Android instance. After `lim gradle build . --id <builderId>
+--upload myapp.apk`, use the MCP `install-app` tool with that asset and the
+panel's `instanceId`. For a local APK, use
+`lim android sync ./path/to/app-debug.apk --id <instanceId>`.
 
 ## Authenticate through the active MCP connection
 
@@ -59,7 +59,7 @@ valid. On expiry, repeat pairing instead of browser login or another account.
 If inherited `LIM_API_KEY`, `LIM_API_ENDPOINT`, or `LIM_CONSOLE_ENDPOINT` conflicts
 with the paired workspace, remove the conflicting override in the build shell;
 never copy the MCP credential into those variables. Use the panel's explicit
-simulator and builder IDs. Pairing to another account/environment clears remembered
+emulator and builder IDs. Pairing to another account/environment clears remembered
 devices for this workspace.
 
 ## Auth and CLI
@@ -139,7 +139,8 @@ lim gradle build . --env APP_ENV=staging
 
 ## Run it on an emulator
 
-Upload the built APK as a named asset, then install it on an Android instance:
+When a live panel is open, use its existing instance as described above. Outside
+that workflow, upload the built APK as a named asset and create an Android instance:
 
 ```bash
 lim gradle build . --upload myapp.apk
