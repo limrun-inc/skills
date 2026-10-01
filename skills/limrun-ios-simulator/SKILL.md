@@ -119,9 +119,31 @@ in points; `tapDisplay` uses those coordinates. Use `outer` for the cover or
 `inner` for the unfolding display. A display that iOS has turned off returns a
 black image.
 
-Use these display-specific methods for Duo automation. Existing screenshot,
-recording, and accessibility commands do not automatically follow the inner
-display. The 3D viewer supports single-finger touch and drag. Rotating the view
+For gestures, use `client.performActions(actions, { display: 'inner' })` with
+`touchDown`, `touchMove`, and `touchUp` in upright screenshot points. Insert a
+`wait` to hold a touch. For two fingers, supply `x2` and `y2` together on
+each down, move, and up action. `client.scroll('down', 300, { display: 'inner' })` uses
+the same display. Omitting `display` follows the active panel for taps, scrolls,
+and raw gestures. The CLI follows the same default: `lim ios tap`, `scroll`,
+`swipe`, and `perform` accept `--display inner|outer` as an override. Each new action resolves
+the active panel. A held raw touch keeps its original panel until touch-up.
+
+`tapElement`, its scroll search, and batched element taps follow the active
+display. The element tree preserves Apple's reported accessibility frames. The
+application root can report portrait bounds while its windows and descendants
+match the upright screenshot. Use `screenshotDisplay`'s `width` and `height` for
+the capture canvas. Do not infer a coordinate transform from the root size.
+Full-screen descendants can already match the capture; compatibility-mode apps
+can report app-local frames inside a centered window. Any root resizing for
+rendering belongs in a separate presentation copy of the tree.
+Read `(await client.getFoldState())?.displays.filter(display => display.active)`
+to identify active panels. Automatic input and selector actions require exactly one active panel;
+retry after the fold settles if both report active. The flag comes from native
+state and is absent when the query fails, on older servers, and on other
+fold-state responses. Geometry remains available when the activity query fails. Default screenshots capture the active display. Recordings follow native activity across folds,
+keeping the initial canvas size and letterboxing other aspect ratios. Use
+`lim ios record start --display inner|outer` or SDK `startRecording({ display: 'inner' })`
+to keep recording one panel. Screenshot overrides use `--display` or `screenshotDisplay`. The 3D viewer supports single-finger touch and drag. Rotating the view
 changes the camera; **Rotate device** changes native orientation. **Laptop view**
 sets the hinge and orientation; it does not enable Apple's separate Table Mode.
 
