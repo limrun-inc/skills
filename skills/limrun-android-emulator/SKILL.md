@@ -354,25 +354,18 @@ selectors**: leave the pinned host out of the selectors or pass
 
 ## Trust a CA certificate
 
-Add a PEM CA certificate to the emulator's trust stores, for example the CA
-of an intercepting proxy that records app traffic:
+Add a PEM CA certificate to the emulator's trust stores, for example the root
+of a private CA that signs the user's test servers:
 
 ```bash
-lim android ca add ./proxy-ca.pem --id <android-instance-id>
+lim android ca add ./my-ca.pem --id <android-instance-id>
 ```
 
 Apps, WebViews, and Chrome trust it on their next connection, with no
 restart, for the life of the instance. Only one CA certificate per file;
 leaf certificates are rejected. Apps that pin certificates still reject it.
-
-To record through a proxy on the user's machine, trust its CA, reach it
-with a `--no-inspect` destination tunnel, then point the system proxy at the
-tunneled port. Start the tunnel first:
-
-```bash
-lim android tunnel --selector localhost:8888 --no-inspect --detach --id <android-instance-id>
-lim android adb-shell --id <android-instance-id> -- settings put global http_proxy 127.0.0.1:8888
-```
+To look at the app's HTTP and HTTPS traffic, use tunnel inspection (above)
+instead: it needs no CA of the user's own.
 
 ## Preview URL for humans
 
