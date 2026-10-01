@@ -15,6 +15,30 @@ driving the running emulator.
 
 Never use a local emulator, a local Android SDK, or Android Studio.
 
+## Context from the live device extension
+
+When a Limrun live-device panel is open, keep using it. Do not call
+`stream-device`, `open-device`, or `open-device-panel` to add a second preview.
+Use the screenshot-and-element-tree tool for background inspection; those results
+do not need another user-facing card.
+
+When the user sends an annotated area, its comment, or a captured flow from the Limrun extension, use the
+instance ID in that context. Keep subsequent inspection, interaction, and app
+installation on that device unless the user asks for another. Do not create a
+replacement because a screenshot or CLI call failed; first check the account,
+environment, and instance status.
+
+Annotations can arrive together as numbered comments and cropped images. Match
+each comment to the crop and device context with the same number. Each image
+shows its selection time; the user may have navigated between annotations.
+
+Captured flows contain up to six historical screenshots and action descriptions,
+not continuous video. Tap and drag positions in flow descriptions are percentages,
+not device pixels. Inspect the current screenshot and element tree before acting;
+do not use historical coordinates as a current interaction target. The extension
+supplies device context; source edits and builds still require the project's build
+skill and an authenticated CLI in the agent's execution environment.
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or

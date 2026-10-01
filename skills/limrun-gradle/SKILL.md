@@ -19,9 +19,56 @@ dev-client loop (Metro, hot reload) on either platform, use
 **`limrun-expo-development`**; it comes back here for the Android Debug
 build.
 
+## Building with the live device extension
+
+When a Limrun live-device panel is open, its context owns the target device and
+API environment. Before looking up or creating a builder, set `LIM_API_ENDPOINT`
+to the endpoint in that context and verify the CLI credentials work there.
+Do not reuse a production builder for a staging panel or silently switch
+credentials/environments after an error.
+
+Reuse the panel's ready `instanceId`. If it is empty or terminated, create the
+device through `create-ios-simulator` or `create-android-emulator`, passing the
+`panelId` from the context. The panel follows that device. Do not use the CLI to
+create a separate simulator/emulator in this workflow. CLI commands still own
+source sync and builds; use the explicit builder and device IDs for installation.
+Use `--no-open` on commands that open a browser, and do not open a console or
+signed-stream URL when the user is already using the live panel.
+
+Build with the explicit Gradle builder ID and install the resulting app onto the
+panel's existing Android instance. Run
+`lim gradle build . --id <builderId> --upload myapp.apk`, then install its returned
+download URL with `lim android install-app <downloadUrl> --id <instanceId>`.
+For a local APK, use
+`lim android sync ./path/to/app-debug.apk --id <instanceId>`.
+
+## Authenticate through the active MCP connection
+
+When the project uses the Limrun MCP extension, reuse its account and environment:
+
+1. Call `get-cli-auth-context`. It returns `apiEndpoint`, `authEndpoint`, `consoleEndpoint`, and `organizationId`, never a key.
+2. In the project directory, run `lim login --mcp --api-endpoint <apiEndpoint> --auth-endpoint <authEndpoint> --console-endpoint <consoleEndpoint> --organization-id <organizationId>`.
+3. Call `approve-cli-login` with the returned `sessionId` and `phrase`.
+4. In the same directory, run `lim login --complete <sessionId>`.
+
+The CLI stores the credential and endpoints for that workspace. No second browser
+login is needed. Do not read or print private pairing files or ask for an API key.
+An older OAuth connection needs the user to reconnect Limrun once to authorize
+builds and organization asset uploads. If an upload returns `403` requiring
+`asset:*:all`, ask the user to reconnect Limrun and approve asset access, then
+repeat CLI pairing. Refreshing an old token does not expand its permissions.
+If these flags are unavailable, update the CLI; do not invent a command.
+Paired access lasts up to one hour and depends on the MCP connection remaining
+valid. On expiry, repeat pairing instead of browser login or another account.
+If inherited `LIM_API_KEY`, `LIM_API_ENDPOINT`, or `LIM_CONSOLE_ENDPOINT` conflicts
+with the paired workspace, remove the conflicting override in the build shell;
+never copy the MCP credential into those variables. Use the panel's explicit
+emulator and builder IDs. Pairing to another account/environment clears remembered
+devices for this workspace.
+
 ## Auth and CLI
 
-Install if needed: `npm install --global lim`. Auth is `lim login` or
+Install if needed: `npm install --global lim`. Outside an MCP-paired workspace, auth is `lim login` or
 `LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `--help` instead of guessing:
@@ -96,7 +143,8 @@ lim gradle build . --env APP_ENV=staging
 
 ## Run it on an emulator
 
-Upload the built APK as a named asset, then install it on an Android instance:
+When a live panel is open, use its existing instance as described above. Outside
+that workflow, upload the built APK as a named asset and create an Android instance:
 
 ```bash
 lim gradle build . --upload myapp.apk
