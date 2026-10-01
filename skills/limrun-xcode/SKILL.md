@@ -52,7 +52,10 @@ When the project uses the Limrun MCP extension, reuse its account and environmen
 The CLI stores the credential and endpoints for that workspace. No second browser
 login is needed. Do not read or print private pairing files or ask for an API key.
 An older OAuth connection needs the user to reconnect Limrun once to authorize
-builds. If these flags are unavailable, update the CLI; do not invent a command.
+builds and organization asset uploads. If an upload returns `403` requiring
+`asset:*:all`, ask the user to reconnect Limrun and approve asset access, then
+repeat CLI pairing. Refreshing an old token does not expand its permissions.
+If these flags are unavailable, update the CLI; do not invent a command.
 Paired access lasts up to one hour and depends on the MCP connection remaining
 valid. On expiry, repeat pairing instead of browser login or another account.
 If inherited `LIM_API_KEY`, `LIM_API_ENDPOINT`, or `LIM_CONSOLE_ENDPOINT` conflicts
