@@ -223,6 +223,19 @@ If you don't know the bundle ID, run `lim ios list-apps`.
 
 `launch-app` streams the app's logs and returns when the app exits or the
 command is interrupted. Pass `--detach` to launch and return immediately.
+When the app ends, `launch-app` prints the exit reason (`crash`, `exit`, or
+`terminated`). After a crash it adds the exception and signal, the crash
+message (for example a Swift `Fatal error` line or an uncaught exception's
+reason), and the crashed thread's frames with the app's own function names.
+That report is the way to see why an app died; frames carry no file and line,
+which need the build's dSYM (`atos -l <load address>` with the address from
+the report's `Binary Images` lines).
+
+A React Native or Expo red error screen is not an exit: the app process keeps
+running, so nothing is reported. In the TypeScript SDK, `launchApp`'s
+`onExit(logs, info)` gets the same report, and `watchApp(bundleId, onExit)`
+reports the next exit of an app you did not launch, for example one opened
+with `lim ios open-url`.
 
 ## App logs
 
