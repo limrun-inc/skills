@@ -17,6 +17,15 @@ The `lim` CLI installs the skills into whichever agent you use and keeps them up
 lim skills install
 ```
 
+To pin a skills release or commit:
+
+```bash
+lim skills install --version 0.1.17
+lim skills install --commit <full-commit-sha>
+```
+
+`--version` accepts a release version with or without the `v` prefix. `--commit` requires a full 40-character SHA. Use one flag at a time; omitting both fetches `main`. The install summary and JSON `source.commit` field report the resolved commit. Save that SHA to repeat the install even if a release tag moves.
+
 ### Alternatives
 
 If you prefer your agent's own plugin or skills mechanism:
