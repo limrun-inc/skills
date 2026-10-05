@@ -20,11 +20,11 @@ lim skills install
 To pin a skills release or commit:
 
 ```bash
-lim skills install --version 0.1.17
-lim skills install --commit <full-commit-sha>
+lim skills install --ref 0.1.17
+lim skills install --ref <full-commit-sha>
 ```
 
-`--version` accepts a release version with or without the `v` prefix. `--commit` requires a full 40-character SHA. Use one flag at a time; omitting both fetches `main`. The install summary and JSON `source.commit` field report the resolved commit. Save that SHA to repeat the install even if a release tag moves.
+`--ref` accepts a release version with or without the `v` prefix, or a full 40-character commit SHA. Branch names are not accepted. Omitting the flag fetches `main`. The install summary and JSON `source.commit` field report the resolved commit. Save that SHA to repeat the install even if a release tag moves.
 
 ### Alternatives
 
