@@ -9,7 +9,7 @@ Sign up at [Limrun](https://lim.run) to get a `LIM_API_KEY`.
 
 If your work email domain has SSO configured and verified, use **Continue with SSO** in the console, including for your first signup. Other sign-in methods are blocked for that domain. See the [SSO setup guide](https://docs.limrun.com/docs/reference/single-sign-on).
 
-For SCIM-managed organizations, access comes from group role mappings or IdP-managed role entitlements, selected in organization settings. Agents cannot bypass this policy with invitations or manual role changes. See [SCIM provisioning](https://docs.limrun.com/docs/reference/single-sign-on/scim).
+For SCIM-managed organizations, the provider controls membership while organization settings select console-managed or provider-managed roles. Group-to-role rules belong in the provider; Limrun does not synchronize groups. Invitations and manual membership changes cannot bypass SCIM, and console role edits are blocked when the provider manages roles. See [SCIM provisioning](https://docs.limrun.com/docs/reference/single-sign-on/scim).
 
 ## Install
 
