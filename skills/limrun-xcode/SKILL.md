@@ -370,6 +370,16 @@ the concrete prefix), must omit export-managed keys (`application-identifier`,
 `beta-reports-active`), and every capability must be enabled on the App ID in
 the developer portal or the export fails naming it.
 
+For App Groups, `@limrun/apple-auth` can perform the portal setup through an
+Apple ID relay session. Call `ensureAppleAppGroup`, read each App ID with
+`getAppleBundleIDDetails`, enable feature `APG3427HIY` through
+`updateAppleAppService`, then call `assignAppleAppGroups` for the main app and
+widget. Pass the union of existing and desired opaque `applicationGroup` IDs;
+the `group.*` identifier belongs in entitlements, not the assignment payload.
+Await these calls sequentially. Create or regenerate and re-download affected
+profiles afterward, and still pass `--entitlements` for both bundles. See the
+[SDK helper reference](https://github.com/limrun-inc/typescript-sdk/tree/main/packages/apple-auth#developer-portal-resources).
+
 Manual signing remains available when the user already has a p12 and profiles:
 
 ```bash
