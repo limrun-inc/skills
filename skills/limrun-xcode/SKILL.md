@@ -380,6 +380,13 @@ Await these calls sequentially. Create or regenerate and re-download affected
 profiles afterward, and still pass `--entitlements` for both bundles. See the
 [SDK helper reference](https://github.com/limrun-inc/typescript-sdk/tree/main/packages/apple-auth#developer-portal-resources).
 
+If the app needs APNs, DeviceCheck, or MusicKit service credentials,
+`createAppleDeveloperKey` creates a Developer Portal key through the Apple ID
+relay session; `downloadAppleDeveloperKey` retrieves its private bytes. These
+service keys do not replace the App Store Connect key used by cloud signing.
+The same package provides pending-agreement, team-member, and invitation helpers;
+see the [account helper reference](https://github.com/limrun-inc/typescript-sdk/tree/main/packages/apple-auth#developer-service-keys-agreements-and-team-access).
+
 Manual signing remains available when the user already has a p12 and profiles:
 
 ```bash
