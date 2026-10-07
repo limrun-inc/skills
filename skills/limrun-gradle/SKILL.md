@@ -228,6 +228,13 @@ Failure strings to recognize on the `--sign` path:
 ## Gotchas
 
 - **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
+- **A project mise file installs tools the build never uses.** The first
+  build or run in a sandbox runs `mise install` for every `[tools]` entry in the
+  synced mise files, so a monorepo's root `mise.toml` full of databases and
+  cloud CLIs slows it down or fails it. Keep using the project file when it
+  works. If it doesn't, add a `mise.limrun.toml` beside it listing only the
+  build's tools (for example node and pnpm); in that directory Limrun reads it
+  instead of the other mise files.
 - **Instance reuse is per git worktree.** Commands resolve the remembered
   instance from the worktree of your cwd; pass `--id <gradle-instance-id>`
   (from `lim gradle list`) to target a specific one.
