@@ -360,6 +360,21 @@ lim ios record start                       # non-blocking
 lim ios record stop -o /tmp/recording.mp4
 ```
 
+For a flow that rotates the screen, opt into separate MP4 parts:
+
+```bash
+lim ios record start --segments --quality 5
+# Drive the UI, including rotations.
+lim ios record stop --segments -o /tmp/recording
+```
+
+Use `--segments` on both commands. The output directory contains ordered MP4
+parts and `recording.json` with their dimensions, start offsets, and durations.
+Add `--persist` at start to keep each part after instance termination. Download
+local parts before another recording starts. A single `--presigned-url` cannot
+receive segments. Without `--segments`, the MP4 keeps its starting dimensions
+and orientation; rotate before starting for a single landscape file.
+
 For UI changes, include a demo video in the pull request so the user can see it.
 
 ## App container files
