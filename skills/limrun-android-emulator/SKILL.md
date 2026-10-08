@@ -275,8 +275,23 @@ lim android record start                     # non-blocking
 lim android record stop -o /tmp/recording.mp4
 ```
 
-`record stop` accepts `--quality 5-10`. Recorded frames are half the
-screenshot resolution, so read tap coordinates from screenshots, never from
+For a flow that rotates the screen, opt into separate MP4 parts:
+
+```bash
+lim android record start --segments --quality 5
+# Drive the UI, including rotations.
+lim android record stop --segments -o /tmp/recording
+```
+
+Use `--segments` on both commands. The output directory contains ordered MP4
+parts and `recording.json` with their dimensions, start offsets, and durations.
+Add `--persist` at start to keep each part after instance termination. Download
+local parts before another recording starts. A single `--presigned-url` cannot
+receive segments. Without `--segments`, the MP4 keeps its starting dimensions
+and orientation; rotate before starting for a single landscape file.
+
+`record start` accepts `--quality 5-10`. At the default quality of `5`,
+recorded frames are half the screenshot resolution, so read tap coordinates from screenshots, never from
 video frames. For UI changes, include a demo video in the pull request so the
 user can see it.
 
