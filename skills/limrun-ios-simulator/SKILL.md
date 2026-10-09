@@ -368,6 +368,19 @@ lim ios record stop -o /tmp/recording.mp4
 
 For UI changes, include a demo video in the pull request so the user can see it.
 
+### Touch indicators
+
+iPhone and iPad simulators show translucent touch ripples and drag trails by default. They appear in the live stream, screenshots, and recordings. To hide them, use the TypeScript device client from `@limrun/api`:
+
+```ts
+await client.setTouchIndicators(false);
+await client.setTouchIndicators(true); // restore indicators
+```
+
+`client` is an `Ios.createInstanceClient` connection using the instance's `apiUrl` and token. The toggle affects every viewer of that simulator and remains set across client reconnects and recording start/stop. A new simulator boot enables indicators again.
+
+A direct signaling WebSocket client can send `{"type":"setTouchIndicators","id":"touches-1","enabled":false}`. Wait for `setTouchIndicatorsResult` with the same `id`; an `error` field means it failed. There is no CLI flag for this setting.
+
 ## App container files
 
 List an app's data container before pulling a file so you use the exact path the
