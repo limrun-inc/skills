@@ -479,7 +479,7 @@ echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios"
 ```
 
 Once the command finishes, you can give the following URL to the user to
-click to see a simulator where this bundle is pre-installed.
+click to open a simulator stream while the console installs this bundle.
 
 ```
 https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
@@ -494,7 +494,9 @@ receives these variables on its first launch, with the same restrictions as
 Add `openUrl` to open a URL or app deep link after launch, for example
 `&openUrl=myapp%3A%2F%2Fcheckout`. Use `URLSearchParams.set("openUrl", url)` to
 encode the full URL and its query string. This works with or without `env`;
-the viewer opens after the device handles the URL.
+the stream stays visible while the app installs, launches, and opens the URL.
+An `Installing <asset name>` overlay shows installation progress and disappears
+when the preview is ready.
 
 
 ## Cleanup
