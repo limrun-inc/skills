@@ -51,4 +51,4 @@ the new version automatically.
 
 For instance lifecycle, billing, asset, distribution, and OTA notifications, use [organization webhook subscriptions](https://docs.limrun.com/docs/reference/webhooks). Register the endpoint before starting the operation, verify its HMAC signature, and deduplicate by event ID. `instance.billed` records usage allocation, not invoice payment. `ota.delivery_completed` confirms the download, not installation on the phone.
 
-After a direct presigned asset upload, call `POST /v1/assets/{assetId}/complete` with your Limrun API key to verify the stored version and publish `asset.available`. Xcode builds that report asset metadata do this automatically. Existing per-build completion webhooks remain available.
+After a direct presigned asset upload, call `POST /v1/assets/{assetId}/complete` with your Limrun API key to verify the stored version and publish `asset.available`. Xcode builds that report asset metadata do this automatically. Existing per-build completion webhooks remain available. Endpoint updates use PUT replacement semantics; include every filter and `enabled: false` when updating a paused endpoint.
