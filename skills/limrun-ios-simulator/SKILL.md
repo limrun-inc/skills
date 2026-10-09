@@ -226,8 +226,10 @@ If you don't know the bundle ID, run `lim ios list-apps`.
 An explicit `--mode ForegroundIfRunning` with variables is rejected. Use `KEY=`
 for an empty value; the last occurrence of a key wins. Use app variable names,
 without `SIMCTL_CHILD_`. Library loader overrides (`DYLD_*`, `__DYLD_*`, `LD_*`,
-and `LIMRUN_INSERT_LIBRARIES`) are rejected, as are the reserved `__XPC_`,
-`XPC_DYLD_`, and `SWIFT_DEBUG_` namespaces. Managed Detox launches can combine
+and `LIMRUN_INSERT_LIBRARIES`) are silently skipped, along with the reserved
+`__XPC_`, `XPC_DYLD_`, and `SWIFT_DEBUG_` namespaces. Existing inherited variables
+and variables Limrun sets for simulator boot or app launch keep their values;
+customer variables only add new keys. Managed Detox launches can combine
 `--runtime detox` with safe app variables.
 
 `launch-app` streams the app's logs and returns when the app exits or the
