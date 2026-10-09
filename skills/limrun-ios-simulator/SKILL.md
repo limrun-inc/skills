@@ -216,10 +216,19 @@ fresh attach to an old build, or after a terminate), launch it by bundle ID:
 ```bash
 lim ios launch-app <bundle-id>                            # foregrounds it if already running
 lim ios launch-app <bundle-id> --mode RelaunchIfRunning   # restart for a clean state
+lim ios launch-app <bundle-id> --env API_URL=https://api.example.com --env FEATURE_FLAG=1
 lim ios terminate-app <bundle-id>                         # stop it, e.g. to reset app state
 ```
 
 If you don't know the bundle ID, run `lim ios list-apps`.
+
+`--env KEY=VALUE` is repeatable and restarts the app so the variables take effect.
+An explicit `--mode ForegroundIfRunning` with variables is rejected. Use `KEY=`
+for an empty value; the last occurrence of a key wins. Use app variable names,
+without `SIMCTL_CHILD_`. Library loader overrides (`DYLD_*`, `__DYLD_*`, `LD_*`,
+and `LIMRUN_INSERT_LIBRARIES`) are rejected, as are the reserved `__XPC_`,
+`XPC_DYLD_`, and `SWIFT_DEBUG_` namespaces. Managed Detox launches can combine
+`--runtime detox` with safe app variables.
 
 `launch-app` streams the app's logs and returns when the app exits or the
 command is interrupted. Pass `--detach` to launch and return immediately.
@@ -473,6 +482,13 @@ click to see a simulator where this bundle is pre-installed.
 ```
 https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 ```
+
+For nonsecret iOS app configuration, append repeatable URL-encoded `env=KEY=VALUE`
+parameters, for example `&env=FEATURE_FLAG%3D1&env=API_URL%3Dhttps%3A%2F%2Fapi.example.com`.
+Use `URLSearchParams.append("env", "KEY=VALUE")` when constructing links. The app
+receives these variables on its first launch, with the same restrictions as
+`launch-app --env`. Values are visible in the link and browser history.
+
 
 ## Cleanup
 
