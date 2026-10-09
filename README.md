@@ -9,6 +9,8 @@ Sign up at [Limrun](https://lim.run) to get a `LIM_API_KEY`.
 
 If your work email domain has SSO configured and verified, use **Continue with SSO** in the console, including for your first signup. Other sign-in methods are blocked for that domain. See the [SSO setup guide](https://docs.limrun.com/docs/reference/single-sign-on).
 
+For SCIM-managed organizations, the provider controls membership while organization settings select console-managed or provider-managed roles. Group-to-role rules belong in the provider; Limrun does not synchronize groups. Invitations and manual membership changes cannot bypass SCIM, and console role edits are blocked when the provider manages roles. See [SCIM provisioning](https://docs.limrun.com/docs/reference/single-sign-on/scim).
+
 ## Install
 
 The `lim` CLI installs the skills into whichever agent you use and keeps them updated:
