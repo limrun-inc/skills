@@ -9,6 +9,8 @@ Sign up at [Limrun](https://lim.run) to get a `LIM_API_KEY`.
 
 If your work email domain has SSO configured and verified, use **Continue with SSO** in the console, including for your first signup. Other sign-in methods are blocked for that domain. See the [SSO setup guide](https://docs.limrun.com/docs/reference/single-sign-on).
 
+Audit logs require an organization admin session in the console. The `LIM_API_KEY` used by these skills cannot read audit logs. Successful routine reads such as instance polling are excluded from new audit capture. Sensitive access and selected access denials remain recorded. See [Audit logs](https://docs.limrun.com/docs/reference/audit-logs) for the captured events and search behavior.
+
 ## Install
 
 The `lim` CLI installs the skills into whichever agent you use and keeps them updated:
