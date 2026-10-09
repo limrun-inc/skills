@@ -225,6 +225,13 @@ Failure strings to recognize on the `--sign` path:
   unsigned bundle; the signing config was not applied. Not a problem in the
   user's code; retry, and report it if it persists.
 
+## Android previews on pull requests
+
+For repeatable previews on pull requests, prefer the packaged
+[Android preview action](https://github.com/limrun-inc/android-preview-action).
+It builds and uploads the app, updates the PR preview comment, and cleans up the
+builder; see the repository for inputs and workflow examples.
+
 ## Gotchas
 
 - **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
