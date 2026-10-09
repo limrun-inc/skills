@@ -379,8 +379,13 @@ lim asset push ./app-debug.apk -n ${ASSET_NAME}
 echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=android"
 ```
 
-Opening the link in the Limrun console provisions an emulator with the APK
-pre-installed.
+Opening the link in the Limrun console provisions an emulator and starts
+streaming while the console installs the APK. An `Installing <asset name>`
+overlay stays visible during installation. Add `openUrl` to open a URL or app deep link after launch, for
+example `&openUrl=myapp%3A%2F%2Fcheckout`. Use
+`URLSearchParams.set("openUrl", url)` to encode the full URL and its query string.
+The stream stays visible while the app installs, launches, and opens the URL.
+The overlay disappears when the preview is ready.
 
 ## Cleanup
 
