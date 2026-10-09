@@ -491,6 +491,11 @@ Use `URLSearchParams.append("env", "KEY=VALUE")` when constructing links. The ap
 receives these variables on its first launch, with the same restrictions as
 `launch-app --env`. Values are visible in the link and browser history.
 
+Add `openUrl` to open a URL or app deep link after launch, for example
+`&openUrl=myapp%3A%2F%2Fcheckout`. Use `URLSearchParams.set("openUrl", url)` to
+encode the full URL and its query string. This works with or without `env`;
+the viewer opens after the device handles the URL.
+
 
 ## Cleanup
 

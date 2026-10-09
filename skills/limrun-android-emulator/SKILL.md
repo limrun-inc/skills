@@ -380,7 +380,10 @@ echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=android"
 ```
 
 Opening the link in the Limrun console provisions an emulator with the APK
-pre-installed.
+pre-installed. Add `openUrl` to open a URL or app deep link after launch, for
+example `&openUrl=myapp%3A%2F%2Fcheckout`. Use
+`URLSearchParams.set("openUrl", url)` to encode the full URL and its query string.
+The viewer opens after the device handles the URL.
 
 ## Cleanup
 
