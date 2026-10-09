@@ -225,6 +225,35 @@ Failure strings to recognize on the `--sign` path:
   unsigned bundle; the signing config was not applied. Not a problem in the
   user's code; retry, and report it if it persists.
 
+## Android previews on pull requests
+
+Use `limrun-inc/android-preview-action@main` to build an APK on a temporary
+Gradle sandbox and post a browser preview link on a pull request. The workflow
+needs `contents: read`, `pull-requests: write`, and a `LIM_API_KEY` repository
+secret. Subscribe to `opened`, `synchronize`, `reopened`, and `closed` PR events,
+and use a PR-specific concurrency group with `cancel-in-progress: true`.
+
+```yaml
+- uses: actions/checkout@v4
+- uses: limrun-inc/android-preview-action@main
+  with:
+    api-key: ${{ secrets.LIM_API_KEY }}
+    project-path: .
+    tasks: assembleDebug
+    build-env: |
+      APP_ENV=preview
+    open-url: 'myapp://checkout?source=preview'
+```
+
+`tasks` accepts one Gradle task per line; choose APK-producing tasks.
+`gradle-project-path` selects a nested Gradle root when discovery is ambiguous.
+`build-env` sets build-time variables, not Android app-launch variables.
+`open-url` is encoded automatically and opens after launch; keep it nonsecret.
+The action returns `preview-url` and `asset-name` and cleans up its builder,
+including through an always-run post hook. Reviewers need membership in the
+asset's Limrun organization. See the [action README](https://github.com/limrun-inc/android-preview-action)
+for the complete workflow and fork PR limitations.
+
 ## Gotchas
 
 - **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
