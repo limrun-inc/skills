@@ -46,3 +46,7 @@ npm run validate   # skills + catalog validation
 CI fails if a manifest is stale, and PRs that change skills or manifests must bump the
 version: `npm run bump` (patch) or `npm run bump minor`. Merges to main tag and release
 the new version automatically.
+
+## Simulator webhooks
+
+Use [simulator webhooks](https://docs.limrun.com/docs/reference/webhooks) to receive `instance.created`, `instance.ready`, and `instance.terminated` notifications for iOS and Android. Configure one URL per organization with `PUT /v1/organizations/{organizationId}/instance_webhook` before creating instances. Save the returned signing secret, verify each request's HMAC signature, and deduplicate by event ID. Every PUT rotates the secret. Limrun retries failed deliveries automatically; no replay API is needed.
