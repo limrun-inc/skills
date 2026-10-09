@@ -503,6 +503,11 @@ key above must be set; then no post-upload steps exist at all.
 
 ## Preview builds
 
+For repeatable previews on pull requests, prefer the packaged
+[iOS preview action](https://github.com/limrun-inc/ios-preview-action).
+It builds and uploads the app, updates the PR preview comment, and cleans up the
+builder; see the repository for inputs and workflow examples.
+
 Only create a reusable preview asset when the user asks for a preview build or
 when you're opening a PR. Build and upload:
 
