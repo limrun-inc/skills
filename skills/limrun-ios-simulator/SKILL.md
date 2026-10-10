@@ -368,6 +368,18 @@ lim ios record stop -o /tmp/recording.mp4
 
 For UI changes, include a demo video in the pull request so the user can see it.
 
+### Touch indicators
+
+Video recording includes touch ripples and drag trails by default on iPhone and iPad simulators. To record without them:
+
+```bash
+lim ios record start --no-touch-indicators
+```
+
+Indicators also appear in the live stream and screenshots while recording. They turn off when recording stops or fails. Reconnecting a viewer preserves the recording's setting. Each recording defaults to indicators enabled.
+
+The TypeScript device client accepts the same option with `await client.startRecording({ touchIndicators: false })`.
+
 ## App container files
 
 List an app's data container before pulling a file so you use the exact path the
