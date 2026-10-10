@@ -370,16 +370,15 @@ For UI changes, include a demo video in the pull request so the user can see it.
 
 ### Touch indicators
 
-Touch ripples and drag trails are disabled by default on iPhone and iPad simulators and turn on when video recording starts. They appear in the live stream, screenshots, and recordings. Hide or restore them with the CLI:
+Video recording includes touch ripples and drag trails by default on iPhone and iPad simulators. To record without them:
 
 ```bash
-lim ios touch-indicators off
-lim ios touch-indicators on --id <instance-ID>
+lim ios record start --no-touch-indicators
 ```
 
-Omit `--id` to use the workspace's last iOS instance. `--json` returns the applied `enabled` boolean. The toggle affects every viewer of that simulator and remains set across client reconnects. Stopping or failing a recording restores the manual setting, including changes made during recording. A new simulator boot disables indicators.
+Indicators also appear in the live stream and screenshots while recording. They turn off when recording stops or fails. Reconnecting a viewer preserves the recording's setting. Each recording defaults to indicators enabled.
 
-The TypeScript device client exposes the same control as `await client.setTouchIndicators(false)` or `true` to restore it.
+The TypeScript device client accepts the same option with `await client.startRecording({ touchIndicators: false })`.
 
 ## App container files
 
