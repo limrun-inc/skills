@@ -210,8 +210,8 @@ end to end (no summaries, HAR, or persistence).
 ## Reaching a private network through a persistent tunnel
 
 An organization can run a persistent tunnel: a connector inside its network,
-set up by an admin in the console (Network) and run with `lim tunnel run`,
-that serves every instance naming it. When the user names one, pass it at
+created by an admin with `lim tunnel create` or in the console (Network) and
+run with `lim tunnel run`, that serves every instance naming it. When the user names one, pass it at
 create time instead of starting a tunnel yourself:
 
 ```bash
