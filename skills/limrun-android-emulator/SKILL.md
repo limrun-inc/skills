@@ -271,17 +271,11 @@ changes) and screenshots only for visual properties. For anything involving
 motion (animations, gameplay, streaming UI), prefer video:
 
 ```bash
-lim android record start                     # non-blocking; touch indicators enabled
-lim android record start --no-touch-indicators # omit the pointer location overlay
+lim android record start                     # non-blocking
 lim android record stop -o /tmp/recording.mp4
 ```
 
-Recordings show Android's built-in pointer location overlay by default: touch
-crosshairs, drag trails, and a coordinate bar. It also appears in the live stream
-while recording. Use `--no-touch-indicators` on start to omit it. The previous
-pointer location setting is restored when recording ends.
-
-`record start` accepts `--quality 5-10`. Recorded frames are half the
+`record stop` accepts `--quality 5-10`. Recorded frames are half the
 screenshot resolution, so read tap coordinates from screenshots, never from
 video frames. For UI changes, include a demo video in the pull request so the
 user can see it.
