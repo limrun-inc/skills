@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a persistent tunnel, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -352,9 +352,9 @@ CA, so **apps with certificate pinning fail through inspected domain
 selectors**: leave the pinned host out of the selectors or pass
 `--no-inspect` to relay bytes opaquely (no summaries, HAR, or persistence).
 
-## Reach a private network through a persistent tunnel
+## Reach services in a private network through a private tunnel
 
-An organization can run a persistent tunnel: a connector inside its network,
+An organization can run a private tunnel: a connector inside its network,
 created by an admin with `lim tunnel create` or in the console (Network) and
 run with `lim tunnel run`, that serves every instance naming it. When the user names one, pass it at
 create time instead of starting a tunnel yourself:

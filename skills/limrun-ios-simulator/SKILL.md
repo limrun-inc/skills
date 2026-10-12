@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services or a persistent tunnel, play a video file as the camera, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services or a private tunnel, play a video file as the camera, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -207,9 +207,9 @@ CA, so **apps with certificate pinning fail through inspected selectors**:
 leave the pinned host out of the selectors or pass `--no-inspect` to keep TLS
 end to end (no summaries, HAR, or persistence).
 
-## Reaching a private network through a persistent tunnel
+## Reaching services in a private network through a private tunnel
 
-An organization can run a persistent tunnel: a connector inside its network,
+An organization can run a private tunnel: a connector inside its network,
 created by an admin with `lim tunnel create` or in the console (Network) and
 run with `lim tunnel run`, that serves every instance naming it. When the user names one, pass it at
 create time instead of starting a tunnel yourself:
