@@ -16,7 +16,7 @@ and verified on a Limrun simulator.
 
 For driving the app once it's running (tap, type, element tree, screenshot,
 record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
-**`limrun-xcode-bazel`** instead of this skill.
+**`limrun-bazel`** instead of this skill.
 
 ## Auth and CLI
 

@@ -26,6 +26,10 @@
       "defaultSelected": false
     },
     {
+      "name": "limrun-bazel",
+      "defaultSelected": false
+    },
+    {
       "name": "limrun-gradle",
       "defaultSelected": true
     },

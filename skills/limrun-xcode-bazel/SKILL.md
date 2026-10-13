@@ -1,11 +1,16 @@
 ---
 name: limrun-xcode-bazel
-description: "Build a Bazel-based iOS / macOS / Apple app on Limrun's remote build execution (RBE) instead of a local Mac, and install it on a remote iOS simulator. Use when the project is a Bazel workspace (MODULE.bazel / WORKSPACE) building rules_apple / rules_swift targets and the user wants to `bazel build` it or run it on a simulator, or when a `--config=limrun` build or install misbehaves. To then tap, type, screenshot, or otherwise interact with the running app, use limrun-ios-simulator. For non-Bazel (plain xcodebuild) projects use limrun-xcode instead."
+description: "Legacy: build a Bazel iOS app with `lim xcode rbe` on a dedicated Xcode sandbox and install it on a remote iOS simulator attached to that sandbox. Use only when the workspace already runs on `lim xcode rbe` (its `.limrun/` came from `lim xcode rbe`) or the user explicitly asks for it, or when a `lim xcode rbe` build, upload, or install misbehaves. For every other Bazel build, including new workspaces, iOS or Android, and running the app on a simulator, use limrun-bazel. To tap, type, screenshot, or otherwise interact with the running app, use limrun-ios-simulator."
 user-invocable: true
 effort: high
 ---
 
-# Bazel iOS builds on Limrun RBE
+# Bazel iOS builds on Limrun RBE (legacy)
+
+`lim xcode rbe` is the legacy Bazel path. `lim bazel setup` (skill
+limrun-bazel) replaces it: no sandbox or tunnel, iOS and Android targets, and
+one cache across the organization. Use this skill only for workspaces that
+already run on `lim xcode rbe`, or when the user asks for it.
 
 Build Bazel Apple projects on Limrun's remote Mac workers — from any environment
 (Linux, Windows, macOS, VM, container), no local Xcode. `lim xcode rbe` brings up
