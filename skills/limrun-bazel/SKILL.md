@@ -1,6 +1,6 @@
 ---
 name: limrun-bazel
-description: "Build a Bazel workspace's iOS and Android targets on Limrun's shared build plane with `lim bazel setup` and `bazel build --config=limrun`, from any environment (Linux, Windows, macOS, VM, container, CI), with one remote cache shared across the organization. Use when the project is a Bazel workspace (MODULE.bazel) with rules_apple or rules_android and the user wants to build it remotely, set up Bazel remote execution in CI, or fix a `--config=limrun` build that fails on authentication, workers, or missing MODULE.bazel lines. To build on a dedicated Xcode sandbox and install the app on a remote iOS simulator, use limrun-xcode-bazel instead. For non-Bazel Android builds, use limrun-gradle."
+description: "The default way to build any Bazel workspace on Limrun: build its iOS and Android targets on Limrun's shared build plane with `lim bazel setup` and `bazel build --config=limrun`, from any environment (Linux, Windows, macOS, VM, container, CI), with one remote cache shared across the organization. Use when the project is a Bazel workspace (MODULE.bazel) with rules_apple or rules_android and the user wants to build it remotely, run the built app on a Limrun simulator or emulator, set up Bazel remote execution in CI, or fix a `--config=limrun` build that fails on authentication, workers, or missing MODULE.bazel lines. limrun-xcode-bazel covers only the legacy `lim xcode rbe` flow; use it only when the workspace already runs on `lim xcode rbe` or the user asks for it. For non-Bazel Android builds, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -62,6 +62,19 @@ root; the generated config imports it last and it survives re-running setup.
 
 In CI: install `lim` from npm, set `LIM_API_KEY` as a secret, run
 `lim bazel setup --yes`, then build with `--config=limrun`.
+
+## Run the app
+
+Build for the simulator or emulator, then install the `.ipa` or `.apk` path
+Bazel prints:
+
+```bash
+lim ios create && lim ios sync bazel-bin/App/App.ipa
+lim android create && lim android install-app bazel-bin/app/app.apk
+```
+
+Re-run `lim ios sync` after each rebuild; it sends only the difference. To
+drive the running app, use limrun-ios-simulator or limrun-android-emulator.
 
 ## Check results
 

@@ -10,7 +10,7 @@ effort: high
 Interact with an app running on a Limrun cloud iOS simulator, from any
 environment (Linux, Windows, macOS, VM, container). This skill is build-agnostic:
 it assumes the app was already built and installed by a build skill
-(`limrun-xcode-bazel` for Bazel, `limrun-xcode` for xcodebuild). Keep build
+(`limrun-bazel` for Bazel, `limrun-xcode` for xcodebuild). Keep build
 concerns in those skills; this one is about driving the running simulator.
 
 Never use local Xcode, local simulators, or local macOS tools.
@@ -552,4 +552,4 @@ lim ios delete
 - **Bundle ID discovery.** If you don't know the bundle ID, run
   `lim ios list-apps` after a successful install.
 - **Build errors are the build skill's job.** If the app isn't installing, the
-  failure is upstream; go back to `limrun-xcode-bazel` / `limrun-xcode`.
+  failure is upstream; go back to `limrun-bazel` / `limrun-xcode`.
