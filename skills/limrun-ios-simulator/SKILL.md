@@ -385,7 +385,11 @@ Screenshot takes a **positional path** (not `-o`):
 ```bash
 lim ios screenshot screenshot.png
 lim ios screenshot screenshot.png --id <ios-instance-id>
+lim ios screenshot app-store.png --format png --size full --id <ios-instance-id>
 ```
+
+Use `--format png --size full` for a full-resolution PNG without alpha, including screenshots intended for store uploads. Combine it with `--display inner` or `--display outer` on Duo. The SDK equivalent is `client.screenshot({ format: 'png', size: 'full' })`; it returns base64 PNG data and pixel dimensions. `--format` accepts `jpeg` or `png` and defaults to `jpeg`. `--size` accepts `scaled` or `full` and defaults to `scaled`. Choose them independently. `scaled` uses point dimensions; `full` preserves native pixel resolution. Tap coordinates remain in points, so use `tapWithScreenSize` for coordinates measured in a native screenshot.
+
 
 Use the element tree for functional assertions (element existence, labels, state
 changes) and screenshots only for visual properties. For anything involving
