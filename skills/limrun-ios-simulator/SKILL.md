@@ -243,8 +243,7 @@ Tunnels carry only declared destinations; there is no catch-all selector. When
 the user wants all traffic, Safari included, to leave through their proxy (for
 example a recording proxy), point the simulator's system proxy at a proxy the
 tunnel reaches. Tunnel inspection passes requests meant for the proxy through as
-sent. If they stall on an older instance, create a new instance or pass
-`--no-inspect`.
+sent.
 
 ```bash
 lim ios tunnel --selector localhost:3128 --detach --id <ios-instance-id>
