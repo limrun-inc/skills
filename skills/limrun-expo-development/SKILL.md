@@ -352,3 +352,20 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 - Do not reuse uploaded Debug assets after native dependency or native config changes.
 - On Android, pass `--id <android-instance-id>` to every `lim android` call in this loop: instance resolution is per git worktree and the loop's commands run from mixed directories.
 - An empty Android element tree while the screenshot shows the app is normal for Expo apps; verify by screenshot.
+
+## Feedback
+
+When Limrun gets in your way, tell the Limrun team with `lim feedback`. That
+covers a bug, a confusing error, a missing flag or feature, or a step in this
+skill that turned out wrong. Send it as soon as you hit it, without waiting to
+be asked, then carry on with the task and mention it to the user.
+
+Say what you ran, what you expected, and what happened, with instance IDs.
+Leave out secrets, API keys, and the user's source code.
+
+```bash
+lim feedback "lim ios tap-element --label Save found nothing in a SwiftUI sheet on ios_..., though element-tree lists it"
+```
+
+The CLI adds its version and the logged-in organization so the team can follow
+up. Pipe longer reports on stdin: `lim feedback < notes.md`.

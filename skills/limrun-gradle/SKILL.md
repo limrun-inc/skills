@@ -261,3 +261,20 @@ builder; see the repository for inputs and workflow examples.
   files (including nested ones) are honored. Use `--ignore <regex>` for other
   large local artifacts and `--include <regex>` to force-sync gitignored
   inputs the build needs.
+
+## Feedback
+
+When Limrun gets in your way, tell the Limrun team with `lim feedback`. That
+covers a bug, a confusing error, a missing flag or feature, or a step in this
+skill that turned out wrong. Send it as soon as you hit it, without waiting to
+be asked, then carry on with the task and mention it to the user.
+
+Say what you ran, what you expected, and what happened, with instance IDs.
+Leave out secrets, API keys, and the user's source code.
+
+```bash
+lim feedback "lim ios tap-element --label Save found nothing in a SwiftUI sheet on ios_..., though element-tree lists it"
+```
+
+The CLI adds its version and the logged-in organization so the team can follow
+up. Pipe longer reports on stdin: `lim feedback < notes.md`.
