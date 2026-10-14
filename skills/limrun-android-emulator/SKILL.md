@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, send all traffic through the user's proxy, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', 'route all traffic through my proxy', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -383,6 +383,29 @@ Retrying the create in a loop does not help in any of these cases.
 
 The tunnel's token belongs on the connector's machine. Never ask the user to
 paste it into the conversation.
+
+## Send all device traffic through a proxy
+
+Tunnels carry only declared destinations; there is no catch-all selector. When
+the user wants all traffic to leave through their proxy (for example a
+recording proxy), point the emulator's global HTTP proxy at a proxy the tunnel
+reaches. Run the tunnel with `--no-inspect`: inspection breaks requests
+addressed to a proxy. Use a port other than 8080 for a `localhost` proxy; the
+emulator already uses 8080.
+
+```bash
+lim android tunnel --selector localhost:3128 --no-inspect --detach --id <android-instance-id>
+lim android proxy set localhost:3128 --id <android-instance-id>
+# later, before stopping the tunnel:
+lim android proxy clear --id <android-instance-id>
+```
+
+With a private tunnel whose selector is the proxy, only `lim android proxy set`
+is needed. A proxy elsewhere in the user's network works the same way:
+`--selector proxy.example.internal` and `lim android proxy set
+proxy.example.internal:3128`. While the proxy is set and the tunnel is down,
+Chrome's requests fail instead of going direct. To read HTTPS in the proxy,
+trust its CA (below).
 
 ## Trust a CA certificate
 
