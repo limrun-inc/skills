@@ -389,12 +389,13 @@ paste it into the conversation.
 Tunnels carry only declared destinations; there is no catch-all selector. When
 the user wants all traffic to leave through their proxy (for example a
 recording proxy), point the emulator's global HTTP proxy at a proxy the tunnel
-reaches. Run the tunnel with `--no-inspect`: inspection breaks requests
-addressed to a proxy. Use a port other than 8080 for a `localhost` proxy; the
+reaches. Tunnel inspection passes requests meant for the proxy through as
+sent. If they stall on an older instance, create a new instance or pass
+`--no-inspect`. Use a port other than 8080 for a `localhost` proxy; the
 emulator already uses 8080.
 
 ```bash
-lim android tunnel --selector localhost:3128 --no-inspect --detach --id <android-instance-id>
+lim android tunnel --selector localhost:3128 --detach --id <android-instance-id>
 lim android proxy set localhost:3128 --id <android-instance-id>
 # later, before stopping the tunnel:
 lim android proxy clear --id <android-instance-id>
