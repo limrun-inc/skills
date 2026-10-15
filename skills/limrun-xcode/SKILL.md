@@ -142,7 +142,9 @@ project has a usable Git `origin`. The key is the remote host/repository plus
 the synced directory's repo-relative path, for example
 `github.com/acme/monorepo/apps/ios`. SSH and HTTPS origins resolve to the same
 key. There is no version prefix, branch, or commit hash. The CLI sets only the
-snapshot key; it restores from and publishes back to that key.
+snapshot key; it restores from and publishes back to that key. Discovery reads
+local Git metadata, including worktree and submodule pointers. Do not install
+Git just to enable snapshot-key discovery.
 
 Start with this default. Do not add a restore list or split keys by branch,
 Xcode version, or configuration unless the workflow benefits from it. When
@@ -166,7 +168,8 @@ directory; `lim run` uses its detected or cloned project. An existing instance
 keeps its original configuration, including no snapshots.
 
 The CLI prints the inferred key when creating an instance. On older CLI
-versions, or without a usable Git origin, pass the project key explicitly:
+versions, without Git metadata, or with an origin that needs config includes
+or global URL rewrites, pass the project key explicitly:
 `--snapshot-key github.com/acme/monorepo/apps/ios`. Use `--no-snapshot` to
 create without snapshots. CLI 0.35.1 and earlier use `--cache-key` and
 `--wait-cache`; later versions retain those aliases.
