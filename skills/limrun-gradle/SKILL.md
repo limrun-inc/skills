@@ -69,24 +69,24 @@ builds, use **`limrun-expo-development`**.
 
 ## Private dependency credentials
 
-Use `--additional-file localPath=remotePath` on `lim gradle build` or
-`lim gradle sync` to copy existing credential files into the remote workspace
-without adding them to the repository. For npm or pnpm registry credentials:
+Use `--additional-file localPath=remotePath` on `lim gradle build`,
+`lim gradle sync`, or `lim gradle run` to copy existing credential files
+without adding them to the repository:
 
 ```bash
-lim gradle build . --additional-file "$HOME/.npmrc=.npmrc"
+lim gradle build . \
+  --additional-file "$HOME/.npmrc=~/.npmrc" \
+  --additional-file "$HOME/.netrc=~/.netrc"
 ```
 
-Repeat the flag for multiple files and on subsequent builds, since each
-build syncs again. Remote paths are relative to the workspace; Gradle does
-not expand remote `~/` paths. If a tool needs a file in its home directory,
-sync it first, then copy it with a remote command:
+The local `$HOME` expands in your shell. A remote destination starting with
+`~/` targets the sandbox home used by builds and tool commands. Other remote
+paths are relative to the workspace; use `.npmrc` to place project-specific
+npm configuration at the project root.
 
-```bash
-lim gradle sync . --additional-file "$HOME/.netrc=.netrc"
-lim gradle run --no-sync -- sh -c 'cp .netrc "$HOME/.netrc" && chmod 600 "$HOME/.netrc"'
-lim gradle build . --additional-file "$HOME/.netrc=.netrc"
-```
+Repeat the flag for multiple files and on subsequent syncs, since omitting a
+previously synced file removes it. Files in the sandbox home are shared by
+projects on that instance.
 
 For private-package 401s, check that the required registry configuration
 and credentials reached the remote build. If `.npmrc` references an environment
