@@ -67,6 +67,20 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
 
+## Private dependency credentials
+
+Copy existing credential files with `--additional-file`, also supported by `sync`:
+
+```bash
+lim gradle build . \
+  --additional-file "$HOME/.npmrc=~/.npmrc" \
+  --additional-file "$HOME/.netrc=~/.netrc"
+```
+
+Remote `~/` targets the sandbox home; other destinations are workspace-relative.
+Repeat the flags on later syncs to retain the files. Pass `--env` for environment
+variables referenced by the configuration.
+
 ## Detached builds and logs
 
 Use `--detach` to return once the build is accepted; a webhook is optional.
