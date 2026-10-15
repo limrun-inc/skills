@@ -172,6 +172,30 @@ save key if snapshots were already enabled; it does not restore or enable them.
 See the [disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots) for skipped
 saves, cold builds, and SDK usage.
 
+## Private dependency credentials
+
+Use `--additional-file localPath=remotePath` on `lim xcode build` or
+`lim xcode sync` to copy existing credential files into the sandbox without
+adding them to the repository. Repeat the flag for each file:
+
+```bash
+lim xcode build . \
+  --additional-file "$HOME/.npmrc=~/.npmrc" \
+  --additional-file "$HOME/.netrc=~/.netrc"
+```
+
+The local `$HOME` expands in your shell. The remote `~/` expands to the
+Xcode build's managed home; other remote paths are relative to the synced
+workspace. Use `.npmrc` as the destination when the configuration belongs
+at the workspace root. Pass the flags on subsequent builds too, since each
+build syncs again.
+
+For private-package 401s, check that the required registry configuration
+and credentials reached the remote build. If a file references an environment
+variable such as `${NPM_TOKEN}`, also pass `--env NPM_TOKEN="$NPM_TOKEN"`.
+Use file paths, keep credential contents out of logs and commits, and preserve
+restrictive local permissions such as `chmod 600` before syncing.
+
 ## Developer tool versions
 
 After syncing, `lim xcode use` selects tools in the sandbox and installs missing versions.

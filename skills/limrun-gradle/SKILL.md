@@ -67,6 +67,33 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
 
+## Private dependency credentials
+
+Use `--additional-file localPath=remotePath` on `lim gradle build` or
+`lim gradle sync` to copy existing credential files into the remote workspace
+without adding them to the repository. For npm or pnpm registry credentials:
+
+```bash
+lim gradle build . --additional-file "$HOME/.npmrc=.npmrc"
+```
+
+Repeat the flag for multiple files and on subsequent builds, since each
+build syncs again. Remote paths are relative to the workspace; Gradle does
+not expand remote `~/` paths. If a tool needs a file in its home directory,
+sync it first, then copy it with a remote command:
+
+```bash
+lim gradle sync . --additional-file "$HOME/.netrc=.netrc"
+lim gradle run --no-sync -- sh -c 'cp .netrc "$HOME/.netrc" && chmod 600 "$HOME/.netrc"'
+lim gradle build . --additional-file "$HOME/.netrc=.netrc"
+```
+
+For private-package 401s, check that the required registry configuration
+and credentials reached the remote build. If `.npmrc` references an environment
+variable such as `${NPM_TOKEN}`, also pass `--env NPM_TOKEN="$NPM_TOKEN"`.
+Use file paths, keep credential contents out of logs and commits, and preserve
+restrictive local permissions such as `chmod 600` before syncing.
+
 ## Detached builds and logs
 
 Use `--detach` to return once the build is accepted; a webhook is optional.
