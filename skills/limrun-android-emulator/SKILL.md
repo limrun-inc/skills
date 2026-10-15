@@ -144,19 +144,6 @@ lim android pull-file /sdcard/Download/out.json ./out.json
 They run with the same permissions the adb shell user has, and `adb-shell`
 exits with the command's exit code.
 
-Emulators boot with the lock screen off. When the user wants to see the lock
-screen, notifications on it, or its media controls, turn on the swipe lock
-screen, then put the device to sleep and wake it:
-
-```bash
-lim android adb-shell -- locksettings set-disabled false
-lim android adb-shell -- input keyevent KEYCODE_SLEEP
-lim android adb-shell -- input keyevent KEYCODE_WAKEUP
-```
-
-A swipe up unlocks it, with no PIN. The setting lasts for that instance's
-lifetime. A new instance boots with the lock screen off again.
-
 ## Full logcat and interactive adb over the tunnel
 
 Full-device logcat and anything interactive (Android Studio, scrcpy,
@@ -454,6 +441,21 @@ example `&openUrl=myapp%3A%2F%2Fcheckout`. Use
 `URLSearchParams.set("openUrl", url)` to encode the full URL and its query string.
 The stream stays visible while the app installs, launches, and opens the URL.
 The overlay disappears when the preview is ready.
+
+## Lock screen
+
+Emulators boot with the lock screen off. When the user wants to see the lock
+screen, notifications on it, or its media controls, turn on the swipe lock
+screen, then put the device to sleep and wake it:
+
+```bash
+lim android adb-shell -- locksettings set-disabled false
+lim android adb-shell -- input keyevent KEYCODE_SLEEP
+lim android adb-shell -- input keyevent KEYCODE_WAKEUP
+```
+
+A swipe up unlocks it, with no PIN. The setting lasts for that instance's
+lifetime. A new instance boots with the lock screen off again.
 
 ## Cleanup
 
