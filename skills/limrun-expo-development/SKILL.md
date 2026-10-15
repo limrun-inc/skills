@@ -29,6 +29,11 @@ Derive:
 - `BRANCH` from `git branch --show-current`, falling back to `main`
 - `ASSET_NAME="${BUNDLE_ID}/${BRANCH}-debug.zip"` on iOS, `ASSET_NAME="${PACKAGE}/${BRANCH}-debug.apk"` on Android
 
+For iOS, new CLI-created Xcode instances use the Git project snapshot key by
+default. Keep that default unless the workflow needs separate saved state;
+**limrun-xcode** covers explicit keys, opt-out, and publication at termination.
+A restored snapshot does not make an old uploaded dev-client asset current.
+
 ## Ensure Dev Client
 
 Expo development builds require `expo-dev-client`. If it is missing from `package.json`, add it:

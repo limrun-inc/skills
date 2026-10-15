@@ -103,8 +103,8 @@ error lists the available ones) but keeps it when the sandbox is merely busy.
 When the sandbox is on another Xcode than the workspace prefers, the next
 build says so and switches it first. Switching invalidates the build cache made
 with the other version (the next build starts cold) and is refused while a build,
-sync or `lim xcode rbe` stack is running. With persistent disk snapshots
-(`--snapshot-key`), use a separate key per Xcode lane, for example `myapp-27` and
+sync or `lim xcode rbe` stack is running. When alternating Xcode lanes, override
+the default snapshot key with one per lane, for example `myapp-27` and
 `myapp-27.1`: archives are stored per key and a restore under a different Xcode
 is wiped.
 
@@ -137,37 +137,58 @@ lim ios open-url --id <ios-instance-id> '<absolute-url>'
 
 ## Disk snapshots
 
-Reuse source files, dependencies, and DerivedData across Xcode instances.
+New CLI-created Xcode instances use a project snapshot by default when the
+project has a usable Git `origin`. The key is the remote host/repository plus
+the synced directory's repo-relative path, for example
+`github.com/acme/monorepo/apps/ios`. SSH and HTTPS origins resolve to the same
+key. There is no version prefix, branch, or commit hash. The CLI sets only the
+snapshot key; it restores from and publishes back to that key.
 
-CLI **0.35.1 and earlier** use `--cache-*` instead of `--snapshot-*`, and
-`--wait-cache` instead of `--wait-snapshot`. The snapshot rename preserves
-the old flags as aliases.
+Start with this default. Do not add a restore list or split keys by branch,
+Xcode version, or configuration unless the workflow benefits from it. When
+switching Xcode versions repeatedly causes cold builds, override with a stable
+key per version. For independent CI jobs, separate keys prevent overwriting
+one another's saved state. Restoring different keys from the same snapshot can
+still cause a cold fallback when concurrent instances share a host.
 
-From the project directory, create with a snapshot key, build, then delete:
+From the project directory, create, build, and publish:
 
 ```bash
-XCODE_ID=$(lim xcode create --snapshot-key myapp-main --quiet)
+XCODE_ID=$(lim xcode create --quiet)
 lim xcode build . --id "$XCODE_ID" --scheme MyApp
 lim xcode delete "$XCODE_ID" --wait-snapshot
 ```
 
+`lim xcode build ./apps/ios`, `lim xcode test ./apps/ios`, and
+`lim xcode sync ./apps/ios` derive the default from that path when they create
+an instance. `lim xcode create` and `lim ios create --xcode` use the current
+directory; `lim run` uses its detected or cloned project. An existing instance
+keeps its original configuration, including no snapshots.
+
+The CLI prints the inferred key when creating an instance. On older CLI
+versions, or without a usable Git origin, pass the project key explicitly:
+`--snapshot-key github.com/acme/monorepo/apps/ios`. Use `--no-snapshot` to
+create without snapshots. CLI 0.35.1 and earlier use `--cache-key` and
+`--wait-cache`; later versions retain those aliases.
+
 The first run starts cold; later runs restore the saved snapshot. Termination
 saves it after a successful build with no later sync, replacing the previous
 snapshot under that key. `--wait-snapshot` waits for the save and reports its
-result. In CI, run deletion in a cleanup step even if the build fails.
+result. In CI, run deletion in a cleanup step even if the build fails. Keep
+interactive instances running while iterating.
 
 Leave `--snapshot-paths` unset to save the whole workspace. Keep the project
-folder's name unchanged between runs. Use separate keys per project, Xcode
-version, and concurrent CI job.
+folder's name unchanged between runs so restored build paths remain useful.
 
-For branch fallbacks, add `--snapshot-restore-keys "myapp-pr51,myapp-main"`
-at creation. Each entry tries an exact match, then the newest matching literal
-prefix, before moving to the next entry. Without this flag, the save key is
-also the restore key. Pass only restore keys to reuse a snapshot without saving.
+For an explicit branch fallback, configure `--snapshot-key myapp-pr51` with
+`--snapshot-restore-keys "myapp-pr51,myapp-main"` at creation. Each restore entry
+tries an exact match, then the newest matching literal prefix. Explicit
+restore-only settings remain restore-only; the CLI adds no default save key.
 
-Configure snapshots at creation. Restore keys and paths stay fixed.
-On an existing instance, `build --snapshot-key` can only bind an unassigned
-save key if snapshots were already enabled; it does not restore or enable them.
+Restore keys and paths stay fixed at creation. On an existing instance,
+`build --snapshot-key` can only bind an unassigned save key if snapshots were
+already enabled; it does not restore or enable them. Create a new instance
+with the override when changing an already assigned key.
 
 See the [disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots) for skipped
 saves, cold builds, and SDK usage.
