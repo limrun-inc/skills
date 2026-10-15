@@ -174,6 +174,10 @@ or global URL rewrites, pass the project key explicitly:
 create without snapshots. CLI 0.35.1 and earlier use `--cache-key` and
 `--wait-cache`; later versions retain those aliases.
 
+Build success and failure messages suggest `--snapshot-key` when the sandbox
+has no snapshot configuration. Apply the tip when creating the next sandbox;
+an existing sandbox created without snapshots cannot enable them in place.
+
 The first run starts cold; later runs restore the saved snapshot. Termination
 saves it after a successful build with no later sync, replacing the previous
 snapshot under that key. `--wait-snapshot` waits for the save and reports its
