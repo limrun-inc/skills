@@ -18,6 +18,19 @@ For driving the app once it's running (tap, type, element tree, screenshot,
 record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
 **`limrun-bazel`** instead of this skill.
 
+## Automation output
+
+Use `--json` on commands that advertise it. Finite commands emit one JSON value;
+streams and watch modes emit newline-delimited JSON. Diagnostics go to stderr.
+Check the process exit status even when stdout contains JSON. Preserve response
+field names and types, and tolerate additional fields. See the
+[CLI JSON contract](https://github.com/limrun-inc/typescript-sdk/blob/main/packages/cli/JSON_OUTPUT.md).
+
+`lim xcode build --json` returns the SDK execution result plus `instanceId`;
+build logs go to stderr. Inspect `exitCode`, `status`, and optional
+`timedOut`/`incomplete` fields. A timeout can leave remote work running.
+`run`, `tools`, and mise `use` include captured `stdout` and `stderr`.
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
