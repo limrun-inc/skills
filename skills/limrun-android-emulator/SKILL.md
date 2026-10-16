@@ -483,3 +483,12 @@ lim android delete <android-instance-id>
   instance" above; pass `--id` when in doubt.
 - **Build errors are the build skill's job.** If the APK isn't building, the
   failure is upstream; go back to **limrun-gradle**.
+
+## Streaming tokens
+
+When embedding the streaming viewer, use `status.streamToken` with
+`status.endpointWebSocketUrl`. It supports interactive viewer actions, including
+`openUrl` messages for web URLs and app deep links. Opening a link can launch its
+registered app. App installation and explicit app launch or termination still
+require `status.token`. This permission applies to the streaming WebSocket, not
+the HTTP control endpoints.

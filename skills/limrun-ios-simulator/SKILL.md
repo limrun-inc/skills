@@ -594,3 +594,12 @@ lim ios delete
   `lim ios list-apps` after a successful install.
 - **Build errors are the build skill's job.** If the app isn't installing, the
   failure is upstream; go back to `limrun-bazel` / `limrun-xcode`.
+
+## Streaming tokens
+
+When embedding the streaming viewer, use `status.streamToken` with
+`status.endpointWebSocketUrl`. It supports interactive viewer actions, including
+`openUrl` messages for web URLs and app deep links. Opening a link can launch its
+registered app. App installation and explicit app launch or termination still
+require `status.token`. This permission applies to the streaming WebSocket, not
+the HTTP control endpoints.
