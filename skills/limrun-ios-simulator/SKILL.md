@@ -22,6 +22,10 @@ streams and watch modes emit newline-delimited JSON. Diagnostics go to stderr.
 Check the process exit status even when stdout contains JSON. Preserve response
 field names and types, and tolerate additional fields. See the
 [CLI JSON contract](https://github.com/limrun-inc/typescript-sdk/blob/main/packages/cli/JSON_OUTPUT.md).
+Device action results include `ok`, the resolved `instanceId`, and action details,
+such as `x`/`y` for taps and app identifiers for launch/terminate. Text entry
+reports `textLength` without echoing input. Optional selectors and display
+overrides appear when supplied.
 
 ## Auth and CLI
 
