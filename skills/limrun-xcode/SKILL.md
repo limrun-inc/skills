@@ -42,6 +42,12 @@ lim xcode build .
 This creates or reuses the remembered Xcode target, syncs the current directory,
 and streams the build logs through stdout and stderr.
 
+**Run the build in the foreground and wait for it to return.** It completes in
+seconds to a few minutes and its exit code is your build result. Never launch
+it in a background shell: if your session ends or moves on before the build
+finishes, the build is killed mid-flight and nothing gets installed. There is
+no need to poll or wait separately; the command blocks until the build is done.
+
 Use `--scheme` and `--workspace` if the project has multiple schemes or uses a
 workspace file:
 
