@@ -483,6 +483,13 @@ API:
   they must generate a new key. Never commit the `.p8` or paste its content
   into files; pass a filesystem path.
 
+The upload target must exactly match the built app's bundle ID. Apps that only
+share its prefix are ignored, and no exact match fails the upload before reservation.
+SDK callers can pass `appstore.appId` to select an App Store Connect app explicitly;
+its bundle ID is verified before upload and automatic build-number lookup.
+`result.appstore.appId` reports the verified target once resolved, including on a
+later upload failure. Older sandbox versions may omit it.
+
 By default the build returns as soon as the upload commits and leaves Apple's
 processing verdict to App Store Connect (processing routinely takes many
 minutes). Pass `--asc-wait-timeout <seconds>` (max 1800) to watch for the
