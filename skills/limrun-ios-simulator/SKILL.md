@@ -541,15 +541,22 @@ Here is how to upload it:
 export ASSET_NAME=myapp.tar.gz # can be any name
 lim asset push ${ASSET_NAME}
 
-echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios"
+echo "https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios"
 ```
 
-Once the command finishes, you can give the following URL to the user to
-click to open a simulator stream while the console installs this bundle.
+Once the command finishes, give the following URL to the user. It opens
+Playground at `/stream` with the app and launch settings filled in and automatically selects
+the organization that owns the linked apps. The user can edit the configuration
+and click Start to create the simulator. The stream stays visible during
+installation, with the same Inspect, Connect, Stop, and inspector controls as
+other Playground devices. Existing `/preview` links redirect to `/stream` with their settings preserved.
 
 ```
-https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
+https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
+
+The optional `model` parameter preselects `iphone`, `iphone-duo`, `ipad`, or
+`watch`. For example, append `&model=iphone-duo` to preselect iPhone Duo.
 
 For nonsecret iOS app configuration, append repeatable URL-encoded `env=KEY=VALUE`
 parameters, for example `&env=FEATURE_FLAG%3D1&env=API_URL%3Dhttps%3A%2F%2Fapi.example.com`.
