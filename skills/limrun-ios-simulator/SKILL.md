@@ -551,6 +551,9 @@ click to open a simulator stream while the console installs this bundle.
 https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 ```
 
+The `model` query parameter accepts `iphone` (default), `iphone-duo`, `ipad`, or
+`watch`. Append `&model=iphone-duo`, for example, to preview on an iPhone Duo.
+
 For nonsecret iOS app configuration, append repeatable URL-encoded `env=KEY=VALUE`
 parameters, for example `&env=FEATURE_FLAG%3D1&env=API_URL%3Dhttps%3A%2F%2Fapi.example.com`.
 Use `URLSearchParams.append("env", "KEY=VALUE")` when constructing links. The app
