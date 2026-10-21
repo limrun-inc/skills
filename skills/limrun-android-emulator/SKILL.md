@@ -275,10 +275,25 @@ lim android record start                     # non-blocking
 lim android record stop -o /tmp/recording.mp4
 ```
 
-`record stop` accepts `--quality 5-10`. Recorded frames are half the
-screenshot resolution, so read tap coordinates from screenshots, never from
-video frames. For UI changes, include a demo video in the pull request so the
+`record start` accepts `--quality 5-10`. At the default quality of 5, recorded
+frames are half the screenshot resolution. Read tap coordinates from screenshots,
+never from video frames. For UI changes, include a demo video in the pull request so the
 user can see it.
+
+### Review snippets while a full video keeps recording
+
+Use the TypeScript Android client's `startRecordingSession()` and
+`stopRecordingSession(recordingId, { localPath })` when the user needs snippets
+during an ongoing recording. Save the ID from each start and stop only the
+snippet's ID when sending it to a video model. Repeat with a new snippet ID;
+stop the full recording when the reproduction ends.
+
+Wait for each start to resolve before driving the actions to capture. Use the
+same quality for concurrent recordings, default 5. Up to eight recordings can
+be active or uploading, and they can stop in any order. Each completed session
+has a separate download URL. This requires an Android runtime and TypeScript
+SDK with recording-session support. See the
+[recording example](https://docs.limrun.com/docs/android/run-emulator#review-snippets-during-a-full-recording).
 
 ## Simulate the microphone with an audio file
 
