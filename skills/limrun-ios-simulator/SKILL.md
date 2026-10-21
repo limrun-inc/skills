@@ -439,6 +439,24 @@ lim ios record stop -o /tmp/recording.mp4
 
 For UI changes, include a demo video in the pull request so the user can see it.
 
+### Review snippets while a full video keeps recording
+
+Use the TypeScript iOS client's `startRecordingSession()` and
+`stopRecordingSession(recordingId, { localPath })` when the user needs snippets
+during an ongoing recording. Save the ID from each start and stop only the
+snippet's ID when sending it to a video model. Repeat with a new snippet ID;
+stop the full recording when the reproduction ends.
+
+Wait for each start to resolve before driving the actions to capture. Use the
+same quality, display, and touchIndicators for concurrent recordings. Defaults
+are quality 5, the active Duo display, and touch indicators enabled. Keep
+`display` omitted on every recording to follow the active display, or pass the
+same explicit display on each one. Up to eight recordings can
+be active or uploading, and they can stop in any order. Each completed session
+has a separate download URL. This requires an iOS runtime and TypeScript
+SDK with recording-session support. See the
+[recording example](https://docs.limrun.com/docs/ios/run-simulator#review-snippets-during-a-full-recording).
+
 ## App container files
 
 List an app's data container before pulling a file so you use the exact path the
