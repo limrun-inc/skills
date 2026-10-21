@@ -174,6 +174,19 @@ saves, cold builds, and SDK usage.
 
 ## Private dependency credentials
 
+For Git dependencies hosted on github.com, prefer an existing organization GitHub
+connection when available. An organization admin connects repositories in
+**Settings > GitHub** in the console. The connecting GitHub user needs admin access
+to every selected repository.
+
+Use HTTPS Git URLs. The connection grants read access to all Xcode and Gradle
+builds in the organization without an extra build flag or GitHub Actions workflow.
+A new connection may take a short time to reach each region.
+
+This does not authenticate SSH URLs, GitHub Packages, or private binary downloads.
+Use the existing credential-file workflow below for those services or repositories
+outside the connection. Never ask the user to paste credentials into the conversation.
+
 Copy existing credential files with `--additional-file`, also supported by `sync`:
 
 ```bash
