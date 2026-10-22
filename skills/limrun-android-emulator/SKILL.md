@@ -280,20 +280,32 @@ frames are half the screenshot resolution. Read tap coordinates from screenshots
 never from video frames. For UI changes, include a demo video in the pull request so the
 user can see it.
 
-### Review snippets while a full video keeps recording
+### Multiple recordings
 
-Use the TypeScript Android client's `startRecordingSession()` and
-`stopRecordingSession(recordingId, { localPath })` when the user needs snippets
-during an ongoing recording. Save the ID from each start and stop only the
-snippet's ID when sending it to a video model. Repeat with a new snippet ID;
-stop the full recording when the reproduction ends.
+Use ordinary recording commands with optional IDs:
 
-Wait for each start to resolve before driving the actions to capture. Use the
-same quality for concurrent recordings, default 5. Up to eight recordings can
-be active or uploading, and they can stop in any order. Each completed session
-has a separate download URL. This requires an Android runtime and TypeScript
-SDK with recording-session support. See the
-[recording example](https://docs.limrun.com/docs/android/run-emulator#review-snippets-during-a-full-recording).
+```bash
+lim android record start run-1
+lim android record start run-2
+lim android record stop -o run-2.mp4
+lim android record stop run-1 -o run-1.mp4
+```
+
+Start generates an ID when omitted and includes it as `recordingId` in JSON output.
+Stop without an ID selects the most recently started recording that is still active.
+Other recordings continue. Stop fails when none are active. `--id` selects the
+instance, while the optional positional argument selects the recording.
+
+Wait for each start before driving device actions. Concurrent recordings must use
+the same quality. Up to eight recordings may be active or uploading.
+IDs contain 1 to 64 lowercase letters, digits, underscores, or hyphens, start with a letter
+or digit, and cannot be reused during the instance lifetime.
+
+The TypeScript equivalents are `startRecordingSession({ recordingId })` and
+`stopRecordingSession(recordingId, { localPath })`. Omit the start ID to generate
+one, or pass `undefined` at stop to select the latest active recording. Requires
+a runtime and CLI or SDK with recording-session support. See
+[multiple recordings](https://docs.limrun.com/docs/android/run-emulator#multiple-recordings).
 
 ## Simulate the microphone with an audio file
 
