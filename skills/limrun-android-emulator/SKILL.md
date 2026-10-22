@@ -275,10 +275,37 @@ lim android record start                     # non-blocking
 lim android record stop -o /tmp/recording.mp4
 ```
 
-`record stop` accepts `--quality 5-10`. Recorded frames are half the
-screenshot resolution, so read tap coordinates from screenshots, never from
-video frames. For UI changes, include a demo video in the pull request so the
+`record start` accepts `--quality 5-10`. At the default quality of 5, recorded
+frames are half the screenshot resolution. Read tap coordinates from screenshots,
+never from video frames. For UI changes, include a demo video in the pull request so the
 user can see it.
+
+### Multiple recordings
+
+Use ordinary recording commands with optional IDs:
+
+```bash
+lim android record start run-1
+lim android record start run-2
+lim android record stop -o run-2.mp4
+lim android record stop run-1 -o run-1.mp4
+```
+
+Start generates an ID when omitted and includes it as `recordingId` in JSON output.
+Stop without an ID selects the most recently started recording that is still active.
+Other recordings continue. Stop fails when none are active. `--id` selects the
+instance, while the optional positional argument selects the recording.
+
+Wait for each start before driving device actions. Concurrent recordings must use
+the same quality. Up to eight recordings may be active or uploading.
+IDs contain 1 to 64 lowercase letters, digits, underscores, or hyphens, start with a letter
+or digit, and cannot be reused during the instance lifetime.
+
+The TypeScript equivalents are `startRecordingSession({ recordingId })` and
+`stopRecordingSession(recordingId, { localPath })`. Omit the start ID to generate
+one, or pass `undefined` at stop to select the latest active recording. Requires
+a runtime and CLI or SDK with recording-session support. See
+[multiple recordings](https://docs.limrun.com/docs/android/run-emulator#multiple-recordings).
 
 ## Simulate the microphone with an audio file
 
