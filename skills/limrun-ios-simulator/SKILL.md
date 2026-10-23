@@ -557,6 +557,10 @@ that already completed. After refreshing, the same tab offers Resume setup using
 its saved progress. Closing the tab can discard that progress. Stop cancels the
 remaining steps and terminates the device. Direct Playground launches behave the same way.
 
+If the link restores a saved simulator snapshot, keep the tab open during restoration.
+Refreshing before restoration completes requires stopping the device and reopening
+the link. Once restoration finishes, app setup can resume without restoring again.
+
 ```
 https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
