@@ -80,7 +80,7 @@ bundle. It will patch with the difference and reload it in the simulator.
 ## Inspect simulator snapshots
 
 Open [Snapshots](https://console.limrun.com/snapshots?type=ios) and select
-**iOS simulators** to find saved device state by key. The list shows saved status,
+**iOS** to find saved device state by key. The list shows saved status,
 compressed size, last save, iOS version, and last use. Open a key to copy a Preview
 link with `snapshot-key` that restores its installed apps and their data.
 
@@ -90,7 +90,7 @@ URL-encode the key. The list accepts `prefix`, `limit` from 1 to 100, and `offse
 follow `nextOffset` until it is absent. `saved: false` means no archive exists yet.
 `lastUsedAt` records when a simulator last resolved the key, not when it saved.
 These are simulator snapshots; Xcode disk snapshots appear in the separate
-**Xcode disks** tab.
+**Xcode** tab.
 
 ## Fold an iPhone Duo
 
