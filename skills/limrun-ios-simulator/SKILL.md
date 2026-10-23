@@ -572,11 +572,6 @@ An `Installing <asset name>` overlay shows installation progress and disappears
 when the preview is ready.
 
 
-For saved simulator state, append `deviceState=<key>` to the preview URL. Keys are organization-scoped; use a URL-encoded `{user}` template for separate reviewer states, for example `deviceState=checkout-%7Buser%7D`. Playground lets the reviewer select None, an existing key, or New state before starting.
-
-List registered keys with `GET /v1/organizations/{organizationId}/ios_device_states` on `https://api.limrun.com`, using an organization token with `ios:*:read`. The response has `states` entries containing `id`, `key`, `createdAt`, and `lastUsedAt`, plus `nextCursor` when more remain. Pass `limit` from 1 to 100, default 50, and the returned `cursor` for the next page. A registered key does not guarantee a saved archive exists yet.
-
-
 ## Cleanup
 
 When the work is completed, you can delete the iOS simulator.
