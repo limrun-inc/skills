@@ -541,15 +541,32 @@ Here is how to upload it:
 export ASSET_NAME=myapp.tar.gz # can be any name
 lim asset push ${ASSET_NAME}
 
-echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios"
+echo "https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios"
 ```
 
-Once the command finishes, you can give the following URL to the user to
-click to open a simulator stream while the console installs this bundle.
+Once the command finishes, give the following URL to the user. It opens
+Playground at `/stream` with the app and launch settings filled in and automatically selects
+the organization that owns the linked apps. The user can edit the configuration
+and click Start. The console checks app availability before creating the simulator, then installs and launches the apps in order. The stream stays visible during
+installation, with the same Inspect, Connect, Stop, and inspector controls as
+other Playground devices. Existing `/preview` links redirect to `/stream` with their settings preserved.
+
+Keep the tab open until setup finishes. If installation, launch, or opening the URL
+fails, Resume setup retries the unfinished step on the same device and skips apps
+that already completed. After refreshing, the same tab offers Resume setup using
+its saved progress. Closing the tab can discard that progress. Stop cancels the
+remaining steps and terminates the device. Direct Playground launches behave the same way.
+
+If the link restores a saved simulator snapshot, keep the tab open during restoration.
+Refreshing before restoration completes requires stopping the device and reopening
+the link. Once restoration finishes, app setup can resume without restoring again.
 
 ```
-https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
+https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
+
+The optional `model` parameter preselects `iphone`, `iphone-duo`, `ipad`, or
+`watch`. For example, append `&model=iphone-duo` to preselect iPhone Duo.
 
 For nonsecret iOS app configuration, append repeatable URL-encoded `env=KEY=VALUE`
 parameters, for example `&env=FEATURE_FLAG%3D1&env=API_URL%3Dhttps%3A%2F%2Fapi.example.com`.
