@@ -22,5 +22,20 @@
     "expo",
     "mcp"
   ],
-  "mcpServers": "./.mcp.json"
+  "mcpServers": "./.mcp.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/skill-loaded.mjs\" claude-code",
+            "async": true,
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
 }

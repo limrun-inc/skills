@@ -18,6 +18,7 @@ const changed = git('diff', '--name-only', `${baseRef}...HEAD`).split('\n').filt
 const shipped = changed.filter(
   (f) =>
     f.startsWith('skills/') ||
+    f.startsWith('hooks/') ||
     f === 'distribution.json' ||
     f === 'plugin.json' ||
     f === 'mcp.json' ||
