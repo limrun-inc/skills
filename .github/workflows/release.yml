@@ -23,7 +23,7 @@ jobs:
           TAG="v${VERSION}"
           if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
             git fetch origin "refs/tags/${TAG}:refs/tags/${TAG}" --no-tags
-            if git diff --quiet "${TAG}" HEAD -- skills/ assets/ distribution.json plugin.json mcp.json .mcp.json gemini-extension.json .claude-plugin .codex-plugin .agents; then
+            if git diff --quiet "${TAG}" HEAD -- skills/ hooks/ assets/ distribution.json plugin.json mcp.json .mcp.json gemini-extension.json .claude-plugin .codex-plugin .agents; then
               echo "${TAG} already exists with the same source; nothing to do."
               exit 0
             fi

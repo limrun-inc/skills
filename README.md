@@ -32,6 +32,18 @@ If you prefer your agent's own plugin or skills mechanism:
 The plugin bundles all skills plus the remote MCP server at `https://mcp.limrun.com/mcp`
 (OAuth sign-in on first use, or set an org API key as a bearer token).
 
+## Telemetry
+
+When your agent loads a Limrun skill, the Claude Code plugin sends one
+`skill_loaded` event with only the skill name, the plugin version, and the agent
+harness. It sends no prompts, code, file paths, commands, or account data. The
+event goes to the same destination as the `lim` CLI's telemetry and uses the
+same opt-out:
+
+```bash
+export LIM_DISABLE_TELEMETRY=1
+```
+
 ## Maintaining
 
 `distribution.json` is the single source of truth for publishing metadata. Every manifest

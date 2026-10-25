@@ -1,6 +1,7 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, run project commands with `lim xcode run`, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, run code generation or Make targets, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Use when the user wants to build, compile, test, or ship an iOS / Apple app without local Xcode, or says 'build my iOS app', 'run xcodebuild', 'fix the build', 'run the XCTests', 'make a signed IPA', 'upload to TestFlight', or 'make a preview build'. Builds non-Bazel projects (`.xcodeproj`, `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native code) on Limrun's remote Xcode with `lim xcode build`, runs project commands (code generation, Make targets) with `lim xcode run`, and runs XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Also covers build logs, Xcode version pins, disk snapshots, cloud or p12 signing, and App Store Connect upload. To run, tap, screenshot, or otherwise drive the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-bazel."
+allowed-tools: Bash(lim *)
 user-invocable: true
 effort: high
 ---
@@ -71,53 +72,10 @@ lim xcode logs --follow
 
 ### Pick the Xcode version
 
-A sandbox builds with its node's default Xcode (26.4 today). The fleet carries
-one released (GA) Xcode per major plus one beta while Apple seeds one: today
-26.4 GA, 27.0 GA and 27.1 beta. Two selectors cover them:
-
-- A bare major (`27`) binds the newest GA release of that major, never a beta,
-  and follows Apple's point releases on its own. Use it for App Store builds.
-- A major.minor (`27.1`) pins that exact version. This is how you pick a beta.
-
-Set a preference once for the workspace; every later build, test, RBE session
-and new sandbox follows it, and the flag overrides it for one command:
-
-```bash
-lim xcode version list      # Select is the value to type, Channel is ga or beta; * marks the one in use
-lim xcode use xcode@27      # prefer the Xcode 27 GA for this workspace; switches the remembered sandbox now
-lim xcode build .           # builds with 27
-lim xcode version           # "27.0 (27A266a)" shows the sandbox's current Xcode
-lim xcode version set 27.1  # pin the 27.1 beta instead
-lim xcode build . --xcode-version 26   # one-off override, not remembered
-lim xcode version unset     # forget the preference; the sandbox goes back to the node default
-```
-
-Combine Xcode and mise selections with `lim xcode use xcode@27 node@24`.
-
-For scripting, `lim xcode version list --quiet` prints one selector per line
-(`26`, `27`, `27.1`) and `--json` returns `{ installed, bound, preferred }`
-(`installed[].channel` is `ga` or `beta`). The table marks the Xcode in use
-with `*`. `lim xcode version set` does not record a version the node lacks (the
-error lists the available ones) but keeps it when the sandbox is merely busy.
-
-When the sandbox is on another Xcode than the workspace prefers, the next
-build says so and switches it first. Switching invalidates the build cache made
-with the other version (the next build starts cold) and is refused while a build,
-sync or `lim xcode rbe` stack is running. With persistent disk snapshots
-(`--snapshot-key`), use a separate key per Xcode lane, for example `myapp-27` and
-`myapp-27.1`: archives are stored per key and a restore under a different Xcode
-is wiped.
-
-A major.minor pin lasts until the fleet retires that version; then
-`lim xcode build` fails with the daemon's message and a hint to run
-`lim xcode version set 27` or `lim xcode version unset`. When a beta becomes GA
-it replaces the beta under the same major.minor selector (one cold build); the
-bare major follows the newest released Xcode of its major, so it moves to 27.1
-as soon as 27.1 is GA on the node.
-
-App Store uploads from a beta Xcode are rejected by Apple, so keep
-`--upload-to-appstore` on a bare-major pin (`27`, not `27.1`). Gate on
-`channel`, not `betaSeed`: Apple's 27.1 seed ships without a seed number.
+A sandbox builds with its node's default Xcode (26.4 today). To pin another
+Xcode for the workspace (`lim xcode use xcode@27`, `lim xcode version set 27.1`)
+or for one build (`--xcode-version 26`), read `references/xcode-versions.md`
+first: switching changes the build cache, and App Store uploads need a GA Xcode.
 
 `--dev-server-url` is only supported with `--configuration Debug` for React
 Native / Expo builds. It's a post-install launch URL: limbuild validates it is a
@@ -137,40 +95,9 @@ lim ios open-url --id <ios-instance-id> '<absolute-url>'
 
 ## Disk snapshots
 
-Reuse source files, dependencies, and DerivedData across Xcode instances.
-
-CLI **0.35.1 and earlier** use `--cache-*` instead of `--snapshot-*`, and
-`--wait-cache` instead of `--wait-snapshot`. The snapshot rename preserves
-the old flags as aliases.
-
-From the project directory, create with a snapshot key, build, then delete:
-
-```bash
-XCODE_ID=$(lim xcode create --snapshot-key myapp-main --quiet)
-lim xcode build . --id "$XCODE_ID" --scheme MyApp
-lim xcode delete "$XCODE_ID" --wait-snapshot
-```
-
-The first run starts cold; later runs restore the saved snapshot. Termination
-saves it after a successful build with no later sync, replacing the previous
-snapshot under that key. `--wait-snapshot` waits for the save and reports its
-result. In CI, run deletion in a cleanup step even if the build fails.
-
-Leave `--snapshot-paths` unset to save the whole workspace. Keep the project
-folder's name unchanged between runs. Use separate keys per project, Xcode
-version, and concurrent CI job.
-
-For branch fallbacks, add `--snapshot-restore-keys "myapp-pr51,myapp-main"`
-at creation. Each entry tries an exact match, then the newest matching literal
-prefix, before moving to the next entry. Without this flag, the save key is
-also the restore key. Pass only restore keys to reuse a snapshot without saving.
-
-Configure snapshots at creation. Restore keys and paths stay fixed.
-On an existing instance, `build --snapshot-key` can only bind an unassigned
-save key if snapshots were already enabled; it does not restore or enable them.
-
-See the [disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots) for skipped
-saves, cold builds, and SDK usage.
+To reuse source files, dependencies, and DerivedData across Xcode instances
+(`lim xcode create --snapshot-key`, usually in CI), read
+`references/disk-snapshots.md`.
 
 ## Private dependency credentials
 
@@ -329,191 +256,12 @@ If UI tests fail at the very first interaction on an instance that has run
 many suites back to back, prefer fresh instances with
 `--inactivity-timeout 30m` on the next run.
 
-## Signed device builds (IPA)
+## Signed device builds and App Store Connect
 
-Prefer Apple cloud signing when the user has an App Store Connect team API key.
-Apple creates or reuses a cloud-managed certificate and provisioning profile,
-so the user does not need to supply a p12 or `.mobileprovision`. The key ID,
-issuer ID and `.p8` file are configured by the user on their own machine as
-flags or environment variables; never ask for their values in the conversation:
-
-```bash
-lim xcode build . --sdk iphoneos --configuration Release \
-  --signing-method release-testing --team-id "$APPLE_TEAM_ID" \
-  --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
-  --asc-key AuthKey.p8 \
-  --upload myapp.ipa
-```
-
-Signing methods:
-
-- `debugging`: development-signed IPA for registered development devices.
-- `release-testing`: distribution-signed IPA for registered test devices.
-- `app-store-connect`: distribution-signed IPA for App Store Connect.
-
-Cloud signing requires a device SDK (`--sdk iphoneos` or `--sdk watchos`), a
-team API key with an issuer ID, and `--team-id` matching that key's Apple
-Developer team. For distribution methods,
-the API key must be an Admin key or have **Access to cloud-managed distribution
-certificates** enabled. A `Cloud signing permission error` means that permission
-is missing. `No Account for Team` means the team ID and API key do not match.
-`Failed Registering Bundle Identifier` means the bundle ID belongs to another
-team and cannot be registered automatically.
-
-Cloud signing takes entitlements only from `--entitlements`, never from the
-project's `.entitlements` file: the archive is unsigned and the export
-preserves entitlements only from an existing code signature. Any app using
-capabilities (HealthKit, CloudKit, app groups, push) MUST pass the flag or
-the capability is silently stripped from the IPA. A bare path targets the
-app; `<bundleId>=<path>` targets an embedded bundle (widget, watch app);
-repeat per bundle:
-
-```bash
-lim xcode build . --sdk iphoneos --configuration Release \
-  --signing-method release-testing --team-id VMBY3VYW4U \
-  --asc-key-id 2X9R4HXF34 --asc-issuer-id "$ASC_ISSUER_ID" \
-  --asc-key AuthKey.p8 \
-  --entitlements ./MyApp/MyApp.entitlements \
-  --entitlements com.example.myapp.widgets=./Widgets/Widgets.entitlements \
-  --upload myapp.ipa
-```
-
-The plist values must be fully expanded (no `$(AppIdentifierPrefix)`; write
-the concrete prefix), must omit export-managed keys (`application-identifier`,
-`com.apple.developer.team-identifier`, `get-task-allow`,
-`beta-reports-active`), and every capability must be enabled on the App ID in
-the developer portal or the export fails naming it.
-
-Manual signing remains available when the user already has a p12 and profiles:
-
-```bash
-lim xcode build . --sdk iphoneos --configuration Release \
-  --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
-  --provisioning-profile app.mobileprovision \
-  --upload myapp.ipa
-```
-
-The upload output includes a download URL for the signed IPA. A SUCCEEDED build
-means the signature already passed Apple's verifier on the server, so don't
-re-verify the IPA yourself unless the user asks. Invalid signing fails the
-build loudly instead of producing a broken artifact.
-
-If the app embeds extensions (WidgetKit widgets, share sheets, intents) or a
-watch app, App Store signing needs one provisioning profile per bundle id, all
-issued for the same distribution certificate. Repeat `--provisioning-profile`
-once per bundle; each profile is matched to its bundle by the
-application-identifier inside it, so order doesn't matter:
-
-```bash
-lim xcode build . --sdk iphoneos --configuration Release \
-  --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
-  --provisioning-profile app.mobileprovision \
-  --provisioning-profile widgets.mobileprovision \
-  --upload myapp.ipa
-```
-
-With multiple profiles, every profile must carry an explicit (non-wildcard)
-bundle id. A `signing preflight failed: no provisioning profile covers ...`
-error names the embedded bundle that lacks a profile; ask the user for a
-profile with exactly that bundle id.
-
-Use a p12 that includes its full CA chain, not just the leaf certificate. If
-needed, re-export it with the chain:
-
-```bash
-openssl pkcs12 -export -inkey dist.key -in dist.pem -certfile wwdr.pem -out dist-chain.p12
-```
-
-Failure strings to recognize in the build output:
-
-- `Unknown issuer hash`: the p12 lacks its CA chain; re-export it with the
-  chain as above.
-- `code signature verification failed`: the platform's post-sign check rejected
-  the artifact. Not a problem in the user's code; retry, and report it if it
-  persists.
-- p12 password errors: `--certificate-password` doesn't match the file; the
-  user corrects the value on their machine.
-
-## Upload to App Store Connect
-
-To upload the signed IPA to App Store Connect for TestFlight or App Store
-distribution, pass `--upload-to-appstore` with the App Store Connect API key
-flags on a signed device build:
-
-```bash
-lim xcode build . --sdk iphoneos --configuration Release \
-  --certificate-p12 dist.p12 --certificate-password "$P12_PASSWORD" \
-  --provisioning-profile app.mobileprovision \
-  --upload-to-appstore --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
-  --asc-key AuthKey.p8
-```
-
-Cloud signing can sign and upload with the same API key:
-
-```bash
-lim xcode build . --sdk iphoneos --configuration Release \
-  --signing-method app-store-connect --team-id "$APPLE_TEAM_ID" \
-  --asc-key-id "$ASC_KEY_ID" --asc-issuer-id "$ASC_ISSUER_ID" \
-  --asc-key AuthKey.p8 \
-  --upload-to-appstore --auto-build-number
-```
-
-`--upload-to-appstore` requires either cloud signing or the manual signing
-flags, plus `--asc-key-id` and `--asc-key`. Combine it with `--upload
-<asset-name>` when the user also wants the IPA in Asset Storage.
-
-Device IPAs carry the app's symbols (`Symbols/` next to `Payload/`), so App
-Store Connect symbolicates crash reports without a separate dSYM upload. This
-needs the build to produce dSYMs: `--configuration Release` does by default;
-Debug does not, and the IPA then simply ships without symbols.
-
-The user provides these on their own machine, as flags or environment variables
-the CLI reads locally; they are not pasted into the conversation. All three live
-in App Store Connect under Users and Access, Integrations tab, App Store Connect
-API:
-
-- `--asc-key-id`: the Key ID next to their API key. If they don't have one,
-  point them at Team Keys with the **Developer** role: the least-privileged
-  role that can upload builds. Creating team keys needs an Admin account.
-- `--asc-issuer-id`: the Issuer ID at the TOP of the Integrations page (a
-  team value, not per-key). Cloud signing requires a team key and this flag.
-  For manual signing plus upload, omit it for individual API keys.
-- `--asc-key`: path to the downloaded `.p8` file. Apple keeps no copy and
-  the download link disappears after leaving the page; if the user lost it,
-  they must generate a new key. Never commit the `.p8` or paste its content
-  into files; pass a filesystem path.
-
-By default the build returns as soon as the upload commits and leaves Apple's
-processing verdict to App Store Connect (processing routinely takes many
-minutes). Pass `--asc-wait-timeout <seconds>` (max 1800) to watch for the
-verdict before returning. Read the outcome from the final lines:
-
-- `App Store Connect: upload accepted.`: done; the build appears in
-  TestFlight once Apple finishes.
-- `App Store Connect: uploaded, still processing on Apple's side (upload
-  <id>).`: the exit code is 0 and the upload succeeded; Apple is still
-  processing. Do NOT retry the build.
-- `App Store Connect upload failed; the build and signing succeeded.`: exit
-  code 1 with Apple's error text earlier in the log. Only the delivery
-  failed.
-
-Failure strings to recognize:
-
-- Apple text about the bundle version being already used: bump
-  `CFBundleVersion` (Expo: `expo.ios.buildNumber` in app.json) and rebuild.
-- `HTTP 401`: key ID / issuer ID / .p8 mismatch, or a revoked key.
-- `HTTP 403`: the key's role cannot upload builds; it needs the Developer role
-  or higher.
-- `no App Store Connect app with bundle id`: the app record doesn't exist;
-  the user must create it in App Store Connect manually (the API cannot).
-- Build later stuck at "Missing Compliance" in TestFlight: the app doesn't
-  answer the export-compliance question at build time. Set
-  `ITSAppUsesNonExemptEncryption` to `NO` in Info.plist (Expo:
-  `expo.ios.config.usesNonExemptEncryption: false` in app.json) and rebuild.
-
-For hands-off delivery to testers, the app's internal TestFlight group must
-have automatic distribution enabled (create-only setting) and the compliance
-key above must be set; then no post-upload steps exist at all.
+For a signed device IPA (`--sdk iphoneos`: Apple cloud signing, manual p12
+signing, entitlements, extensions), read `references/signing.md`. To upload a
+signed build to App Store Connect or TestFlight (`--upload-to-appstore`), read
+`references/app-store-connect.md`.
 
 ## Preview builds
 

@@ -1,6 +1,14 @@
 ---
 name: limrun-bazel
-description: "The default way to build any Bazel workspace on Limrun: build its iOS and Android targets on Limrun's shared build plane with `lim bazel setup` and `bazel build --config=limrun`, from any environment (Linux, Windows, macOS, VM, container, CI), with one remote cache shared across the organization. Use when the project is a Bazel workspace (MODULE.bazel) with rules_apple or rules_android and the user wants to build it remotely, run the built app on a Limrun simulator or emulator, set up Bazel remote execution in CI, or fix a `--config=limrun` build that fails on authentication, workers, or missing MODULE.bazel lines. limrun-xcode-bazel covers only the legacy `lim xcode rbe` flow; use it only when the workspace already runs on `lim xcode rbe` or the user asks for it. For non-Bazel Android builds, use limrun-gradle."
+description: "Use when the project is a Bazel workspace (`MODULE.bazel`) with rules_apple or rules_android and the user wants to build it remotely, run the built app on a Limrun simulator or emulator, set up Bazel remote execution in CI, or fix a `--config=limrun` build that fails on authentication, workers, or missing MODULE.bazel lines. The default way to build any Bazel workspace on Limrun: builds its iOS and Android targets on Limrun's shared build plane with `lim bazel setup` and `bazel build --config=limrun`, from any environment (Linux, Windows, macOS, VM, container, CI), with one remote cache shared across the organization. limrun-xcode-bazel covers only the legacy `lim xcode rbe` flow; use it only when the workspace already runs on `lim xcode rbe` or the user asks for it. For non-Bazel Android builds, use limrun-gradle."
+allowed-tools: Bash(lim *)
+paths:
+  - "**/MODULE.bazel"
+  - "**/WORKSPACE"
+  - "**/WORKSPACE.bazel"
+  - "**/*.bzl"
+  - "**/BUILD.bazel"
+  - "**/.bazelrc"
 user-invocable: true
 effort: high
 ---

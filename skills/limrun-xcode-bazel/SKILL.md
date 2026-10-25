@@ -1,6 +1,16 @@
 ---
 name: limrun-xcode-bazel
-description: "Legacy: build a Bazel iOS app with `lim xcode rbe` on a dedicated Xcode sandbox and install it on a remote iOS simulator attached to that sandbox. Use only when the workspace already runs on `lim xcode rbe` (its `.limrun/` came from `lim xcode rbe`) or the user explicitly asks for it, or when a `lim xcode rbe` build, upload, or install misbehaves. For every other Bazel build, including new workspaces, iOS or Android, and running the app on a simulator, use limrun-bazel. To tap, type, screenshot, or otherwise interact with the running app, use limrun-ios-simulator."
+description: "Use only when the workspace already runs on `lim xcode rbe` (its `.limrun/` came from `lim xcode rbe`), the user explicitly asks for `lim xcode rbe`, or a `lim xcode rbe` build, upload, or install misbehaves. Legacy: builds a Bazel iOS app with `lim xcode rbe` on a dedicated Xcode sandbox and installs it on a remote iOS simulator attached to that sandbox. For every other Bazel build, including new workspaces, iOS or Android, and running the app on a simulator, use limrun-bazel. To tap, type, screenshot, or otherwise interact with the running app, use limrun-ios-simulator."
+allowed-tools: Bash(lim *)
+paths:
+  - "**/MODULE.bazel"
+  - "**/WORKSPACE"
+  - "**/WORKSPACE.bazel"
+  - "**/*.bzl"
+  - "**/BUILD.bazel"
+  - "**/.bazelrc"
+  - ".limrun/**"
+  - "**/user.limrun.bazelrc"
 user-invocable: true
 effort: high
 ---

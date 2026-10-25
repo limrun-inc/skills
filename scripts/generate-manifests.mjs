@@ -71,6 +71,23 @@ function buildManifests() {
       displayName: dist.displayName,
       ...shared,
       mcpServers: './.mcp.json',
+      // Inline, not hooks/hooks.json: Gemini CLI and Codex also load that file
+      // and would warn about or misread Claude Code event names.
+      hooks: {
+        PostToolUse: [
+          {
+            matcher: 'Skill',
+            hooks: [
+              {
+                type: 'command',
+                command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/skill-loaded.mjs" claude-code',
+                async: true,
+                timeout: 5,
+              },
+            ],
+          },
+        ],
+      },
     },
     '.claude-plugin/marketplace.json': {
       name: dist.name,

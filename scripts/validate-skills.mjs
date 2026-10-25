@@ -7,6 +7,10 @@ import yaml from 'js-yaml';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const skillsDir = path.join(repoRoot, 'skills');
 const catalogPath = path.join(repoRoot, 'catalog.json');
+// Agent Skills spec limit for descriptions, and Anthropic's guidance for the
+// SKILL.md body: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+const MAX_DESCRIPTION_CHARS = 1024;
+const MAX_SKILL_LINES = 500;
 
 function fail(message) {
   throw new Error(message);
@@ -106,6 +110,17 @@ function main() {
     assertString(frontmatter.description, `skills/${dir}/SKILL.md frontmatter description`);
     if (frontmatter.name !== dir) {
       fail(`skills/${dir}/SKILL.md frontmatter name must match directory name`);
+    }
+    if (frontmatter.description.length > MAX_DESCRIPTION_CHARS) {
+      fail(
+        `skills/${dir}/SKILL.md description has ${frontmatter.description.length} characters; the limit is ${MAX_DESCRIPTION_CHARS}`,
+      );
+    }
+    const lineCount = fs.readFileSync(skillMdPath, 'utf8').trimEnd().split('\n').length;
+    if (lineCount > MAX_SKILL_LINES) {
+      fail(
+        `skills/${dir}/SKILL.md has ${lineCount} lines; the limit is ${MAX_SKILL_LINES}. Move detail to references/`,
+      );
     }
     frontmatterNames.push(frontmatter.name);
   }

@@ -1,6 +1,7 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services or a private tunnel, play a video file as the camera, send all traffic through the user's proxy and trust its CA, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Use when the user wants to see, test, or interact with their app on an iOS simulator, or says 'launch on simulator', 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'why did it crash', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'mock the camera', 'paste into the app', 'change the language', or 'simulate Face ID'. Drives an app on a Limrun cloud iOS simulator from any environment: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, share a live stream link, connect the app to local services or a private tunnel, send traffic through a proxy and trust its CA, play a video file as the camera, set the clipboard and user defaults, post notifications, and run timed action chains. Use after a build from any builder. To build the app first, use limrun-xcode (xcodebuild projects) or limrun-bazel (Bazel workspaces)."
+allowed-tools: Bash(lim *)
 user-invocable: true
 effort: high
 ---
@@ -79,51 +80,8 @@ bundle. It will patch with the difference and reload it in the simulator.
 
 ## Fold an iPhone Duo
 
-Create a Duo instance in a region that offers it:
-
-```bash
-lim ios create --model iphone-duo
-lim ios fold --json --id <instance-ID>
-lim ios fold 90 --orientation landscape-left --id <instance-ID>
-lim ios fold 90 --id <instance-ID>
-lim ios fold 180 --id <instance-ID>
-lim ios screenshot ./inner.png --display inner --id <instance-ID>
-lim ios tap 300 200 --display inner --id <instance-ID>
-```
-
-The hinge accepts fractional angles from **0° (closed)** to **180° (flat)**.
-Omit the angle to read fold state. `--orientation` accepts `portrait`, `pud`
-(portrait upside down), `landscape-left`, or `landscape-right`; it can change
-independently of the hinge angle.
-This changes the native simulator hinge, so apps receive Apple's hinge and
-layout updates. The browser stream starts in 2D and offers a lazy-loaded 3D
-frame. Both modes provide hinge and rotation controls, with touch input on the
-cover and inner display. The frame's
-Sleep/Wake and volume buttons accept clicks and holds even when position is locked.
-For automation, pair `buttonDown` and `buttonUp` actions with `button` set to
-`side`, `volumeUp`, or `volumeDown` in `client.performActions`.
-
-With an already connected TypeScript device client:
-
-```ts
-const fold = await client.getFoldState(); // null on an ordinary simulator
-await client.setHingeAngle(110);
-await client.setDuoOrientation('landscape-left');
-const inner = await client.screenshotDisplay('inner');
-await client.tapDisplay('inner', inner.width / 2, inner.height / 2);
-```
-
-`setDuoOrientation` accepts `portrait`, `landscape-left`, `landscape-right`,
-and `pud` (upside down). Display screenshots are upright and report dimensions
-in points; `tapDisplay` uses those coordinates. Use `outer` for the cover or
-`inner` for the unfolding display. A display that iOS has turned off returns a
-black image.
-
-Use these display-specific methods for Duo automation. Existing screenshot,
-recording, and accessibility commands do not automatically follow the inner
-display. The 3D viewer supports single-finger touch and drag. Rotating the view
-changes the camera; **Rotate device** changes native orientation. **Laptop view**
-sets the hinge and orientation; it does not enable Apple's separate Table Mode.
+For the foldable iPhone Duo model (`lim ios create --model iphone-duo`,
+`lim ios fold`, `--display inner`), read `references/iphone-duo.md`.
 
 ## Targeting the right instance
 
@@ -147,132 +105,14 @@ all `lim ios` calls for the rest of the session (screenshot, tap, type,
 element-tree, record). Alternatively, `git init` the project so the workspace
 resolves on its own. When controlling multiple instances, always pass `--id`.
 
-## Reaching services on the local machine
+## Network: local services, private tunnels, proxies, and CAs
 
-Destination tunnels let an iPhone simulator app keep calling its normal
-destinations while the CLI dials them from the machine running `lim`. Select
-exact `localhost:port` or literal `IP:port` destinations, or domains that only
-your machine or VPN can reach:
-
-```bash
-lim ios tunnel \
-  --id <ios-instance-id> \
-  --selector localhost:3000 \
-  --selector localhost:8081 \
-  --selector "*.staging.example" \
-  --detach
-```
-
-Use the app's normal URLs, such as `http://localhost:3000`. Declaring
-`localhost:3000` also captures loopback forms such as `127.0.0.1:3000` and
-`[::1]:3000`, plus `[::ffff:127.0.0.1]:3000`. Domain selectors (exact
-`api.corp.example` or label-bound wildcard `"*.staging.example"`) are
-intercepted on the simulator and dialed from your machine whether or not the
-name resolves on public DNS, so your DNS and VPN apply. Apps that resolve DNS
-themselves over HTTPS bypass domain interception.
-A tunnel carries TCP only: up to ten exact selectors and 64 domain selectors,
-ports 1-65535 except 53; CIDRs and UDP are not supported. Start the tunnel
-before launching the app or opening the page: connections opened earlier keep
-their original route, so relaunch the app if it connected first.
-
-One instance accepts one active destination tunnel, and its selector set is
-immutable. To add or remove a destination, stop the tunnel and start it again
-with the complete selector list:
-
-```bash
-lim ios tunnel status --id <ios-instance-id> --json
-lim ios tunnel stop --id <ios-instance-id>
-```
-
-If the simulator attempts a route while its local service is stopped, the
-tunnel remains active and reports `connection_refused`; restart the service
-without recreating the simulator or tunnel.
-
-### Inspect HTTP traffic, capture HAR, persist a network log
-
-Inspection is on by default: every HTTP and HTTPS request through the tunnel
-is decoded, printed as one summary line per request (in the tunnel log file
-when detached), and shown live in the console's network panel.
-
-```bash
-lim ios tunnel --selector "*.api.example" --har ./traffic.har --detach   # write HAR 1.2 with bodies
-lim ios tunnel --selector "*.api.example" --persist --detach             # network log survives the instance
-```
-
-`--persist` uploads a body-inclusive network log as a session artifact when
-the tunnel stops or the instance terminates; it appears on the instance's
-session page in the console with a HAR download (default lifetime 3 days,
-`--ttl <seconds>` up to 30 days). HTTPS is decoded with a simulator-trusted
-CA, so **apps with certificate pinning fail through inspected selectors**:
-leave the pinned host out of the selectors or pass `--no-inspect` to keep TLS
-end to end (no summaries, HAR, or persistence).
-
-## Reaching services in a private network through a private tunnel
-
-An organization can run a private tunnel: a connector inside its network,
-created by an admin with `lim tunnel create` or in the console (Network) and
-run with `lim tunnel run`, that serves every instance naming it. When the user names one, pass it at
-create time instead of starting a tunnel yourself:
-
-```bash
-lim ios create --tunnel <tunnel-name>
-```
-
-The app reaches the tunnel's selectors, such as `localhost:3000` or
-`*.internal.example`, at those addresses. They resolve on the connector's
-machine, not on yours. The tunnel takes the instance's one destination
-tunnel, so do not start or stop `lim ios tunnel` on it.
-
-Creation checks the tunnel and fails when it is not usable:
-
-- `tunnel <name> does not exist`: the name is wrong or the tunnel was not
-  created. Ask the user for the right name.
-- `tunnel <name> is offline`: no connector is running. Ask the user to
-  start it.
-- `did not attach within 30s`: the connector cannot attach the instance.
-  Ask the user to check the connector's output.
-
-Retrying the create in a loop does not help in any of these cases.
-
-The tunnel's token belongs on the connector's machine. Never ask the user to
-paste it into the conversation.
-
-## Send all device traffic through a proxy
-
-Tunnels carry only declared destinations; there is no catch-all selector. When
-the user wants all traffic, Safari included, to leave through their proxy (for
-example a recording proxy), point the simulator's system proxy at a proxy the
-tunnel reaches. Tunnel inspection passes requests meant for the proxy through as
-sent.
-
-```bash
-lim ios tunnel --selector localhost:3128 --detach --id <ios-instance-id>
-lim ios proxy set localhost:3128 --id <ios-instance-id>
-# later, before stopping the tunnel:
-lim ios proxy clear --id <ios-instance-id>
-```
-
-With a private tunnel whose selector is the proxy, only `lim ios proxy set` is
-needed. A proxy elsewhere in the user's network works the same way:
-`--selector proxy.example.internal` and `lim ios proxy set
-proxy.example.internal:3128`. Requests to `localhost` stay direct. New
-connections use the proxy at once; apps keep connections they opened before
-until relaunched. `lim ios proxy clear` restores the previous settings.
-
-## Trust a CA certificate
-
-Add a PEM CA certificate to the simulator's trusted roots, for example the CA
-of the user's recording proxy, so the proxy can read HTTPS traffic:
-
-```bash
-lim ios ca add ./proxy-ca.pem --id <ios-instance-id>
-```
-
-Safari and apps trust it on their next connection, with no restart, for the
-life of the instance. Only one CA certificate per file; leaf certificates are
-rejected. Apps that pin certificates, and the simulator's Apple services,
-still reject it. To look at the app's traffic without a proxy of the user's
-own, use tunnel inspection (above) instead.
+`localhost` inside the simulator is not the user's machine. To connect the app
+to a local or VPN-only service (`lim ios tunnel`), inspect its HTTP traffic or
+capture a HAR, or use an organization's private tunnel (`lim ios create
+--tunnel`), read `references/tunnels.md`. To send all device traffic through the
+user's proxy (`lim ios proxy set`) or trust a CA certificate (`lim ios ca add`),
+read `references/proxy-and-ca.md`.
 
 ## Launching the app
 
@@ -427,7 +267,6 @@ lim ios screenshot app-store.png --format png --size full --id <ios-instance-id>
 
 Use `--format png --size full` for a full-resolution PNG without alpha, including screenshots intended for store uploads. Combine it with `--display inner` or `--display outer` on Duo. The SDK equivalent is `client.screenshot({ format: 'png', size: 'full' })`; it returns base64 PNG data and pixel dimensions. `--format` accepts `jpeg` or `png` and defaults to `jpeg`. `--size` accepts `scaled` or `full` and defaults to `scaled`. Choose them independently. `scaled` uses point dimensions; `full` preserves native pixel resolution. Tap coordinates remain in points, so use `tapWithScreenSize` for coordinates measured in a native screenshot.
 
-
 Use the element tree for functional assertions (element existence, labels, state
 changes) and screenshots only for visual properties. For anything involving
 motion (animations, gameplay, streaming UI), prefer video:
@@ -439,96 +278,14 @@ lim ios record stop -o /tmp/recording.mp4
 
 For UI changes, include a demo video in the pull request so the user can see it.
 
-## App container files
+## App files, camera, clipboard, user defaults, and Face ID
 
-List an app's data container before pulling a file so you use the exact path the
-app created. Keep the same `--bundle-id` and `--container-type` flags for list,
-pull, push, and delete:
-
-```bash
-lim ios ls Documents --bundle-id com.example.app --container-type data
-lim ios pull-file Documents/recording.mov ./recording.mov \
-  --bundle-id com.example.app --container-type data
-lim ios push-file ./fixture.json Documents/fixture.json \
-  --bundle-id com.example.app --container-type data
-lim ios delete-file Documents/fixture.json \
-  --bundle-id com.example.app --container-type data
-```
-
-`lim ios ls` defaults to the staging-folder root. With `--bundle-id`, it
-defaults to the app bundle (`--container-type app`); use `data` for the app's
-writable `Documents`, `Library`, and `tmp` directories. Paths in `ls` output are
-relative to the selected root and can be copied directly into the other file
-commands.
-
-## Simulate the camera with a video
-
-For camera-driven flows (QR-code scanning, document capture, video calls),
-play a local video file as the simulator's camera. The app sees the frames
-through its normal capture pipeline:
-
-```bash
-lim ios camera play ./fixtures/qr-scan.mp4            # loops by default
-lim ios camera play ./fixtures/intro.mp4 --no-loop    # play once, freeze on last frame
-lim ios camera clear                                  # restore the default camera
-```
-
-Any AVFoundation-decodable file works (H.264/HEVC in `.mp4`/`.mov`). Use
-`--no-loop` when the app must observe the end of the clip exactly once (the
-feed freezes on the last frame rather than stalling).
-
-## Clipboard
-
-Set or read the simulator clipboard. Apps paste it like text copied inside the
-simulator, so the edit menu's Paste shows no permission prompt. For example, to
-paste a one-time code into a login form:
-
-```bash
-lim ios clipboard set "123456"                  # or pipe it: echo 123456 | lim ios clipboard set
-lim ios clipboard get
-```
-
-`lim ios simctl -- pbcopy booted` and `pbpaste booted` do the same.
-
-## User defaults
-
-Read, write, or delete the simulator's user defaults with its `defaults` tool.
-Pass the arguments after `--`. Apps read defaults at launch, so relaunch the app
-under test after a change. For example, to switch the device language and
-region without UI automation:
-
-```bash
-lim ios defaults -- write -g AppleLanguages -array fr-FR
-lim ios defaults -- write -g AppleLocale -string fr_FR
-lim ios defaults -- read -g AppleLanguages
-```
-
-`lim ios simctl -- spawn booted defaults ...` does the same. Only `read`,
-`write`, and `delete` are available.
-
-## Darwin notifications
-
-Post a notification, or set and read a notification's state, inside the
-simulator with its `notifyutil` tool:
-
-```bash
-lim ios notify post <name>
-lim ios notify set <name> <state>
-lim ios notify get <name>
-```
-
-For example, the simulator drives Face ID through these notifications. Enroll
-once, then answer each Face ID prompt with a match or a non-match (Touch ID
-devices use `fingerTouch` in place of `pearl`):
-
-```bash
-lim ios notify set com.apple.BiometricKit.enrollmentChanged 1
-lim ios notify post com.apple.BiometricKit.enrollmentChanged
-lim ios notify post com.apple.BiometricKit_Sim.pearl.match      # the next scan succeeds
-lim ios notify post com.apple.BiometricKit_Sim.pearl.nomatch    # the next scan fails
-```
-
-`lim ios simctl -- spawn booted notifyutil -p|-s|-g ...` does the same.
+Read `references/device-state.md` to list, pull, push, or delete files in an
+app's container (`lim ios ls`, `lim ios pull-file`, `lim ios push-file`), play
+a video file as the camera (`lim ios camera play`), set or read the clipboard
+(`lim ios clipboard`), change user defaults such as the device language
+(`lim ios defaults`), or post Darwin notifications such as a Face ID match
+(`lim ios notify`).
 
 ## Preview URL for humans
 
@@ -563,7 +320,6 @@ encode the full URL and its query string. This works with or without `env`;
 the stream stays visible while the app installs, launches, and opens the URL.
 An `Installing <asset name>` overlay shows installation progress and disappears
 when the preview is ready.
-
 
 ## Cleanup
 
