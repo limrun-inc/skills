@@ -67,6 +67,15 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
 
+## Reuse build outputs
+
+Keep the same instance for repeat builds. `lim gradle build` enables Gradle
+output caching by default; `org.gradle.caching=false` in the project or generated
+Android `gradle.properties` opts out. CMake uses a C/C++ compiler cache by default;
+pass `--env CCACHE_DISABLE=1` to bypass it. These are separate caches and last
+only for that instance. Gradle commands through `lim gradle run` keep their own
+cache settings. Do not pass Gradle flags through `--task`.
+
 ## Private dependency credentials
 
 Copy existing credential files with `--additional-file`, also supported by `sync`:
