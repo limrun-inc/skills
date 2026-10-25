@@ -283,3 +283,27 @@ builder; see the repository for inputs and workflow examples.
   files (including nested ones) are honored. Use `--ignore <regex>` for other
   large local artifacts and `--include <regex>` to force-sync gitignored
   inputs the build needs.
+
+## Scoped workload uploads
+
+When a customer needs a build workload to upload to only one asset, configure
+`spec.workloadScopes` through the instance create API or TypeScript SDK. Use
+`asset:name/<percent-encoded-name>:create` and `asset:name/<percent-encoded-name>:upload`
+for create-if-missing plus upload, or `asset:<asset-id>:upload` for an existing asset.
+Use the SDK's `assetNameTarget(name)` helper to encode exact names; there are no name globs.
+
+The TypeScript build helper accepts `upload: { target }`; the exec API calls this
+`assetUpload: { target }`. The daemon obtains fresh credentials from the instance's
+workload identity. An optional `token` selects a customer-supplied credential instead,
+with no fallback after denial. Do not print tokens or put them in committed source.
+
+`workloadScopes: []` grants no ambient asset access. Omission uses the organization's
+compatibility default. Existing CLI `--upload` and SDK `upload: { assetName }` obtain
+presigned URLs using the caller's credential, so they do not demonstrate workload
+scope enforcement. Do not invent a CLI flag for workload scopes.
+
+`read` permits downloads, `update` permits editable metadata and TTL changes, and
+`delete` permits deletion. `all` includes every asset operation. The lookup name
+cannot be renamed; `displayName` can be updated. A name grant survives delete and
+recreate; an ID grant does not. See
+[workload asset permissions](https://docs.limrun.com/docs/platform/asset-storage#workload-asset-permissions).
