@@ -1,6 +1,7 @@
 ---
 name: limrun-maestro-testing
-description: "Run Maestro YAML flows against a Limrun cloud iOS simulator with `lim ios maestro`, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to run, write, or debug Maestro flows or `maestro test` on iOS, migrate an existing Maestro suite to remote simulators, or asks for UI testing with Maestro. iOS simulators only today. For Detox suites use limrun-detox-testing; for driving the simulator without a test framework use limrun-ios-simulator."
+description: "Use when the user wants to run, write, or debug Maestro YAML flows or `maestro test` on iOS, migrate an existing Maestro suite to remote simulators, or asks for UI testing with Maestro. Runs Maestro flows against a Limrun cloud iOS simulator with `lim ios maestro`, from any environment (Linux, Windows, macOS, VM, container). iOS simulators only today. For Detox suites use limrun-detox-testing; for driving the simulator without a test framework use limrun-ios-simulator."
+allowed-tools: Bash(lim *)
 user-invocable: true
 ---
 

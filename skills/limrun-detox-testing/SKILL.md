@@ -1,6 +1,7 @@
 ---
 name: limrun-detox-testing
-description: Configure, run, or debug Detox on Limrun iOS simulators. Use when attaching the Limrun Detox runtime to an app, wiring Detox mediator connectivity, or validating app/tester connections over destination tunnels.
+description: "Use when the user wants to run, configure, or debug Detox end-to-end tests on a Limrun cloud iOS simulator: attaching the Limrun Detox runtime to an app (`lim ios launch-app --runtime detox`), wiring Detox mediator connectivity, or validating app/tester connections over destination tunnels. For Maestro flows use limrun-maestro-testing; to build the app first use limrun-xcode or limrun-expo-development."
+allowed-tools: Bash(lim *)
 user-invocable: true
 ---
 

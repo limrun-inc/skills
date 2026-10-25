@@ -1,6 +1,7 @@
 ---
 name: limrun-gradle
-description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, inspect build logs, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
+description: "Use when the user wants to build an Android app without local Gradle or Android Studio, or says 'build my Android app', 'make an APK', 'build the AAB', 'sign a release', 'prepare a Play Store publish', or 'check the build logs'. Builds on a remote Gradle sandbox with `lim gradle build`, from any environment (Linux, Windows, macOS, VM, container), for native Android projects, React Native, and Expo; also signs releases with an upload key, selects sandbox tools, and runs shell commands. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
+allowed-tools: Bash(lim *)
 user-invocable: true
 effort: high
 ---

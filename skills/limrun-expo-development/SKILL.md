@@ -1,6 +1,7 @@
 ---
 name: limrun-expo-development
-description: "Prepare and run Expo / React Native apps on Limrun with Expo dev-client iteration. Use when the user wants an Expo dev build, Metro tunnel, hot reload, JS/TS iteration without repeated native rebuilds, or to run/test an Expo app on a remote iOS simulator or Android emulator."
+description: "Use when the user wants to run or test an Expo / React Native app on a remote iOS simulator or Android emulator, make an Expo dev build, start Metro through a tunnel, get hot reload, or iterate on JS/TS without repeated native rebuilds, including when no local Xcode, Android SDK, or emulator is available. Prepares and runs Expo / React Native apps on Limrun with Expo dev-client iteration: builds the dev client with `lim xcode build` or `lim gradle build`, connects Metro, and opens the app on a Limrun device. For device interaction details use limrun-ios-simulator or limrun-android-emulator."
+allowed-tools: Bash(lim *)
 user-invocable: true
 effort: high
 ---

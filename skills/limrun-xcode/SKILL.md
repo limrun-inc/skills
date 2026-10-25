@@ -1,6 +1,7 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, run project commands with `lim xcode run`, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, run code generation or Make targets, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Use when the user wants to build, compile, test, or ship an iOS / Apple app without local Xcode, or says 'build my iOS app', 'run xcodebuild', 'fix the build', 'run the XCTests', 'make a signed IPA', 'upload to TestFlight', or 'make a preview build'. Builds non-Bazel projects (`.xcodeproj`, `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native code) on Limrun's remote Xcode with `lim xcode build`, runs project commands (code generation, Make targets) with `lim xcode run`, and runs XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Also covers build logs, Xcode version pins, disk snapshots, cloud or p12 signing, and App Store Connect upload. To run, tap, screenshot, or otherwise drive the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-bazel."
+allowed-tools: Bash(lim *)
 user-invocable: true
 effort: high
 ---
