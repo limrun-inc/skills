@@ -86,7 +86,9 @@ lim gradle build . \
   --additional-file "$HOME/.netrc=~/.netrc"
 ```
 
-Remote `~/` targets the sandbox home; other destinations are workspace-relative.
+Remote `~/` targets `/home/limrun`; other destinations are workspace-relative.
+The same home holds Gradle caches at `~/.gradle`, SDK packages at `~/Android/Sdk`,
+and custom executables at `~/.local/bin`, which is included in `PATH`.
 Repeat the flags on later syncs to retain the files. Pass `--env` for environment
 variables referenced by the configuration.
 
