@@ -74,7 +74,10 @@ Repeat builds start a fresh JVM while retaining disk caches and compiled outputs
 Gradle commands through `lim gradle run` keep their own daemon settings.
 
 Keep the same instance for repeat builds. `lim gradle build` enables Gradle
-task-output and configuration caching by default. In the project or generated
+task-output caching by default. Native Gradle builds also enable configuration
+caching. Managed Expo builds leave it off because the generated scripts use
+incompatible process calls. Opt in with `org.gradle.configuration-cache=true`
+only after making the project compatible. In the project or generated
 Android `gradle.properties`, `org.gradle.caching=false` disables output caching
 and `org.gradle.configuration-cache=false` disables configuration caching. Use
 the latter when a plugin reports configuration-cache incompatibilities.
