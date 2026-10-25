@@ -70,8 +70,11 @@ builds, use **`limrun-expo-development`**.
 ## Reuse build outputs
 
 Keep the same instance for repeat builds. `lim gradle build` enables Gradle
-output caching by default; `org.gradle.caching=false` in the project or generated
-Android `gradle.properties` opts out. CMake uses a C/C++ compiler cache by default;
+task-output and configuration caching by default. In the project or generated
+Android `gradle.properties`, `org.gradle.caching=false` disables output caching
+and `org.gradle.configuration-cache=false` disables configuration caching. Use
+the latter when a plugin reports configuration-cache incompatibilities.
+CMake uses a C/C++ compiler cache by default;
 pass `--env CCACHE_DISABLE=1` to bypass it. These are separate caches and last
 only for that instance. Gradle commands through `lim gradle run` keep their own
 cache settings. Do not pass Gradle flags through `--task`.
