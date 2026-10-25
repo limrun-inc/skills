@@ -69,6 +69,10 @@ builds, use **`limrun-expo-development`**.
 
 ## Reuse build outputs
 
+Managed builds use `--no-daemon` to release JVM memory after each build.
+Repeat builds start a fresh JVM while retaining disk caches and compiled outputs.
+Gradle commands through `lim gradle run` keep their own daemon settings.
+
 Keep the same instance for repeat builds. `lim gradle build` enables Gradle
 task-output and configuration caching by default. In the project or generated
 Android `gradle.properties`, `org.gradle.caching=false` disables output caching
