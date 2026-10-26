@@ -108,6 +108,33 @@ lim gradle run --env APP_ENV=staging -- npm run generate
 lim gradle build . --env APP_ENV=staging
 ```
 
+## Download workspace files
+
+Use `pull-file` for archives, reports, and other files produced in the build
+workspace. Wait for the build or command to finish, then use the same instance:
+
+```bash
+lim gradle pull-file artifacts/app.zip ./app.zip
+lim gradle pull-file reports/test.xml ./test.xml --id <instance-ID>
+```
+
+The remote path is relative to the synced project root, even when `run` used a
+subdirectory. The destination defaults to the remote filename; an existing local
+directory receives that filename. An existing file is replaced only after a
+successful download. `--json` returns `localPath` and `bytes`.
+
+Archive directories first, using `--no-sync` to keep the existing workspace:
+
+```bash
+lim gradle run --no-sync -- 'tar -czf reports.tar.gz reports'
+lim gradle pull-file reports.tar.gz
+```
+
+Downloads use ordinary HTTP and stream to disk. Do not send file bytes or base64
+through build logs. Absolute paths, parent traversal, and symlinks outside the
+project are rejected. `pull-file` does not sync or create an instance. Download
+before deleting the instance, or use build uploads and assets for lasting access.
+
 ## Run it on an emulator
 
 Upload the built APK as a named asset, then install it on an Android instance:

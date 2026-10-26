@@ -235,6 +235,33 @@ lim xcode run -- brew install tree
 
 Commands are one-shot and non-interactive. There is no TTY or stdin channel.
 
+## Download workspace files
+
+Use `pull-file` for archives, reports, and other files produced in the build
+workspace. Wait for the build or command to finish, then use the same instance:
+
+```bash
+lim xcode pull-file artifacts/app.zip ./app.zip
+lim xcode pull-file reports/test.xml ./test.xml --id <instance-ID>
+```
+
+The remote path is relative to the synced project root, even when `run` used a
+subdirectory. The destination defaults to the remote filename; an existing local
+directory receives that filename. An existing file is replaced only after a
+successful download. `--json` returns `localPath` and `bytes`.
+
+Archive directories first, using `--no-sync` to keep the existing workspace:
+
+```bash
+lim xcode run --no-sync -- 'tar -czf reports.tar.gz reports'
+lim xcode pull-file reports.tar.gz
+```
+
+Downloads use ordinary HTTP and stream to disk. Do not send file bytes or base64
+through build logs. Absolute paths, parent traversal, and symlinks outside the
+project are rejected. `pull-file` does not sync or create an instance. Download
+before deleting the instance, or use build uploads and assets for lasting access.
+
 ## Generated Xcode projects (XcodeGen)
 
 If the repo has a `project.yml` and the `.xcodeproj` is gitignored, do not run
