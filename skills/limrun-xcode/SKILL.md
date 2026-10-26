@@ -614,7 +614,7 @@ The cumulative list must be covered by the instance creator's permissions.
 
 For SDK users, create an upload object with `target: assetNameTarget(name)` and
 pass `assetUploadPermissions(upload, customerPermissions)` as
-`spec.delegatedPermissions` before creating the instance. Pass the same upload object
+`spec.role.permissions` before creating the instance. Pass the same upload object
 to the build. The helper preserves customer grants and adds only target-specific
 permissions. IDs need no create grant. Build uploads default to 14-day expiry;
 `ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
