@@ -48,6 +48,11 @@ browser the user can see, open the URL there and tell them. Create also
 prints a console URL: it opens the same live view but requires a console
 login, so prefer the signed stream URL for sharing.
 
+Signed links open the shared device workspace without login. Full instance tokens
+show Inspect, Connect, and the logs, events, and network inspector. Stream-only
+tokens show the screen and input controls without those tools. Stop and app
+selection require the authenticated console.
+
 Useful create flags: `--reuse-if-exists` (reuse a running instance with the
 same labels), `--rm` (delete when the CLI exits), `--jurisdiction us|eu|as`
 (where the instance runs; don't use `--region`, it is deprecated),

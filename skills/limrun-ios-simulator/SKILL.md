@@ -56,6 +56,11 @@ skips opening the URL locally and still prints it for sharing.
 view but requires a console login, so prefer the signed stream URL for sharing.
 If the console URL is all you have, share it and mention it needs login.
 
+Signed links open the shared device workspace without login. Full instance tokens
+show Inspect, Connect, and the logs, events, and network inspector. Stream-only
+tokens show the screen and input controls without those tools. Stop and app
+selection require the authenticated console.
+
 ### Install app from local
 
 Create a new simulator:
