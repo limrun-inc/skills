@@ -235,6 +235,14 @@ lim xcode run -- brew install tree
 
 Commands are one-shot and non-interactive. There is no TTY or stdin channel.
 
+## Download sandbox files
+
+Use `lim xcode pull-file <remote-path> [destination] --id <instance-ID>`.
+Paths can be absolute or relative to the synced project root.
+Never use build or run logs to transfer files, including text, binary, or base64 content.
+Wait for the command writing the file to finish. Archive directories first,
+and download before deleting the instance.
+
 ## Generated Xcode projects (XcodeGen)
 
 If the repo has a `project.yml` and the `.xcodeproj` is gitignored, do not run
