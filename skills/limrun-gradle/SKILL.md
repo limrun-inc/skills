@@ -286,24 +286,28 @@ builder; see the repository for inputs and workflow examples.
 
 ## Scoped workload uploads
 
-When a customer needs a build workload to upload to only one asset, configure
-`spec.role.permissions` through the instance create API or TypeScript SDK. Use
-`asset:name/<percent-encoded-name>:create` and `asset:name/<percent-encoded-name>:upload`
-for create-if-missing plus upload, or `asset:<asset-id>:upload` for an existing asset.
-Use the SDK's `assetNameTarget(name)` helper to encode exact names; there are no name globs.
+Named build uploads use the instance role. `lim gradle build --upload <name>`
+adds exact-name create, upload, and expiry-update permissions to the instance
+creation request. Repeat `--permission asset:<target>:<verb>` to add customer grants.
+The cumulative list must be covered by the instance creator's permissions.
 
-The TypeScript build helper accepts `upload: { target }`; the exec API calls this
-`assetUpload: { target }`. The daemon obtains fresh credentials from the instance's
-workload identity. An optional `token` selects a customer-supplied credential instead,
-with no fallback after denial. Do not print tokens or put them in committed source.
+For SDK users, create an upload object with `target: assetNameTarget(name)` and
+pass `assetUploadPermissions(upload, customerPermissions)` as
+`spec.role.permissions` before creating the instance. Pass the same upload object
+to the build. The helper preserves customer grants and adds only target-specific
+permissions. IDs need no create grant. Build uploads default to 14-day expiry;
+`ttl` changes that expiry and `uploadOptions` carries metadata.
 
-`role: { permissions: [] }` grants no ambient asset access. Omission uses the organization's
-compatibility default. Existing CLI `--upload` and SDK `upload: { assetName }` obtain
-presigned URLs using the caller's credential, so they do not demonstrate workload
-permission enforcement. Do not invent a CLI flag for workload permissions.
+Automatic named-upload builds create a fresh instance with that role rather than
+reuse a cached one with unknown permissions. With `--id` or an environment-pinned
+instance, its existing role must already authorize the upload. Roles cannot be
+widened after creation. The create commands accept repeatable `--permission` flags.
 
-`read` permits downloads, `update` permits editable metadata and TTL changes, and
-`delete` permits deletion. `all` includes every asset operation. The lookup name
-cannot be renamed; `displayName` can be updated. A name grant survives delete and
-recreate; an ID grant does not. See
-[workload asset permissions](https://docs.limrun.com/docs/platform/asset-storage#workload-asset-permissions).
+An explicit `token` in the SDK upload object uses that credential and never falls
+back after denial. `upload: { signedUploadUrl }`, CLI `--signed-upload-url`, and
+`LIM_SIGNED_UPLOAD_URL` retain their behavior and add no workload permissions.
+The old SDK `assetName` spelling is a deprecated alias for a name target; it no
+longer prefetches URLs using the caller's key. Named uploads do not automatically
+return a download URL. Download needs a separate read grant.
+
+See [workload asset permissions](https://docs.limrun.com/docs/platform/asset-storage#workload-asset-permissions).
