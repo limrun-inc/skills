@@ -630,9 +630,9 @@ widened after creation. The create commands accept repeatable `--permission` fla
 
 An explicit `token` in the SDK upload object uses that credential and never falls
 back after denial. `upload: { signedUploadUrl }`, CLI `--signed-upload-url`, and
-`LIM_SIGNED_UPLOAD_URL` retain their behavior and add no workload permissions.
+`LIM_SIGNED_UPLOAD_URL` retain their behavior and add no delegated permissions.
 The old SDK `assetName` spelling is a deprecated alias for a name target; it no
 longer prefetches URLs using the caller's key. Named uploads do not automatically
 return a download URL. Download needs a separate read grant.
 
-See [workload asset permissions](https://docs.limrun.com/docs/platform/asset-storage#workload-asset-permissions).
+See [delegated asset permissions](https://docs.limrun.com/docs/platform/asset-storage#delegated-asset-permissions).
