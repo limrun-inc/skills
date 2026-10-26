@@ -315,6 +315,17 @@ running, so nothing is reported. In the TypeScript SDK, `launchApp`'s
 reports the next exit of an app you did not launch, for example one opened
 with `lim ios open-url`.
 
+While the app runs, `launch-app` also prints each main-thread hang: a hang
+starts once the main thread hasn't answered for 1 second, and each report
+gives its age, the thread's state and CPU time, and the top of its stack.
+`running` with CPU time close to the age means the app kept its main thread
+busy; `waiting` with little CPU time means it waited, and the top frame shows
+on what. The hang's end gives its length. Hangs explain an app that freezes
+or automation calls that stall, since reading the screen waits for the main
+thread. In the TypeScript SDK, `launchApp`'s `onHang` gets the same reports,
+and `watchHangs(bundleId, onHang)` reports every hang of the app, across
+relaunches, until `stop()`.
+
 ## App logs
 
 Log commands print recent lines and exit. Pass `--follow` only to keep
