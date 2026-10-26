@@ -548,7 +548,7 @@ Then construct the preview link and include it in your last message (and in the
 PR, if you're opening one):
 
 ```
-https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
+https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
 
 ## Gotchas
