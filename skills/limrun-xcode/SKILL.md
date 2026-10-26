@@ -540,8 +540,15 @@ Then construct the preview link and include it in your last message (and in the
 PR, if you're opening one):
 
 ```
-https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
+https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
+
+Preview links need no `mode` parameter. `organization=<org-tid>` is optional;
+without it, the console finds the app's organization among the reviewer's
+memberships. Device-only links such as
+`https://console.limrun.com/stream?platform=ios&osVersion=26&model=iphone`
+use the reviewer's selected organization. An explicit organization must be one
+the reviewer can access.
 
 ## Gotchas
 
