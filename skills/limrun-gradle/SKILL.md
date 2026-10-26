@@ -108,6 +108,14 @@ lim gradle run --env APP_ENV=staging -- npm run generate
 lim gradle build . --env APP_ENV=staging
 ```
 
+## Download sandbox files
+
+Use `lim gradle pull-file <remote-path> [destination] --id <instance-ID>`.
+Paths can be absolute or relative to the synced project root.
+Never use build or run logs to transfer files, including text, binary, or base64 content.
+Wait for the command writing the file to finish. Archive directories first,
+and download before deleting the instance.
+
 ## Run it on an emulator
 
 Upload the built APK as a named asset, then install it on an Android instance:
