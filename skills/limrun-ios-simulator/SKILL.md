@@ -82,7 +82,9 @@ bundle. It will patch with the difference and reload it in the simulator.
 Open [Snapshots](https://console.limrun.com/snapshots?type=ios) and select
 **iOS** to find saved device state by key. The list shows saved status,
 compressed size, last save, iOS version, and last use. Open a key to copy a Preview
-link with `snapshot-key` that restores its installed apps and their data.
+link with `snapshot-key`. The link opens Playground with the snapshot's
+organization and recorded iOS version selected. Select **Start device** to
+restore its installed apps and their data.
 
 For automation, use `GET /v1/organizations/{organizationId}/ios_snapshots` or
 `GET /v1/organizations/{organizationId}/ios_snapshots/{key}` with iOS read access.
