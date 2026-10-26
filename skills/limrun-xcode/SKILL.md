@@ -617,7 +617,11 @@ pass `assetUploadPermissions(upload, customerPermissions)` as
 `spec.role.permissions` before creating the instance. Pass the same upload object
 to the build. The helper preserves customer grants and adds only target-specific
 permissions. IDs need no create grant. Build uploads default to 14-day expiry;
-`ttl` changes that expiry and `uploadOptions` carries metadata.
+`ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
+changes require `update`, including app identity extracted after a build.
+`upload` covers artifact and icon bytes; an icon download URL also requires
+`read`. Use `assets.update` for metadata and `assets.createUploadURL(id,
+{ icon: true })` for icon upload URLs.
 
 Automatic named-upload builds create a fresh instance with that role rather than
 reuse a cached one with unknown permissions. With `--id` or an environment-pinned
