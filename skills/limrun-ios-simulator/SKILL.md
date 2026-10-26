@@ -77,6 +77,23 @@ lim ios sync <path to .ipa file or .app folder>
 You can run the same command every time you need to install a new version of the
 bundle. It will patch with the difference and reload it in the simulator.
 
+## Inspect simulator snapshots
+
+Open [Snapshots](https://console.limrun.com/snapshots?type=ios) and select
+**iOS** to find saved device state by key. The list shows saved status,
+compressed size, last save, iOS version, and last use. Open a key to copy a Preview
+link with `snapshot-key`. The link opens Playground with the snapshot's
+organization and recorded iOS version selected. Select **Start device** to
+restore its installed apps and their data.
+
+For automation, use `GET /v1/organizations/{organizationId}/ios_snapshots` or
+`GET /v1/organizations/{organizationId}/ios_snapshots/{key}` with iOS read access.
+URL-encode the key. The list accepts `prefix`, `limit` from 1 to 100, and `offset`;
+follow `nextOffset` until it is absent. `saved: false` means no archive exists yet.
+`lastUsedAt` records when a simulator last resolved the key, not when it saved.
+These are simulator snapshots; Xcode disk snapshots appear in the separate
+**Xcode** tab.
+
 ## Fold an iPhone Duo
 
 Create a Duo instance in a region that offers it:
