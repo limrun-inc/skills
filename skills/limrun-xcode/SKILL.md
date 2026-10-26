@@ -607,14 +607,14 @@ https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 
 ## Scoped workload uploads
 
-Named build uploads use the instance role. `lim xcode build --upload <name>`
+Named build uploads use the instance's delegated permissions. `lim xcode build --upload <name>`
 adds exact-name create, upload, and expiry-update permissions to the instance
 creation request. Repeat `--permission asset:<target>:<verb>` to add customer grants.
 The cumulative list must be covered by the instance creator's permissions.
 
 For SDK users, create an upload object with `target: assetNameTarget(name)` and
 pass `assetUploadPermissions(upload, customerPermissions)` as
-`spec.role.permissions` before creating the instance. Pass the same upload object
+`spec.delegatedPermissions` before creating the instance. Pass the same upload object
 to the build. The helper preserves customer grants and adds only target-specific
 permissions. IDs need no create grant. Build uploads default to 14-day expiry;
 `ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
@@ -623,9 +623,9 @@ changes require `update`, including app identity extracted after a build.
 `read`. Use `assets.update` for metadata and `assets.createUploadURL(id,
 { icon: true })` for icon upload URLs.
 
-Automatic named-upload builds create a fresh instance with that role rather than
+Automatic named-upload builds create a fresh instance with those permissions rather than
 reuse a cached one with unknown permissions. With `--id` or an environment-pinned
-instance, its existing role must already authorize the upload. Roles cannot be
+instance, its existing permissions must already authorize the upload. Permissions cannot be
 widened after creation. The create commands accept repeatable `--permission` flags.
 
 An explicit `token` in the SDK upload object uses that credential and never falls
