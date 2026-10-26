@@ -287,7 +287,7 @@ builder; see the repository for inputs and workflow examples.
 ## Scoped workload uploads
 
 When a customer needs a build workload to upload to only one asset, configure
-`spec.workloadScopes` through the instance create API or TypeScript SDK. Use
+`spec.role.permissions` through the instance create API or TypeScript SDK. Use
 `asset:name/<percent-encoded-name>:create` and `asset:name/<percent-encoded-name>:upload`
 for create-if-missing plus upload, or `asset:<asset-id>:upload` for an existing asset.
 Use the SDK's `assetNameTarget(name)` helper to encode exact names; there are no name globs.
@@ -297,10 +297,10 @@ The TypeScript build helper accepts `upload: { target }`; the exec API calls thi
 workload identity. An optional `token` selects a customer-supplied credential instead,
 with no fallback after denial. Do not print tokens or put them in committed source.
 
-`workloadScopes: []` grants no ambient asset access. Omission uses the organization's
+`role: { permissions: [] }` grants no ambient asset access. Omission uses the organization's
 compatibility default. Existing CLI `--upload` and SDK `upload: { assetName }` obtain
 presigned URLs using the caller's credential, so they do not demonstrate workload
-scope enforcement. Do not invent a CLI flag for workload scopes.
+permission enforcement. Do not invent a CLI flag for workload permissions.
 
 `read` permits downloads, `update` permits editable metadata and TTL changes, and
 `delete` permits deletion. `all` includes every asset operation. The lookup name
