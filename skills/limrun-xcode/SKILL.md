@@ -543,13 +543,6 @@ PR, if you're opening one):
 https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
 
-Preview links need no `mode` parameter. `organization=<org-tid>` is optional;
-without it, the console finds the app's organization among the reviewer's
-memberships. Device-only links such as
-`https://console.limrun.com/stream?platform=ios&osVersion=26&model=iphone`
-use the reviewer's selected organization. An explicit organization must be one
-the reviewer can access.
-
 ## Gotchas
 
 - **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
