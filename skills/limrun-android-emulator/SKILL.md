@@ -439,6 +439,9 @@ lim asset push ./app-debug.apk -n ${ASSET_NAME}
 echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=android"
 ```
 
+The `model` query parameter accepts `phone` (default) or `tablet`. Append
+`&model=tablet` to preview the APK on a tablet.
+
 Opening the link in the Limrun console provisions an emulator and starts
 streaming while the console installs the APK. An `Installing <asset name>`
 overlay stays visible during installation. Add `openUrl` to open a URL or app deep link after launch, for
