@@ -341,6 +341,18 @@ lim ios element-tree
 
 ## Interacting with the app
 
+If a React Native view's `testID` is missing from the default tree, read the XCTest snapshot:
+
+```bash
+lim ios element-tree --id <ios-instance-id> --source xcuitest --json
+```
+
+This requires a server version that supports `xcuitest`; older servers ignore the option.
+Find the identifier in `AXUniqueId` and tap the center of its `frame` with `lim ios tap`.
+`tap-element` still searches the default accessibility tree. XCTest snapshots omit web content
+hosted in another process and leave simulator automation mode enabled. Without `--source`,
+`element-tree` uses the default accessibility reader.
+
 Prefer tapping by accessibility id, then by label, then coordinates as a last
 resort:
 
