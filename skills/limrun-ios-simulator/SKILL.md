@@ -311,9 +311,11 @@ the report's `Binary Images` lines).
 
 A React Native or Expo red error screen is not an exit: the app process keeps
 running, so nothing is reported. In the TypeScript SDK, `launchApp`'s
-`onExit(logs, info)` gets the same report, and `watchApp(bundleId, onExit)`
-reports the next exit of an app you did not launch, for example one opened
-with `lim ios open-url`.
+`onExit(logs, info)` gets the same report, and
+`monitorApp(bundleId, { onExit })` reports every exit of an app you did not
+launch, for example one opened with `lim ios open-url` or relaunched by a test
+runner, until `stop()`. `watchApp`, which reports only the next exit, is
+deprecated.
 
 While the app runs, `launch-app` also prints each main-thread hang: a hang
 starts once the main thread hasn't answered for 1 second, and each report
@@ -323,7 +325,7 @@ busy; `waiting` with little CPU time means it waited, and the top frame shows
 on what. The hang's end gives its length. Hangs explain an app that freezes
 or automation calls that stall, since reading the screen waits for the main
 thread. In the TypeScript SDK, `launchApp`'s `onHang` gets the same reports,
-and `watchHangs(bundleId, onHang)` reports every hang of the app, across
+and `monitorApp(bundleId, { onHang })` reports every hang of the app, across
 relaunches, until `stop()`.
 
 ## App logs
