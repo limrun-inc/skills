@@ -300,7 +300,10 @@ permissions. IDs need no create grant. Build uploads default to 14-day expiry;
 changes require `update`, including app identity extracted after a build.
 `upload` covers artifact and icon bytes; an icon download URL also requires
 `read`. Use `assets.update` for metadata and `assets.createUploadURL(id)`
-to obtain both artifact and icon upload URLs. Upload the PNG to `signedIconUploadUrl`
+to obtain both artifact and icon upload URLs and the existing artifact `md5`.
+Compare `md5` with the local file to skip unchanged uploads. A missing file omits
+`md5`; a failed storage check returns an error. This check needs only `upload`.
+`PUT /v1/assets` also returns `md5` with either `read` or `upload`. Upload the PNG to `signedIconUploadUrl`
 with `PUT` and `Content-Type: image/png`; no other caller-supplied headers are required.
 
 Automatic named-upload builds create a fresh instance with those permissions rather than
