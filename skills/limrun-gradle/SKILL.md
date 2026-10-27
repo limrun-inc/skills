@@ -283,3 +283,41 @@ builder; see the repository for inputs and workflow examples.
   files (including nested ones) are honored. Use `--ignore <regex>` for other
   large local artifacts and `--include <regex>` to force-sync gitignored
   inputs the build needs.
+
+## Scoped workload uploads
+
+Named build uploads use the instance's delegated permissions. `lim gradle build --upload <name>`
+adds exact-name create, upload, and expiry-update permissions to the instance
+creation request. Repeat `--permission asset:<target>:<verb>` to add customer grants.
+The cumulative list must be covered by the instance creator's permissions.
+Invalid permissions or more than 100 entries return HTTP 400; valid grants that
+exceed the creator's permissions return HTTP 403.
+
+For SDK users, create an upload object with `target: assetNameTarget(name)` and
+pass `assetUploadPermissions(upload, customerPermissions)` as
+`spec.role.permissions` before creating the instance. Pass the same upload object
+to the build. The helper preserves customer grants and adds only target-specific
+permissions. IDs need no create grant. Build uploads default to 14-day expiry;
+`ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
+changes require `update`, including app identity extracted after a build.
+`upload` covers artifact and icon bytes; an icon download URL also requires
+`read`. Use `assets.update` for metadata and `assets.createUploadURL(id)`
+to obtain both artifact and icon upload URLs and the existing artifact `md5`.
+Compare `md5` with the local file to skip unchanged uploads. A missing file omits
+`md5`; a failed storage check returns an error. This check needs only `upload`.
+`PUT /v1/assets` also returns `md5` with either `read` or `upload`. Upload the PNG to `signedIconUploadUrl`
+with `PUT` and `Content-Type: image/png`; no other caller-supplied headers are required.
+
+Automatic named-upload builds create a fresh instance with those permissions rather than
+reuse a cached one with unknown permissions. With `--id` or an environment-pinned
+instance, its existing permissions must already authorize the upload. Permissions cannot be
+widened after creation. The create commands accept repeatable `--permission` flags.
+
+An explicit `token` in the SDK upload object uses that credential and never falls
+back after denial. `upload: { signedUploadUrl }`, CLI `--signed-upload-url`, and
+`LIM_SIGNED_UPLOAD_URL` retain their behavior and add no delegated permissions.
+The old SDK `assetName` spelling is a deprecated alias for a name target; it no
+longer prefetches URLs using the caller's key. Named uploads do not automatically
+return a download URL. Download needs a separate read grant.
+
+See [delegated asset permissions](https://docs.limrun.com/docs/platform/asset-storage#delegated-asset-permissions).
