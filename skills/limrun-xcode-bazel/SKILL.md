@@ -106,7 +106,9 @@ lim xcode rbe upload preview/my-app --ttl 24h                # one-shot: the new
   plus at least one successful build. Its instance must already hold create,
   upload, and update permissions for the chosen name; this command cannot
   widen existing permissions. Start the tunnel with `--auto-upload` or provision
-  its instance with those permissions first.
+  its instance with those permissions first. The daemon packages the recorded
+  artifact before getting or creating the named asset with its delegated
+  permissions. A missing build or packaging failure leaves the asset untouched.
 - TTLs are Go durations (`24h`, `30m`; `1d` is invalid) and optional; each
   upload without one pushes the asset's expiry to 14 days from that upload.
 - To change the `--auto-upload` config of a running tunnel, `--stop` and
