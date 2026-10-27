@@ -96,6 +96,7 @@ lim gradle logs --follow
 ## Tool versions and shell commands
 
 After syncing, `lim gradle use` selects tools in the sandbox and installs missing versions.
+Exact pnpm pins are preserved; use `lim gradle use pnpm@10.13.1` for the bundled older version. `rg` is preinstalled.
 Run `lim gradle tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/android/build-with-gradle)). Builds keep the project's `gradlew`; Android SDK/NDK/CMake use `sdkmanager`.
 
 ```bash

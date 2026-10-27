@@ -189,6 +189,7 @@ variables referenced by the configuration.
 ## Developer tool versions
 
 After syncing, `lim xcode use` selects tools in the sandbox and installs missing versions.
+Exact pnpm pins are preserved; use `lim xcode use pnpm@10.13.1` for the bundled older version. `rg` is preinstalled.
 Run `lim xcode tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/ios/build-with-xcode)). Use major versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
 
 ```bash
