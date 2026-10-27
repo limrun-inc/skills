@@ -561,9 +561,11 @@ https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
   works. If it doesn't, add a `mise.limrun.toml` beside it listing only the
   build's tools (for example node and pnpm); in that directory Limrun reads it
   instead of the other mise files.
-- **The embedded Xcode sandbox is gone.** The TypeScript SDK (0.54.0+) and
-  `lim` (0.35.0+) no longer create an Xcode sandbox inside an iOS instance.
-  Symptoms after an upgrade: `'sandbox' does not exist in type 'Spec'` on
+- **The embedded Xcode sandbox is gone.** The API rejects an iOS create with
+  `spec.sandbox.xcode.enabled` (`400 The embedded Xcode sandbox
+  (spec.sandbox.xcode) was removed`), and the TypeScript SDK (0.54.0+) and
+  `lim` (0.35.0+) no longer offer it. If an old `lim` sent the request,
+  upgrade it. Other symptoms: `'sandbox' does not exist in type 'Spec'` on
   `iosInstances.create`, `Property 'sandbox' does not exist on type 'Status'`
   where code reads `status.sandbox.xcode.url`, or `Expected an Xcode instance
   (sandbox_...), got ios_...` from a `lim xcode` command. Create the Xcode
@@ -572,7 +574,7 @@ https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
   simulator; in the SDK, `xcodeInstances.create` then `attachNewSimulator()` or
   `attachSimulator(iosInstance)` on its client. Pass the `sandbox_` ID to
   `lim xcode` commands and the `ios_` ID to `lim ios` commands. Details:
-  https://docs.limrun.com/docs/ios/build-with-xcode#moving-off-the-embedded-xcode-sandbox
+  https://docs.limrun.com/docs/ios/build-with-xcode#move-off-the-embedded-xcode-sandbox
 - **Instance ID for `lim ios` commands.** They resolve the current instance
   from the git worktree of your cwd and can fail with `No instance ID provided
   and no recent ios instance found`. Get the ID from `lim xcode get` and pass
