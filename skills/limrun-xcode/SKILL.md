@@ -611,6 +611,8 @@ Named build uploads use the instance's delegated permissions. `lim xcode build -
 adds exact-name create, upload, and expiry-update permissions to the instance
 creation request. Repeat `--permission asset:<target>:<verb>` to add customer grants.
 The cumulative list must be covered by the instance creator's permissions.
+Invalid permissions or more than 100 entries return HTTP 400; valid grants that
+exceed the creator's permissions return HTTP 403.
 
 For SDK users, create an upload object with `target: assetNameTarget(name)` and
 pass `assetUploadPermissions(upload, customerPermissions)` as
