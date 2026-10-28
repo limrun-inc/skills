@@ -293,11 +293,13 @@ The cumulative list must be covered by the instance creator's permissions.
 Invalid permissions or more than 100 entries return HTTP 400; valid grants that
 exceed the creator's permissions return HTTP 403.
 
-For SDK users, create an upload object with `target: assetNameTarget(name)` and
-pass `assetUploadPermissions(upload, customerPermissions)` as
-`spec.role.permissions` before creating the instance. Pass the same upload object
-to the build. The helper preserves customer grants and adds only target-specific
-permissions. IDs need no create grant. Build uploads default to 14-day expiry;
+For SDK users, supply a literal target such as `target: 'name/result.apk'` and
+an explicit `spec.role.permissions` array containing your existing grants plus
+`asset:name/result.apk:create`, `asset:name/result.apk:upload`, and
+`asset:name/result.apk:update`. Use the same target in the build upload object.
+The SDK sends the permission array unchanged. Encode special characters in names
+with uppercase percent escapes; `preview/app.apk` becomes `name/preview%2Fapp.apk`.
+IDs need no create grant. Build uploads default to 14-day expiry;
 `ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
 changes require `update`, including app identity extracted after a build.
 `upload` covers artifact and icon bytes; an icon download URL also requires
