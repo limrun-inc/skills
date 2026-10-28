@@ -108,6 +108,10 @@ lim gradle run --env APP_ENV=staging -- npm run generate
 lim gradle build . --env APP_ENV=staging
 ```
 
+Wait for any separate sync to succeed before starting a build or command.
+If the server returns `workspace sync is still in progress`, wait for that sync
+to finish successfully, then retry. In SDK code, await `sync` before executing.
+
 ## Download sandbox files
 
 Use `lim gradle pull-file <remote-path> [destination] --id <instance-ID>`.

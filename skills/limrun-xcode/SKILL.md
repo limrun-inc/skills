@@ -223,6 +223,10 @@ lim xcode run --env API_ENV=development -- npm run generate
 lim xcode run --no-sync -- make api
 ```
 
+Wait for any separate sync to finish before starting a build, test, or command.
+If the server returns `workspace sync is still in progress`, wait for that sync
+to succeed, then retry the command. In SDK code, await `sync` before executing.
+
 The sandbox includes Node, Ruby, CMake, Mint, mise, and Homebrew. Tool installs
 made with mise, Mint, or Homebrew stay in the instance's sandbox home and
 remain available on later commands on that instance:
@@ -234,6 +238,23 @@ lim xcode run -- brew install tree
 ```
 
 Commands are one-shot and non-interactive. There is no TTY or stdin channel.
+
+### Temporary files in remote commands
+
+Write temporary logs and scratch files under the remote `$TMPDIR`, or use a
+workspace-relative path. Hardcoded `/tmp/...` destinations are not writable in
+the Xcode sandbox. This also applies to shell redirection and archive output;
+a failed redirection prevents the command from starting.
+
+Single-quote the remote command so `$TMPDIR` expands on the sandbox, not locally:
+
+```bash
+lim xcode run -- 'log="$TMPDIR/check.log"; make check >"$log" 2>&1; status=$?; tail -n 60 "$log"; exit "$status"'
+```
+
+Keep the command's exit status when printing its log. A pipeline into `head`
+or `tail` can hide a failure. For an archive you want to download afterward,
+write it inside the workspace and use `lim xcode pull-file`.
 
 ## Download sandbox files
 
