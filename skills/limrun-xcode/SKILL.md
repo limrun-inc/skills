@@ -644,6 +644,10 @@ Automatic named-upload builds create a fresh instance with those permissions rat
 reuse a cached one with unknown permissions. With `--id` or an environment-pinned
 instance, its existing permissions must already authorize the upload. Permissions cannot be
 widened after creation. The create commands accept repeatable `--permission` flags.
+CLI instance creation always sends an explicit list, empty if no grants are needed.
+`run`, Xcode build/test/sync/RBE, and Gradle build/sync also accept `--permission`.
+Auxiliary simulators receive an empty list; `ios create --xcode` passes the requested
+grants to both newly created workloads. Existing sessions keep their original roles.
 
 An explicit `token` in the SDK upload object uses that credential and never falls
 back after denial. `upload: { signedUploadUrl }`, CLI `--signed-upload-url`, and
