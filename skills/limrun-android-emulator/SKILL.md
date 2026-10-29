@@ -285,6 +285,25 @@ screenshot resolution, so read tap coordinates from screenshots, never from
 video frames. For UI changes, include a demo video in the pull request so the
 user can see it.
 
+### Recover a recording after an upload failure
+
+When uploading to a presigned URL, Android retries temporary DNS, connection,
+and HTTP errors. If the upload still fails, keep the instance running and
+retry `record stop` with the same recording ID. Do not start a replacement
+recording. You can also recover the finalized MP4 locally:
+
+```bash
+lim android record stop run-1 --presigned-url "$UPLOAD_URL"
+# After an upload failure:
+lim android record stop run-1 -o /tmp/run-1.mp4
+```
+
+Use an explicit recording ID for recovery. `record stop` without an ID
+selects the latest active session, which may be a different recording.
+Temporary upload failures are retryable when the stop identifies a specific
+recording. Correct invalid URLs or permanent HTTP errors before retrying,
+or download the file instead.
+
 ## Simulate the microphone with an audio file
 
 For voice-driven flows (assistants, speech-to-text, audio calls), play a local
