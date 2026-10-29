@@ -496,6 +496,7 @@ For StoreKit-like Android testing, use `lim android billing` on an image with bi
 
 ```bash
 lim android billing set com.example.app --config billing.json --id <instance-ID>
+lim android launch-app com.example.app --mode RelaunchIfRunning --id <instance-ID>
 lim android billing status com.example.app --id <instance-ID> --json
 lim android billing next com.example.app --outcome pending --id <instance-ID>
 # Start and confirm checkout in the app before approving its pending purchase.
@@ -507,7 +508,7 @@ lim android billing reset com.example.app --id <instance-ID>
 lim android billing clear com.example.app --id <instance-ID>
 ```
 
-`set` replaces the catalog and clears purchases. `reset` keeps the catalog. `clear` restores regular Play billing. `next` accepts approved, pending, declined, or canceled. `reject` removes a pending purchase; `refund` revokes a completed purchase. `renew` advances one subscription period manually, expiring a canceled subscription at that boundary. Refresh owned purchases after lifecycle changes.
+`set` replaces the catalog and clears purchases. `reset` keeps the catalog. `clear` restores regular Play billing. Restart the app after enabling or clearing simulation so BillingClient reconnects. `next` accepts approved, pending, declined, or canceled. `reject` removes a pending purchase; `refund` revokes a completed purchase. `renew` advances one subscription period manually, expiring a canceled subscription at that boundary. Refresh owned purchases after lifecycle changes.
 
 Label test evidence as local simulation. Simulated purchase tokens cannot pass Google server verification; apps with server verification need a test integration, and signature checks need the public test key from `status`. Do not claim real Play purchase validation from these results. The initial implementation supports ProductDetails with Billing Library 8, not legacy SkuDetails or subscription replacement.
 
