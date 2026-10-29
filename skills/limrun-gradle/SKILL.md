@@ -319,10 +319,12 @@ Compare `md5` with the local file to skip unchanged uploads. A missing file omit
 `PUT /v1/assets` also returns `md5` with either `read` or `upload`. Upload the PNG to `signedIconUploadUrl`
 with `PUT` and `Content-Type: image/png`; no other caller-supplied headers are required.
 
-Automatic named-upload builds create a fresh instance with those permissions rather than
-reuse a cached one with unknown permissions. With `--id` or an environment-pinned
-instance, its existing permissions must already authorize the upload. Permissions cannot be
-widened after creation. The create commands accept repeatable `--permission` flags.
+Named uploads keep the selected instance, including a workspace prepared by earlier commands.
+For an existing instance, the CLI uses the caller's authority to mint a token for
+create, upload, and update on that exact asset name and passes it with the build.
+The token expires four hours after submission. Newly created build instances use
+their refreshing workload credentials. `--reuse-if-exists` matches labels without
+comparing permissions, and reused instances keep their original roles. The create commands accept repeatable `--permission` flags.
 CLI instance creation always sends an explicit list, empty if no grants are needed.
 `run`, Xcode build/test/sync/RBE, and Gradle build/sync also accept `--permission`.
 Auxiliary simulators receive an empty list; `ios create --xcode` passes the requested

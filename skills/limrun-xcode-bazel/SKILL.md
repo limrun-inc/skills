@@ -100,15 +100,13 @@ lim xcode rbe upload preview/my-app --ttl 24h                # one-shot: the new
   post-build step. Upload results land in `.limrun/rbe.log`.
 - `--auto-upload` adds exact-name create, upload, and expiry-update permissions
   to the instance creation request, alongside any repeatable `--permission`
-  values. Automatic selection starts a fresh instance with those permissions. An
-  explicit `--id` or environment-pinned instance must already hold the grants.
+  values when it creates an instance. Uploads keep an existing selected instance
+  and obtain an exact-name upload token with the caller's authority for each
+  completed artifact. The instance's role remains unchanged.
 - `rbe upload` runs from the workspace root and needs a background tunnel
-  plus at least one successful build. Its instance must already hold create,
-  upload, and update permissions for the chosen name; this command cannot
-  widen existing permissions. Start the tunnel with `--auto-upload` or provision
-  its instance with those permissions first. The daemon packages the recorded
-  artifact before getting or creating the named asset with its delegated
-  permissions. A missing build or packaging failure leaves the asset untouched.
+  plus at least one successful build. The CLI mints a token restricted to create,
+  upload, and update for that asset name using the caller's authority. The daemon
+  packages the recorded artifact before getting or creating the named asset. A missing build or packaging failure leaves the asset untouched.
 - TTLs are Go durations (`24h`, `30m`; `1d` is invalid) and optional; each
   upload without one pushes the asset's expiry to 14 days from that upload.
 - To change the `--auto-upload` config of a running tunnel, `--stop` and
