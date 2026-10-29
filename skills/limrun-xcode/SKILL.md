@@ -156,6 +156,12 @@ saves it after a successful build with no later sync, replacing the previous
 snapshot under that key. `--wait-snapshot` waits for the save and reports its
 result. In CI, run deletion in a cleanup step even if the build fails.
 
+A checksum mismatch or failed snapshot download is a cold fallback. The CLI
+reports the failure and continues using the same instance. Continue syncing and
+building there; a successful build can publish a replacement on termination.
+Losing snapshot-status updates also does not require deleting the instance.
+An instance that has terminated must be replaced before building.
+
 Leave `--snapshot-paths` unset to save the whole workspace. Keep the project
 folder's name unchanged between runs. Use separate keys per project, Xcode
 version, and concurrent CI job.
