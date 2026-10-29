@@ -11,10 +11,7 @@ Use this skill for Expo / React Native-specific setup and dev-client iteration, 
 
 All builds and device operations must run on Limrun. Do not use local Xcode, local simulators, a local Android SDK, or local emulators; local `adb` is used only to talk to the remote emulator through the CLI's tunnel.
 
-For custom commands in an Xcode sandbox, write temporary files to the remote
-`$TMPDIR` or a workspace-relative path, including redirected logs and archives.
-Do not use hardcoded `/tmp/...` destinations. Single-quote the remote command
-to keep `$TMPDIR` expansion on the sandbox; see **limrun-xcode** for an example.
+In Xcode sandbox commands, use the remote `$TMPDIR` instead of `/tmp` or `/private/tmp`.
 
 ## Expo Readiness
 
