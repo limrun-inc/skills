@@ -618,10 +618,17 @@ For SDK users, supply a literal target such as `target: 'name/result.ipa'` and
 an explicit `spec.role.permissions` array containing your existing grants plus
 `asset:name/result.ipa:create`, `asset:name/result.ipa:upload`, and
 `asset:name/result.ipa:update`. Use the same target in the build upload object.
-The SDK sends the permission array unchanged. Use literal names without encoding:
-`releases:prod/app.ipa` becomes `name/releases:prod/app.ipa`. The first and last
-colons separate the permission fields. `%2F` stays literal, and `name/*` selects
-only the asset named `*`.
+The SDK sends the permission array unchanged. Do not percent-encode names:
+`releases:prod/app.ipa` uses `name/releases:prod/app.ipa`. The first and last
+colons separate permission fields. In permissions, `*` matches zero or more
+characters and `?` matches one character, including slashes and colons.
+Matching is case-sensitive; other characters are literal. Granting any name
+pattern requires `asset:*:<verb>` or `asset:*:all`; a name pattern cannot grant
+another pattern, even itself. It can grant concrete matching names. Workloads
+inherit their assigned patterns when exchanging identity without an explicit
+permission list. Upload targets always name one concrete asset and do not expand
+patterns. CLI automatic upload names reject `*` and `?` to avoid broad grants.
+Use an asset ID to grant exact access to an existing name containing those characters.
 IDs need no create grant. Build uploads default to 14-day expiry;
 `ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
 changes require `update`, including app identity extracted after a build.
