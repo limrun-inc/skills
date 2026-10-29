@@ -223,6 +223,8 @@ lim xcode run --env API_ENV=development -- npm run generate
 lim xcode run --no-sync -- make api
 ```
 
+Wait for sync to succeed before executing. If you get `workspace sync is still in progress`, retry after sync succeeds.
+
 The sandbox includes Node, Ruby, CMake, Mint, mise, and Homebrew. Tool installs
 made with mise, Mint, or Homebrew stay in the instance's sandbox home and
 remain available on later commands on that instance:
@@ -234,6 +236,8 @@ lim xcode run -- brew install tree
 ```
 
 Commands are one-shot and non-interactive. There is no TTY or stdin channel.
+
+Use the remote `$TMPDIR` for temporary files instead of `/tmp` or `/private/tmp`.
 
 ## Download sandbox files
 

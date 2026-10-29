@@ -11,6 +11,8 @@ Use this skill for Expo / React Native-specific setup and dev-client iteration, 
 
 All builds and device operations must run on Limrun. Do not use local Xcode, local simulators, a local Android SDK, or local emulators; local `adb` is used only to talk to the remote emulator through the CLI's tunnel.
 
+In Xcode sandbox commands, use the remote `$TMPDIR` instead of `/tmp` or `/private/tmp`.
+
 ## Expo Readiness
 
 Before changing Expo dependencies or app config, check the app's Expo SDK version and use the matching Expo versioned docs.
