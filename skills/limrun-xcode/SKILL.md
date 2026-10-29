@@ -618,8 +618,10 @@ For SDK users, supply a literal target such as `target: 'name/result.ipa'` and
 an explicit `spec.role.permissions` array containing your existing grants plus
 `asset:name/result.ipa:create`, `asset:name/result.ipa:upload`, and
 `asset:name/result.ipa:update`. Use the same target in the build upload object.
-The SDK sends the permission array unchanged. Encode special characters in names
-with uppercase percent escapes; `preview/app.ipa` becomes `name/preview%2Fapp.ipa`.
+The SDK sends the permission array unchanged. Use literal names without encoding:
+`releases:prod/app.ipa` becomes `name/releases:prod/app.ipa`. The first and last
+colons separate the permission fields. `%2F` stays literal, and `name/*` selects
+only the asset named `*`.
 IDs need no create grant. Build uploads default to 14-day expiry;
 `ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
 changes require `update`, including app identity extracted after a build.

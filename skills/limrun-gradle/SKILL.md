@@ -297,8 +297,10 @@ For SDK users, supply a literal target such as `target: 'name/result.apk'` and
 an explicit `spec.role.permissions` array containing your existing grants plus
 `asset:name/result.apk:create`, `asset:name/result.apk:upload`, and
 `asset:name/result.apk:update`. Use the same target in the build upload object.
-The SDK sends the permission array unchanged. Encode special characters in names
-with uppercase percent escapes; `preview/app.apk` becomes `name/preview%2Fapp.apk`.
+The SDK sends the permission array unchanged. Use literal names without encoding:
+`releases:prod/app.apk` becomes `name/releases:prod/app.apk`. The first and last
+colons separate the permission fields. `%2F` stays literal, and `name/*` selects
+only the asset named `*`.
 IDs need no create grant. Build uploads default to 14-day expiry;
 `ttl` changes that expiry and `uploadOptions` carries metadata. All metadata
 changes require `update`, including app identity extracted after a build.
