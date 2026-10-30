@@ -488,3 +488,28 @@ lim android delete <android-instance-id>
   instance" above; pass `--id` when in doubt.
 - **Build errors are the build skill's job.** If the APK isn't building, the
   failure is upstream; go back to **limrun-gradle**.
+
+
+## Local in-app purchase testing
+
+For StoreKit-like Android testing, use `lim android billing` on an image with billing sandbox support. Configure a version 1 JSON catalog with the app's actual product IDs. The app keeps using its normal BillingClient. No Google account, merchant setup, or screen lock is needed for this local mode.
+
+```bash
+lim android billing set com.example.app --config billing.json --id <instance-ID>
+lim android launch-app com.example.app --mode RelaunchIfRunning --id <instance-ID>
+lim android billing status com.example.app --id <instance-ID> --json
+lim android billing next com.example.app --outcome pending --id <instance-ID>
+# Start and confirm checkout in the app before approving its pending purchase.
+lim android billing approve com.example.app --product coins --id <instance-ID>
+lim android billing renew com.example.app --product pro --id <instance-ID>
+lim android billing cancel-renewal com.example.app --product pro --id <instance-ID>
+lim android billing expire com.example.app --product pro --id <instance-ID>
+lim android billing reset com.example.app --id <instance-ID>
+lim android billing clear com.example.app --id <instance-ID>
+```
+
+`set` replaces the catalog and clears purchases. `reset` keeps the catalog. `clear` restores regular Play billing. Restart the app after enabling or clearing simulation so BillingClient reconnects. `next` accepts approved, pending, declined, or canceled. `reject` removes a pending purchase; `refund` revokes a completed purchase. `renew` advances one subscription period manually, expiring a canceled subscription at that boundary. Refresh owned purchases after lifecycle changes.
+
+Label test evidence as local simulation. Simulated purchase tokens cannot pass Google server verification; apps with server verification need a test integration, and signature checks need the public test key from `status`. Do not claim real Play purchase validation from these results. The initial implementation supports ProductDetails with Billing Library 8, not legacy SkuDetails or subscription replacement.
+
+See [the catalog schema and examples](https://docs.limrun.com/docs/android/run-emulator#simulate-in-app-purchases).
