@@ -169,6 +169,23 @@ Configure snapshots at creation. Restore keys and paths stay fixed.
 On an existing instance, `build --snapshot-key` can only bind an unassigned
 save key if snapshots were already enabled; it does not restore or enable them.
 
+Inspect and delete stored workspaces by exact key:
+
+```bash
+lim xcode snapshot list --prefix myapp- --json
+lim xcode snapshot get myapp-main
+lim xcode snapshot delete myapp-main
+```
+
+`snapshot flush` aliases `snapshot delete`. Deletion removes the archive and
+its key, and cancels incomplete uploads for that key. Running instances can
+save it again; stop those instances and wait for publication before deleting
+if the key must stay empty. Other keys are unaffected.
+
+List JSON contains `snapshots` and an optional `nextOffset`. Pass that value as
+`--offset` to continue; `--limit` sets the page size. These commands use the login
+or API key's organization, with `--organization` available to select another.
+
 See the [disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots) for skipped
 saves, cold builds, and SDK usage.
 

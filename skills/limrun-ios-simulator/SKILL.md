@@ -22,6 +22,26 @@ Install if needed: `npm install --global lim`. Auth is `lim login` or
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `lim ios <subcommand> --help` instead of guessing.
 
+## Manage saved simulator snapshots
+
+List saved app state, inspect a key, or delete its archive:
+
+```bash
+lim ios snapshot list --prefix preview- --json
+lim ios snapshot get preview-alex
+lim ios snapshot delete preview-alex
+```
+
+`snapshot flush` aliases `snapshot delete`. Deletion removes the saved apps,
+data, and key. Running simulators can save it again. To keep a key empty, stop
+simulators using it and wait for their saves to finish before deleting it.
+
+List JSON contains `snapshots` and an optional `nextOffset`; pass it as `--offset`
+to continue. Use `--limit` for page size and `--organization` to select an
+organization other than the login or API key's default. A key with `saved: false`
+has no saved archive yet. The console exposes the same actions under
+**Snapshots → iOS**.
+
 ## Installing an app bundle
 
 You can either use Limrun remote Bazel or Xcode services to build the app bundle and have
