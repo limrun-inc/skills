@@ -104,6 +104,8 @@ lim xcode rbe upload preview/my-app --ttl 24h                # one-shot: the new
 - `lim xcode rbe upload <name>` requires a live background tunnel for the workspace
   and a successful build. It adds the required grants to that instance before upload.
 - The caller must control the instance and be able to delegate the resulting role.
+- The instance PATCH API can separately replace customer labels with `metadata.labels`,
+  using the same live ETag. `{}` clears labels; omitting permissions preserves the role.
   The daemon requests fresh workload credentials for each upload; the CLI passes no
   temporary access token. Existing signed upload URL behavior is unchanged.
 

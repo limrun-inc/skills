@@ -643,6 +643,8 @@ with `PUT` and `Content-Type: image/png`; no other caller-supplied headers are r
 Named uploads keep the selected instance, including a workspace prepared by earlier commands.
 The CLI reads the live role and adds create, upload, and update on that exact asset name.
 It preserves other grants and retries concurrent updates using the live ETag.
+The instance PATCH API also accepts `metadata.labels` independently of permissions.
+A supplied labels object replaces all customer labels; `{}` clears them. Omitted fields stay unchanged.
 The caller must control the instance and be allowed to delegate the resulting role.
 The daemon requests fresh workload credentials for each permission-based upload.
 `--reuse-if-exists` matches labels without comparing permissions; selection leaves the role unchanged.
