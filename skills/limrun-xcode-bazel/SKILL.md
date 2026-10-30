@@ -99,20 +99,13 @@ lim xcode rbe upload preview/my-app --ttl 24h                # one-shot: the new
   `--config=limrun` build re-uploads the app under that asset name, no
   post-build step. Upload results land in `.limrun/rbe.log`.
 - `--auto-upload` adds exact-name create, upload, and expiry-update permissions
-  to the instance creation request, alongside any repeatable `--permission`
-  values when it creates an instance. Uploads keep an existing selected instance
-  and obtain an exact-name upload token with the caller's authority for each
-  completed artifact. The instance's role remains unchanged.
-- `rbe upload` runs from the workspace root and needs a background tunnel
-  plus at least one successful build. The CLI mints a token restricted to create,
-  upload, and update for that asset name using the caller's authority. The daemon
-  packages the recorded artifact before getting or creating the named asset. A missing build or packaging failure leaves the asset untouched.
-- TTLs are Go durations (`24h`, `30m`; `1d` is invalid) and optional; each
-  upload without one pushes the asset's expiry to 14 days from that upload.
-- To change the `--auto-upload` config of a running tunnel, `--stop` and
-  re-run; the CLI refuses a mismatched re-arm instead of silently ignoring it.
-- Preview an uploaded app in a browser at
-  `https://console.limrun.com/preview?asset=<name>&platform=ios`.
+  to a new instance, or conditionally updates the existing instance's live role at
+  tunnel startup. It preserves other grants. Additional creation grants use `--permission`.
+- `lim xcode rbe upload <name>` requires a live background tunnel for the workspace
+  and a successful build. It adds the required grants to that instance before upload.
+- The caller must control the instance and be able to delegate the resulting role.
+  The daemon requests fresh workload credentials for each upload; the CLI passes no
+  temporary access token. Existing signed upload URL behavior is unchanged.
 
 ## Teardown
 

@@ -641,15 +641,16 @@ Compare `md5` with the local file to skip unchanged uploads. A missing file omit
 with `PUT` and `Content-Type: image/png`; no other caller-supplied headers are required.
 
 Named uploads keep the selected instance, including a workspace prepared by earlier commands.
-For an existing instance, the CLI uses the caller's authority to mint a token for
-create, upload, and update on that exact asset name and passes it with the build.
-The token expires four hours after submission. Newly created build instances use
-their refreshing workload credentials. `--reuse-if-exists` matches labels without
-comparing permissions, and reused instances keep their original roles. The create commands accept repeatable `--permission` flags.
+The CLI reads the live role and adds create, upload, and update on that exact asset name.
+It preserves other grants and retries concurrent updates using the live ETag.
+The caller must control the instance and be allowed to delegate the resulting role.
+The daemon requests fresh workload credentials for each permission-based upload.
+`--reuse-if-exists` matches labels without comparing permissions; selection leaves the role unchanged.
+The create commands accept repeatable `--permission` flags.
 CLI instance creation always sends an explicit list, empty if no grants are needed.
 `run`, Xcode build/test/sync/RBE, and Gradle build/sync also accept `--permission`.
 Auxiliary simulators receive an empty list; `ios create --xcode` passes the requested
-grants to both newly created workloads. Existing sessions keep their original roles.
+grants to both newly created workloads. Explicit role updates affect future token exchanges. Previously issued tokens remain valid until expiry, up to ten minutes.
 
 An explicit `token` in the SDK upload object uses that credential and never falls
 back after denial. `upload: { signedUploadUrl }`, CLI `--signed-upload-url`, and
