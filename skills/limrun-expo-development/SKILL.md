@@ -169,6 +169,11 @@ values. Keep Metro and the detached tunnel running while the user iterates.
 Run Metro as a managed background process, or copy the printed `TUNNEL_URL` into
 a second terminal before launching the app.
 
+Metro keeps talking to the app through the tunnel, and that traffic counts as
+simulator activity, so the simulator stays alive while Metro runs even when
+nobody touches it. To let it reach its inactivity timeout between sessions, add
+`--no-reset-inactivity-timeout` to `lim ios tunnel` (`lim` 0.50.0 or later).
+
 If port 8081 is already occupied, choose another explicit port and use the same
 value for the tunnel selector, `TUNNEL_URL`, and Expo's `--port`. Selector sets
 are immutable: stop and recreate the tunnel with the complete selector list
