@@ -22,6 +22,16 @@ Install if needed: `npm install --global lim`. Auth is `lim login` or
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `lim ios <subcommand> --help` instead of guessing.
 
+## Choose the device model and iOS version
+
+`lim ios create` takes `--model iphone|iphone-duo|ipad|watch` (default
+`iphone`) and `--os-version 26|27`. iPhone and iPad run both versions, iPhone
+Duo runs 27, and Apple Watch runs 26; the default is 26, or 27 on iPhone Duo.
+
+```bash
+lim ios create --model ipad --os-version 27
+```
+
 ## Installing an app bundle
 
 You can either use Limrun remote Bazel or Xcode services to build the app bundle and have

@@ -314,21 +314,40 @@ project has test targets). `--xcode-version 27` builds the tests with that
 major's GA (`27.1` selects the beta); the simulator keeps the fleet default
 runtime, so the run warns and proceeds (runtime-dependent failures are possible).
 
-Select a subset with xcodebuild's identifier format
-`Target[/Class[/method]]`; repeat the flag for multiple entries. The two flags
-are mutually exclusive:
+`--model` (`iphone`, `iphone-duo`, `ipad`) and `--os-version` (`26`, `27`)
+choose the simulator the run creates; iPhone and iPad run both versions,
+iPhone Duo runs 27. Either flag creates a fresh sandbox and simulator instead
+of reusing the last ones, and neither combines with `--id` or `--build-only`:
+
+```bash
+lim xcode test . --model ipad --os-version 27
+```
+
+Select a subset with xcodebuild's identifier format:
+`Target[/Class[/method]]` for XCTest, `Target/Suite[/test()]` for Swift
+Testing. Repeat the flag for multiple entries. The two flags are mutually
+exclusive:
 
 ```bash
 lim xcode test . --only-testing MyAppTests/LoginTests/testValidLogin
+lim xcode test . --only-testing MyAppTests/CartSuite
+lim xcode test . --only-testing 'MyAppTests/CartSuite/addsItem()'
 lim xcode test . --skip-testing MyAppUITests
 ```
 
-A bare target name selects or skips that whole target. An `--only-testing`
+A Swift Testing suite selects its nested suites too. A function needs its
+parentheses, with argument labels for a parameterized test
+(`addsItems(count:)`); without them it matches nothing. A selection that
+matches nothing runs zero cases and still passes, so check the summary
+counts. A bare target name selects or skips that whole target. An `--only-testing`
 entry naming a target the build did not produce fails the run instead of
 silently running everything.
 
-For machine consumption, `--json` streams the raw per-case events as NDJSON
-and ends with a `{"exitCode": N}` record:
+A failed case prints its first failure as `file:line: message`, with the file
+relative to the synced project; a failure without a location (a crash) shows
+only the message. For machine consumption, `--json` streams the raw per-case
+events as NDJSON (failed cases carry `failureMessage`, `failureFile` and
+`failureLine`) and ends with a `{"exitCode": N}` record:
 
 ```bash
 lim xcode test . --json > results.ndjson
