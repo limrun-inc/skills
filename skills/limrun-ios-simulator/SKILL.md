@@ -15,29 +15,6 @@ concerns in those skills; this one is about driving the running simulator.
 
 Never use local Xcode, local simulators, or local macOS tools.
 
-## Temporary access tokens
-
-To give another client control of one existing instance, mint an access token
-with your API key or CLI login:
-
-```bash
-lim access-token create --permission "ios:$INSTANCE_ID:all" --ttl-seconds 900 --json
-lim access-token revoke "$TOKEN_ID"
-```
-
-Use the returned instance ID exactly. Save the response's `id` for revocation, and give the client `token` plus the instance's
-`status.apiUrl`. `--quiet` prints only the token. Instance grants require a
-concrete ID; they do not grant instance creation or organization-wide listing.
-Use `stream` instead of `all` to grant only interactive streaming, including touch
-and typing. Supply `status.endpointWebSocketUrl` with that token to a streaming
-client. It cannot use the device API, manage apps, or fetch the instance record.
-
-The lifetime defaults to one hour and cannot exceed four hours.
-Revocation does not close connections or stop use at instance endpoints, which
-continue accepting the token until expiry or instance termination.
-See [Permissions and access tokens](https://docs.limrun.com/docs/reference/permissions)
-for the complete permission tables and SDK examples.
-
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
