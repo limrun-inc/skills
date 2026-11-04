@@ -67,6 +67,20 @@ lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
 
+## Reuse build outputs
+
+Managed builds use `--no-daemon` to release JVM memory after each build.
+Repeat builds start a fresh JVM while retaining disk caches and compiled outputs.
+Gradle commands through `lim gradle run` keep their own daemon settings.
+
+Keep the same instance for repeat builds. `lim gradle build` enables Gradle
+task-output caching by default. In the project or generated Android
+`gradle.properties`, `org.gradle.caching=false` disables output caching.
+CMake uses a C/C++ compiler cache by default;
+pass `--env CCACHE_DISABLE=1` to bypass it. These are separate caches and last
+only for that instance. Gradle commands through `lim gradle run` keep their own
+cache settings. Do not pass Gradle flags through `--task`.
+
 ## Private dependency credentials
 
 Copy existing credential files with `--additional-file`, also supported by `sync`:
@@ -77,7 +91,9 @@ lim gradle build . \
   --additional-file "$HOME/.netrc=~/.netrc"
 ```
 
-Remote `~/` targets the sandbox home; other destinations are workspace-relative.
+Remote `~/` targets `/home/limrun`; other destinations are workspace-relative.
+The same home holds Gradle caches at `~/.gradle`, SDK packages at `~/Android/Sdk`,
+and custom executables at `~/.local/bin`, which is included in `PATH`.
 Repeat the flags on later syncs to retain the files. Pass `--env` for environment
 variables referenced by the configuration.
 
