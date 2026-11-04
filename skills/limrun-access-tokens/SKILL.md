@@ -78,10 +78,16 @@ Save `id` for revocation and pass `token` to the intended client.
 
 ```bash
 lim access-token revoke "$TOKEN_ID"
+# Or pass the token itself:
+lim access-token revoke "$ACCESS_TOKEN"
 ```
 
-Revoke takes the returned ID, not the `lim_st_...` token value. Repeating a revoke
-call is safe. A failed request is not confirmation of revocation.
+CLI revocation accepts the returned ID or the `lim_st_...` token value. It
+extracts the token's JWT `jti` and sends only that ID, authenticated with your
+API key or login. Tokens without a `jti`, including `status.token` and
+`status.streamToken`, cannot be revoked this way. Output contains the resolved
+ID, not the supplied token. Repeating a revoke call is safe. A failed request
+is not confirmation of revocation.
 
 ## TypeScript SDK
 
@@ -99,7 +105,7 @@ const access = await lim.accessTokens.create({
 await lim.accessTokens.revoke(access.id);
 ```
 
-Use `accessTokens` and `permissions` in new integrations. For REST, the matching
+The SDK revoke method takes an ID. Use `accessTokens` and `permissions` in new integrations. For REST, the matching
 routes are `POST /v1/access_tokens` and `DELETE /v1/access_tokens/{id}`;
 authenticate with the API key in the Authorization Bearer header.
 
