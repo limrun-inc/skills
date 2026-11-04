@@ -25,11 +25,14 @@ lim access-token create --permission "ios:$INSTANCE_ID:all" --ttl-seconds 900 --
 lim access-token revoke "$TOKEN_ID"
 ```
 
-Use the returned instance ID exactly, including `sandbox_` for Xcode. Save the
-response's `id` for revocation, and give the client `token` plus the instance's
+Use the returned instance ID exactly. Save the response's `id` for revocation, and give the client `token` plus the instance's
 `status.apiUrl`. `--quiet` prints only the token. Instance grants require a
-concrete ID and `all`; they do not grant instance creation or organization-wide
-listing. The lifetime defaults to one hour and cannot exceed four hours.
+concrete ID; they do not grant instance creation or organization-wide listing.
+Use `stream` instead of `all` to grant only interactive streaming, including touch
+and typing. Supply `status.endpointWebSocketUrl` with that token to a streaming
+client. It cannot use the device API, manage apps, or fetch the instance record.
+
+The lifetime defaults to one hour and cannot exceed four hours.
 Revocation does not close connections or stop use at instance endpoints, which
 continue accepting the token until expiry or instance termination.
 See [Permissions and access tokens](https://docs.limrun.com/docs/reference/permissions)
