@@ -71,9 +71,9 @@ lim xcode logs --follow
 
 ### Pick the Xcode version
 
-A sandbox builds with its node's default Xcode (26.4 today). The fleet carries
-one released (GA) Xcode per major plus one beta while Apple seeds one: today
-26.4 GA, 27.0 GA and 27.1 beta. Two selectors cover them:
+A sandbox builds with its node's default Xcode (27.1 today). The fleet carries
+the released (GA) Xcodes it supports plus one beta while Apple seeds one: today
+26.4, 27.0 and 27.1, all GA. Two selectors cover them:
 
 - A bare major (`27`) binds the newest GA release of that major, never a beta,
   and follows Apple's point releases on its own. Use it for App Store builds.
@@ -86,8 +86,8 @@ and new sandbox follows it, and the flag overrides it for one command:
 lim xcode version list      # Select is the value to type, Channel is ga or beta; * marks the one in use
 lim xcode use xcode@27      # prefer the Xcode 27 GA for this workspace; switches the remembered sandbox now
 lim xcode build .           # builds with 27
-lim xcode version           # "27.0 (27A266a)" shows the sandbox's current Xcode
-lim xcode version set 27.1  # pin the 27.1 beta instead
+lim xcode version           # "27.1 (27A9275)" shows the sandbox's current Xcode
+lim xcode version set 26.4  # pin 26.4 instead, for a project not ready for Xcode 27
 lim xcode build . --xcode-version 26   # one-off override, not remembered
 lim xcode version unset     # forget the preference; the sandbox goes back to the node default
 ```
