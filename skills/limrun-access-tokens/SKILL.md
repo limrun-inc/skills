@@ -40,10 +40,10 @@ where supported. Give a device or build client the token and `status.apiUrl`.
 Have the trusted backend supply the endpoint URL alongside either token; access
 tokens are not a replacement for an API key across all SDK methods.
 
-Instance grants require a concrete ID. They do not grant organization-wide
-listing, instance creation, deletion, or role updates. Access-token create
-rejects instance `read`, `work`, and `tunnel` actions; the latter two belong to
-specialized build and private-tunnel flows.
+ID-targeted instance grants do not grant organization-wide listing, instance
+creation, deletion, or role updates. Access-token create rejects `read` on ID
+targets. The `work` and `tunnel` actions belong to specialized build and
+private-tunnel flows.
 
 Other accepted grants include:
 
@@ -59,6 +59,33 @@ For asset pattern delegation, organization roles, or workload-role permissions,
 consult [Permissions and access tokens](https://docs.limrun.com/docs/reference/permissions).
 Workload roles grant asset access from inside an instance; they do not grant
 another client control of it.
+
+## Grant access before creating an instance
+
+For iOS, Android, Xcode, or Gradle, use a name target such as
+`xcode:name/workspace-123:all`. Mint it with `lim access-token create --permission 'xcode:name/workspace-123:all' --ttl-seconds 900 --json`.
+
+The client passes the returned token as a bearer credential to the management
+API and supplies `metadata.name: "workspace-123"` in the instance create body.
+`all` permits creating, reading, updating, and deleting that named instance;
+`read` lists and reads matching instances without control credentials. Use the
+returned instance ID in subsequent management URLs. To run builds or control a
+device, use the returned `status.apiUrl` and `status.token`, not the name-scoped
+token. Revoking the name-scoped token does not revoke that instance token.
+
+Names are immutable and unique per organization, region, and instance type.
+They default to the instance ID when omitted. A name contains 1 to 128 lowercase
+letters, digits, dots, underscores, or hyphens and starts with a letter or digit.
+An occupied name returns `409`, including with `reuseIfExists=true`. Termination
+keeps the name occupied until cleanup finishes. Recreating it gets a fresh ID,
+and the name grant still applies. A grant can therefore create one live instance
+per region, not just one globally. Lists accept exact `name` and `region` filters
+but may lag creation.
+
+Name patterns support `*` and `?`; a pattern can cover multiple names. Delegating
+a pattern requires a resource-wide grant. Name-targeted instance access tokens
+accept only `read` and `all`. Keep API-key grants and workload asset roles within
+their existing target restrictions.
 
 ## Create and revoke with the CLI
 
