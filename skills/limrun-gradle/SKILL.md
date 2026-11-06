@@ -57,12 +57,17 @@ lim gradle build . --project-path android
 
 Expo managed-workflow projects (no `android/` directory) are detected
 automatically: the sandbox installs dependencies and runs `expo prebuild`
-before Gradle. Setting `--expo-app-dir` (monorepos) or `--abi` forces that
-pipeline and errors when no Expo app is detected:
+before Gradle. Setting `--expo-app-dir` (monorepos), `--expo-no-clean`, or `--abi`
+forces that pipeline and errors when no Expo app is detected:
 
 ```bash
 lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 ```
+
+For Expo SDK 57 and later, add `--expo-no-clean` to pass `--no-clean` to
+prebuild and preserve the existing `android/` directory. Prebuild still skips
+an unchanged generated project or a complete client-synced native project.
+Omitting the flag keeps the installed Expo CLI's default.
 
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.

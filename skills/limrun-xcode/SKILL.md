@@ -57,6 +57,11 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 lim xcode build . --configuration Debug
 ```
 
+For Expo SDK 57 and later, add `--expo-no-clean` to pass `--no-clean` to
+prebuild and preserve the existing `ios/` directory. This flag does not force
+prebuild to run; combine it with `--expo-force-prebuild` when needed.
+Omitting the flag keeps the installed Expo CLI's default.
+
 ### Detached builds and logs
 
 Use `--detach` to return once the build is accepted; a webhook is optional.
