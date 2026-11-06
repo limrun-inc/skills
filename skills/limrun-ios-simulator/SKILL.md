@@ -140,6 +140,32 @@ display. The 3D viewer supports single-finger touch and drag. Rotating the view
 changes the camera; **Rotate device** changes native orientation. **Laptop view**
 sets the hinge and orientation; it does not enable Apple's separate Table Mode.
 
+## Connect CarPlay
+
+Use a supported iPhone simulator and the TypeScript device client to control
+CarPlay. There is no `lim ios carplay` command. Check capability first:
+
+```ts
+const state = await client.getCarPlayState();
+if (!state.supported) throw new Error('CarPlay is unavailable on this simulator');
+await client.setCarPlayEnabled(true);
+const screen = await client.screenshotDisplay('carplay');
+await client.tapDisplay('carplay', screen.width / 2, screen.height / 2);
+// Disconnect when the CarPlay flow is finished.
+await client.setCarPlayEnabled(false);
+```
+
+CarPlay is supported on iPhone with iOS 26.4; capability detection rejects
+unsupported runtimes and models, including iPhone Duo. Screenshots and touches
+use 400 × 240 points, backed by an 800 × 480 display. Pass
+`display: 'carplay'` to `scroll`, `performActions`, or `startRecording` to
+target it. It supports single-finger touch and drag. Use CarPlay screenshots
+to verify its UI; the accessibility tree and default input target the phone.
+
+The browser viewer offers **Connect CarPlay**, **Show phone** / **Show CarPlay**,
+and **Disconnect CarPlay**. Switching views keeps the CarPlay connection alive.
+All clients share the instance's CarPlay state.
+
 ## Targeting the right instance
 
 Most `lim ios` commands default to the last created instance and resolve the
