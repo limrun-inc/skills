@@ -1,6 +1,6 @@
 ---
 name: limrun-store-auth
-description: "Connect Apple and Google Play publishing accounts with lim ios apple-auth and lim android google-auth, saving credentials on the user's computer for later builds. Use for store sign-in, Desktop OAuth client setup, or renewing a saved store login, not simulator account login or ordinary lim login."
+description: "Connect Apple and Google Play publishing accounts with lim ios apple-auth and lim android play-auth, saving credentials on the user's computer for later builds. Use for store sign-in, Desktop OAuth client setup, or renewing a saved store login, not simulator account login or ordinary lim login."
 ---
 
 # Connect store accounts with Limrun
@@ -11,7 +11,7 @@ authentication request alone does not authorize a build or a store upload.
 
 ## Choose where to run
 
-Check `lim ios apple-auth --help` or `lim android google-auth --help` when the
+Check `lim ios apple-auth --help` or `lim android play-auth --help` when the
 installed CLI's capabilities are unclear. Install the CLI with
 `npm install --global lim` if needed. Apple authentication and later builds need
 `lim login` or an existing `LIM_API_KEY`.
@@ -59,7 +59,7 @@ must already exist. Use `limrun-xcode` when available for the build workflow.
 ## Google Play
 
 Require the path to a downloaded Google OAuth **Desktop app** client JSON
-file. A web OAuth client or service-account key is not valid for `google-auth`.
+file. A web OAuth client or service-account key is not valid for `play-auth`.
 The Google Cloud project needs the Google Play Android Developer API enabled
 and a configured OAuth consent screen, with the user added as a test user when
 applicable. The Google account must have publishing access to the target app
@@ -67,7 +67,7 @@ in Play Console. See the [setup guide](https://docs.limrun.com/docs/guides/store
 if the user still needs to create the client.
 
 ```bash
-lim android google-auth --client-config /path/to/client_secret.json
+lim android play-auth --client-config /path/to/client_secret.json
 ```
 
 The user signs in and grants access in the browser. If automatic opening fails,
@@ -89,7 +89,7 @@ lim gradle build . --sign --upload-to-playstore
 The Play listing must already exist, and the AAB must use the registered upload
 key. `--sign` uses the separate upload key stored for the Limrun organization.
 Use `limrun-gradle` when available for signing and publishing details. If token
-refresh fails, have the user repeat `google-auth`; do not request their token.
+refresh fails, have the user repeat `play-auth`; do not request their token.
 
 ## Remove saved access
 
