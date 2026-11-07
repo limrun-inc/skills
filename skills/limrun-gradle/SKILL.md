@@ -208,7 +208,7 @@ Failure strings to recognize on the bring-your-own path:
 
 ## Authenticate Google Play locally
 
-Use `lim android play auth --client-config /path/to/client_secret.json` for persistent Google Play login on the user's computer. Follow `limrun-store-auth` when available, or the [store authentication guide](https://docs.limrun.com/docs/guides/store-authentication#connect-a-google-account), for Desktop OAuth setup and credential handling. Publishing uses the saved login when explicit Play credentials are absent.
+Use `lim android play auth` for persistent Google Play login on the user's computer. Follow `limrun-store-auth` when available, or the [store authentication guide](https://docs.limrun.com/docs/guides/store-authentication#connect-a-google-account), for sign-in and credential handling. Publishing uses the saved login when explicit Play credentials are absent.
 
 ## Publish to Play Store
 
