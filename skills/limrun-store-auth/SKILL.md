@@ -64,17 +64,18 @@ must already exist. Use `limrun-xcode` when available for the build workflow.
 
 ## Google Play
 
-Require the path to a downloaded Google OAuth **Desktop app** client JSON
-file. A web OAuth client or service-account key is not valid for `play auth`.
-The Google Cloud project needs the Google Play Android Developer API enabled
-and a configured OAuth consent screen, with the user added as a test user when
-applicable. The Google account must have publishing access to the target app
-in Play Console. See the [setup guide](https://docs.limrun.com/docs/guides/store-authentication#connect-a-google-account)
-if the user still needs to create the client.
+Use the bundled Limrun Desktop OAuth client by default. The Google account
+must have publishing access to the target app in Play Console.
 
 ```bash
-lim android play auth --client-config /path/to/client_secret.json
+lim android play auth
 ```
+
+Only ask for a client configuration path if the user wants their own OAuth
+client. Pass it with `--client-config /path/to/client_secret.json`. It must
+be a **Desktop app** client, with the Google Play Android Developer API
+enabled and its consent screen configured. Web clients and service-account
+keys cannot be used with `play auth`.
 
 The user signs in and grants access in the browser. If automatic opening fails,
 they can open the URL printed by the command on the same computer. Wait for
