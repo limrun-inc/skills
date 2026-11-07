@@ -85,8 +85,12 @@ reinstalling:
 lim android sync ./app-debug.apk
 ```
 
-It sends only a delta against the APK already on the instance, then
-reinstalls. `--watch` keeps re-syncing on file changes, and
+It sends a delta against the APK already on the instance, then reinstalls.
+Supported emulators also patch compressed APK entries while preserving the exact
+signed APK bytes. This works with local APKs from any build system and needs no
+signing keys. The client may download an installed APK to seed its basis cache;
+matching local blocks are reused. Unsupported archives or receivers fall back
+to ordinary deltas or full uploads. `--watch` keeps re-syncing on file changes, and
 `--launch-mode ForegroundIfRunning|RelaunchIfRunning` controls what happens to
 the running app after each install.
 
