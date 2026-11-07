@@ -1,6 +1,6 @@
 ---
 name: limrun-store-auth
-description: "Manage Apple Developer and Google Play accounts with lim ios apple and lim android play: authenticate, manage store and signing resources, and publish existing assets. Use for store login, bundle IDs, provisioning, store app creation, or publishing credentials, not simulator account login or ordinary lim login."
+description: "Manage Apple Developer and Google Play accounts with lim ios apple and lim android play: authenticate, manage store and signing resources, and publish existing assets. Use for store login, bundle IDs, provisioning, App Store Connect app records, or publishing credentials, not simulator account login or ordinary lim login."
 ---
 
 # Manage store accounts with Limrun

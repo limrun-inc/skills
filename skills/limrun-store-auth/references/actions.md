@@ -2,7 +2,7 @@
 
 `lim ios apple auth` and `lim android play auth` are login actions. Resource
 actions are siblings, for example `lim ios apple list-bundle-ids` and
-`lim android play create-app`. Use the action's `--help` for required flags.
+`lim android play publish`. Use the action's `--help` for required flags.
 Results are JSON. Never print credential files into the conversation.
 
 ## Apple sessions and IDs
@@ -84,20 +84,17 @@ requires an explicit `--release-status draft|completed`. Choose the status that
 matches the user's requested rollout; do not infer production release approval
 from a request to authenticate or prepare an artifact.
 
-`create-app` and `enroll-signing` use an experimental, undocumented Google API
+`enroll-signing` uses an experimental, undocumented Google API
 that has not been verified end to end with an approved client. Google must
 approve the OAuth client for either `https://www.googleapis.com/auth/play_console`
 or `https://www.googleapis.com/auth/playdeveloperapp`. Request the approved one
 with `lim android play auth --client-config PATH --console-scope SCOPE`.
-The normal `androidpublisher` scope is not sufficient for these actions.
+The normal `androidpublisher` scope is not sufficient for this action.
 
-Creation requires `--developer-id`, `--package-name`, `--title`, `--app-type app|game`,
-and `--pricing free|paid`. Obtain the user's actual declarations before passing
-`--app-meets-guidelines` and `--us-export-compliant`; do not accept on their behalf
-as a default. Creation returns numeric `developerId` and `appId`. Preserve them
-and use them for the separate `enroll-signing` action. If enrollment fails after
-creation, retry enrollment only. If an outcome is unknown, inspect Play Console
-before repeating a mutation. Neither action publishes a release.
+Create the app in Play Console first. For `enroll-signing`, use the existing app's
+numeric `--developer-id` and `--app-id`, not its package name. If an outcome is
+unknown, inspect Play Console before repeating the mutation. Enrollment does
+not publish a release.
 
 `generate-keystore --application-id PACKAGE` saves an upload keystore locally and
 refuses to replace an existing one. `export-keystore --application-id PACKAGE
