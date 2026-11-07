@@ -125,7 +125,23 @@ and download before deleting the instance.
 
 ## Run it on an emulator
 
-Upload the built APK as a named asset, then install it on an Android instance:
+For repeated builds, attach an emulator to the sandbox:
+
+```bash
+lim gradle build .
+lim android create
+lim gradle attach-emulator
+```
+
+Attachment installs the latest retained APK. Later `lim gradle build .` commands
+sync and install each APK automatically, in parallel with any requested upload.
+Use `lim gradle attach-emulator <android-instance-ID> --id <gradle-instance-ID>`
+to select both targets explicitly. Attach a replacement emulator to install the
+last APK without rebuilding. Install failures are warnings; upload failures still
+fail the build. Automatic installation requires one APK. AAB-only builds skip
+installation, and multiple APKs produce a warning.
+
+To share an artifact or create an emulator from an asset, upload it first:
 
 ```bash
 lim gradle build . --upload myapp.apk
