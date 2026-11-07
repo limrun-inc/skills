@@ -470,11 +470,15 @@ Failure strings to recognize in the build output:
 - p12 password errors: `--certificate-password` doesn't match the file; the
   user corrects the value on their machine.
 
+## Authenticate an Apple account locally
+
+Use `lim ios apple auth` to save an App Store Connect API key on the user's computer. Follow `limrun-store-auth` when available, or the [store authentication guide](https://docs.limrun.com/docs/guides/store-authentication#connect-an-apple-account), for interactive sign-in and credential handling. Builds use the saved key when explicit ASC credentials are absent; pass `--team-id` if several teams are saved.
+
 ## Upload to App Store Connect
 
 To upload the signed IPA to App Store Connect for TestFlight or App Store
-distribution, pass `--upload-to-appstore` with the App Store Connect API key
-flags on a signed device build:
+distribution, pass `--upload-to-appstore` on a signed device build. Use saved
+`apple auth` credentials or provide the App Store Connect API key flags:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
@@ -495,7 +499,7 @@ lim xcode build . --sdk iphoneos --configuration Release \
 ```
 
 `--upload-to-appstore` requires either cloud signing or the manual signing
-flags, plus `--asc-key-id` and `--asc-key`. Combine it with `--upload
+flags, plus saved `apple auth` credentials or `--asc-key-id` and `--asc-key`. Combine it with `--upload
 <asset-name>` when the user also wants the IPA in Asset Storage.
 
 Device IPAs carry the app's symbols (`Symbols/` next to `Payload/`), so App

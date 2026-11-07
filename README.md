@@ -17,6 +17,12 @@ The `lim` CLI installs the skills into whichever agent you use and keeps them up
 lim skills install
 ```
 
+To connect Apple and Google Play accounts for publishing from your computer, install the dedicated [store authentication skill](skills/limrun-store-auth/SKILL.md):
+
+```bash
+lim skills install --skills limrun-store-auth
+```
+
 ### Alternatives
 
 If you prefer your agent's own plugin or skills mechanism:

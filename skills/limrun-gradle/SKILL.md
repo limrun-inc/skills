@@ -206,11 +206,14 @@ Failure strings to recognize on the bring-your-own path:
   (`-storepasswd`, `-keypasswd`, or `-changealias`) to a Latin-1 value. Never
   regenerate the key itself: that changes the upload key.
 
+## Authenticate Google Play locally
+
+Use `lim android play auth` for persistent Google Play login on the user's computer. Follow `limrun-store-auth` when available, or the [store authentication guide](https://docs.limrun.com/docs/guides/store-authentication#connect-a-google-account), for sign-in and credential handling. Publishing uses the saved login when explicit Play credentials are absent.
+
 ## Publish to Play Store
 
-When the user has Play credentials configured on their own machine (a
-service-account JSON file or an access token, passed through the
-`--playstore-service-account` or `--playstore-access-token` flag), the build
+When the user has a saved `play auth` login, a service-account JSON file, or
+an access token on their own machine, the build
 publishes the signed release AAB directly, no browser involved. Never ask for
 these credentials in the conversation:
 
@@ -224,9 +227,10 @@ Google Play before the build and stamp it into the workspace copy
 `versionCode` in the conventional `app/` module build script for native
 Gradle projects), so repeat publishes never collide. Without it, or on
 projects with computed or flavor-split versionCodes (which it rejects at
-request time), manage the versionCode yourself as below. Without Play
-credentials you cannot run the publish itself: it is a browser flow with a
-Google sign-in. Prepare the artifact, upload it as an asset, and hand off:
+request time), manage the versionCode yourself as below.
+
+If the user prefers to publish from the console without saving CLI credentials,
+prepare the artifact, upload it as an asset, and hand off:
 
 ```bash
 lim gradle build . --sign --upload <app>-v<versionCode>.aab
