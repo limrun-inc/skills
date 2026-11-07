@@ -470,11 +470,30 @@ Failure strings to recognize in the build output:
 - p12 password errors: `--certificate-password` doesn't match the file; the
   user corrects the value on their machine.
 
+## Authenticate an Apple account locally
+
+Run `lim ios apple-auth` in the user's interactive terminal to create or reuse an
+App Store Connect API key through Apple sign-in and two-factor verification. The
+user must be an Apple team administrator. They enter the password and code in
+the terminal; never ask them to paste either into chat. The command stores the
+key in `~/.lim/secrets` and never saves the Apple password.
+
+Cloud signing and uploads use this key when explicit ASC credentials are absent:
+
+```bash
+lim xcode build . --sdk iphoneos --signing-method app-store-connect --upload-to-appstore
+```
+
+Use `--team-id` when several Apple teams are saved. Explicit `--asc-key-id` and
+`--asc-key` override the saved key as a group. Local credential files are not
+encrypted and must stay out of project source. `lim logout` does not delete them.
+Authentication does not create an app record or start a build instance.
+
 ## Upload to App Store Connect
 
 To upload the signed IPA to App Store Connect for TestFlight or App Store
-distribution, pass `--upload-to-appstore` with the App Store Connect API key
-flags on a signed device build:
+distribution, pass `--upload-to-appstore` on a signed device build. Use saved
+`apple-auth` credentials or provide the App Store Connect API key flags:
 
 ```bash
 lim xcode build . --sdk iphoneos --configuration Release \
@@ -495,7 +514,7 @@ lim xcode build . --sdk iphoneos --configuration Release \
 ```
 
 `--upload-to-appstore` requires either cloud signing or the manual signing
-flags, plus `--asc-key-id` and `--asc-key`. Combine it with `--upload
+flags, plus saved `apple-auth` credentials or `--asc-key-id` and `--asc-key`. Combine it with `--upload
 <asset-name>` when the user also wants the IPA in Asset Storage.
 
 Device IPAs carry the app's symbols (`Symbols/` next to `Payload/`), so App

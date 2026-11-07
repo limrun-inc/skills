@@ -206,11 +206,31 @@ Failure strings to recognize on the bring-your-own path:
   (`-storepasswd`, `-keypasswd`, or `-changealias`) to a Latin-1 value. Never
   regenerate the key itself: that changes the upload key.
 
+## Authenticate Google Play locally
+
+For persistent Google sign-in, run this on the same computer as the user's browser:
+
+```bash
+lim android google-auth --client-config client_secret.json
+lim gradle build . --sign --upload-to-playstore
+```
+
+The JSON must be a Google OAuth **Desktop app** client. Its project needs the
+Google Play Android Developer API and a configured consent screen. The user
+signs in with an account that can publish the target app in Play Console.
+The CLI saves the refresh token in `~/.lim/secrets` and refreshes an access token
+before publishing. The refresh token stays on the computer. Explicit
+`--playstore-service-account` or `--playstore-access-token` takes precedence.
+
+Never ask the user to paste client secrets or tokens into chat. Local files are
+not encrypted and must stay out of source control. `lim logout` does not remove
+them. This command does not create a Play listing or generate an upload key;
+the signing requirements below still apply.
+
 ## Publish to Play Store
 
-When the user has Play credentials configured on their own machine (a
-service-account JSON file or an access token, passed through the
-`--playstore-service-account` or `--playstore-access-token` flag), the build
+When the user has a saved `google-auth` login, a service-account JSON file, or
+an access token on their own machine, the build
 publishes the signed release AAB directly, no browser involved. Never ask for
 these credentials in the conversation:
 
