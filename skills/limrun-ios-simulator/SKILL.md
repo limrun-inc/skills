@@ -340,8 +340,10 @@ relaunches, until `stop()`.
 
 ## App logs
 
-Log commands print recent lines and exit. Pass `--follow` only to keep
-streaming until interrupted.
+App logs cover an installed app however it was opened, including a tap or
+`lim ios open-url`, so there is no need to relaunch it to read them. Log
+commands print recent lines and exit. Pass `--follow` only to keep streaming
+until interrupted.
 
 ```bash
 lim ios launch-app <bundle-id> --detach   # launch and return, no log stream
@@ -351,6 +353,11 @@ lim ios app-log <bundle-id> --follow      # stream until interrupted
 lim ios syslog                            # up to 100 captured syslog lines, then exit
 lim ios syslog --follow                   # stream simulator syslog
 ```
+
+If an app dies at launch and its logs show nothing, launch it with
+`lim ios launch-app <bundle-id>`. When the app ends before its code runs, for
+example because dyld cannot load one of its frameworks, that launch prints
+dyld's reason. An app opened by a tap or `lim ios open-url` cannot report it.
 
 Syslog snapshots read the buffer filled by the current or an earlier syslog
 stream. An empty buffer returns no lines. Snapshot reads need a runtime with
