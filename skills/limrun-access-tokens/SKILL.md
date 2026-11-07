@@ -73,9 +73,13 @@ returned instance ID in subsequent management URLs. To run builds or control a
 device, use the returned `status.apiUrl` and `status.token`, not the name-scoped
 token. Revoking the name-scoped token does not revoke that instance token.
 
-A GET immediately after creation can return `404` before the instance becomes
-visible. Retry GET with the returned ID; do not create a replacement solely
+A GET immediately after creating an instance with a custom name can return `404`
+before the instance becomes visible. Retry GET with the returned ID; do not create a replacement solely
 because of that response.
+DELETE returns `503` when it cannot confirm whether the instance exists. Retry with
+the same ID. Unknown or already-removed IDs can also return `503`; this response
+does not confirm termination. Use GET to inspect the instance's state if retries
+continue to fail.
 
 Names are immutable and unique per organization, region, and instance type.
 They default to the instance ID when omitted. A name contains 1 to 128 characters,
@@ -88,6 +92,11 @@ and the name grant still applies. Each complete name can identify one live insta
 per region. A wildcard grant can cover multiple names and does not impose a shared
 limit on its prefix. Lists accept exact `name` and `region` filters but may lag
 creation.
+
+`xcode:name/*:all` covers every Xcode instance name in the organization, including
+default names, across regions and future creations. It imposes no fleet-size
+limit. Use an exact name to restrict an agent to one live instance per region.
+The bare `xcode:*:all` target is not accepted when minting an access token.
 
 Name patterns support `*` and `?`, including across `/` separators.
 `workspace-123/*` matches `workspace-123/build` and `workspace-123/build/attempt-1`,
