@@ -472,22 +472,7 @@ Failure strings to recognize in the build output:
 
 ## Authenticate an Apple account locally
 
-Run `lim ios apple-auth` in the user's interactive terminal to create or reuse an
-App Store Connect API key through Apple sign-in and two-factor verification. The
-user must be an Apple team administrator. They enter the password and code in
-the terminal; never ask them to paste either into chat. The command stores the
-key in `~/.lim/secrets` and never saves the Apple password.
-
-Cloud signing and uploads use this key when explicit ASC credentials are absent:
-
-```bash
-lim xcode build . --sdk iphoneos --signing-method app-store-connect --upload-to-appstore
-```
-
-Use `--team-id` when several Apple teams are saved. Explicit `--asc-key-id` and
-`--asc-key` override the saved key as a group. Local credential files are not
-encrypted and must stay out of project source. `lim logout` does not delete them.
-Authentication does not create an app record or start a build instance.
+Use `lim ios apple-auth` to save an App Store Connect API key on the user's computer. Follow `limrun-store-auth` when available, or the [store authentication guide](https://docs.limrun.com/docs/guides/store-authentication#connect-an-apple-account), for interactive sign-in and credential handling. Builds use the saved key when explicit ASC credentials are absent; pass `--team-id` if several teams are saved.
 
 ## Upload to App Store Connect
 

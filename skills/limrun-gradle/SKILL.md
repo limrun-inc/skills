@@ -208,24 +208,7 @@ Failure strings to recognize on the bring-your-own path:
 
 ## Authenticate Google Play locally
 
-For persistent Google sign-in, run this on the same computer as the user's browser:
-
-```bash
-lim android google-auth --client-config client_secret.json
-lim gradle build . --sign --upload-to-playstore
-```
-
-The JSON must be a Google OAuth **Desktop app** client. Its project needs the
-Google Play Android Developer API and a configured consent screen. The user
-signs in with an account that can publish the target app in Play Console.
-The CLI saves the refresh token in `~/.lim/secrets` and refreshes an access token
-before publishing. The refresh token stays on the computer. Explicit
-`--playstore-service-account` or `--playstore-access-token` takes precedence.
-
-Never ask the user to paste client secrets or tokens into chat. Local files are
-not encrypted and must stay out of source control. `lim logout` does not remove
-them. This command does not create a Play listing or generate an upload key;
-the signing requirements below still apply.
+Use `lim android google-auth --client-config /path/to/client_secret.json` for persistent Google Play login on the user's computer. Follow `limrun-store-auth` when available, or the [store authentication guide](https://docs.limrun.com/docs/guides/store-authentication#connect-a-google-account), for Desktop OAuth setup and credential handling. Publishing uses the saved login when explicit Play credentials are absent.
 
 ## Publish to Play Store
 
@@ -244,9 +227,10 @@ Google Play before the build and stamp it into the workspace copy
 `versionCode` in the conventional `app/` module build script for native
 Gradle projects), so repeat publishes never collide. Without it, or on
 projects with computed or flavor-split versionCodes (which it rejects at
-request time), manage the versionCode yourself as below. Without Play
-credentials you cannot run the publish itself: it is a browser flow with a
-Google sign-in. Prepare the artifact, upload it as an asset, and hand off:
+request time), manage the versionCode yourself as below.
+
+If the user prefers to publish from the console without saving CLI credentials,
+prepare the artifact, upload it as an asset, and hand off:
 
 ```bash
 lim gradle build . --sign --upload <app>-v<versionCode>.aab
