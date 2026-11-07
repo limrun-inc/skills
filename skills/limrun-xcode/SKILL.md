@@ -300,6 +300,11 @@ When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
 the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
 
+If the automatic install fails, including when the attached simulator has been
+deleted, the build logs a warning and continues with any requested artifact
+upload. The install error does not fail the build. Attach a running simulator
+to install the latest successful build without rebuilding.
+
 ## Run tests (XCTest)
 
 `lim xcode test` builds the scheme's test targets on the sandbox, runs them on
