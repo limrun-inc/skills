@@ -118,3 +118,29 @@ The management and registry APIs check revocation after it propagates. Instance
 endpoints verify tokens offline and continue accepting them until expiry or
 instance termination. Revocation does not close existing connections or
 terminate the instance. Choose the lifetime with these limits in mind.
+
+## Draft workload secret export
+
+Secret export is not available in production yet. For a deployment that includes
+this draft, assign `secret:<secret-id>:export` in the instance's
+`spec.role.permissions`, or use the existing `--permission` creation flag. Use a
+concrete secret ID returned by the secret API. Names and wildcards are rejected.
+The caller must hold the permission it delegates; metadata `read` is insufficient.
+
+Inside the workload, exchange `LIMRUN_WORKLOAD_IDENTITY_TOKEN_FILE` through
+`POST /v1/access_tokens` at `DIRECTOR_URL`, requesting only the needed export
+permission. Call `GET /v1/secrets/{id}/value` at that same URL with the returned
+Bearer token. The JSON `data` field contains the material. Follow the
+[workload secret export example](https://docs.limrun.com/docs/platform/workload-identity#export-a-granted-secret).
+
+Do not use `lim access-token create`, an instance control token, or an organization
+API key for this endpoint. They lack the required pod binding. `--permission`
+assigns a grant; it does not upload, sync, or retrieve local Apple or Play credentials.
+
+Every fetch checks the original pod and the current role. Removed grants,
+replaced pods, terminated instances, and revoked tokens block later fetches.
+A `403` is an authorization failure, a `404` means the secret was not found, and a
+`503` is temporary unavailability. Do not expand permissions automatically.
+Never put returned material in agent prompts, logs, or artifacts. Revoking Limrun
+access cannot invalidate an already exported provider credential; rotate that
+credential when required.
