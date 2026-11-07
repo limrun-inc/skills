@@ -73,6 +73,10 @@ returned instance ID in subsequent management URLs. To run builds or control a
 device, use the returned `status.apiUrl` and `status.token`, not the name-scoped
 token. Revoking the name-scoped token does not revoke that instance token.
 
+A GET immediately after creation can return `404` before the instance becomes
+visible. Retry GET with the returned ID; do not create a replacement solely
+because of that response.
+
 Names are immutable and unique per organization, region, and instance type.
 They default to the instance ID when omitted. A name contains 1 to 128 characters,
 including optional `/` separators. Each segment starts with a lowercase letter or digit and contains lowercase letters,
