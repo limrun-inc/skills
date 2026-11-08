@@ -634,10 +634,10 @@ lim ios delete
 ## Watch-only sharing
 
 To share a screen without allowing interaction, mint an access token with
-`ios:<instance-id>:view` using `lim access-token create --permission`.
-Provide the instance's `status.endpointWebSocketUrl` alongside the token: `view`
-does not allow fetching the instance record. Set `readOnly` on `RemoteControl`,
-or `readOnly: true` in `createDeviceStream`, so the viewer does not send input.
+`ios:<instance-id>:watch` using `lim access-token create --permission`.
+Provide the instance's `status.endpointWebSocketUrl` alongside the token: `watch`
+does not allow fetching the instance record. Set `watchOnly` on `RemoteControl`,
+or `watchOnly: true` in `createDeviceStream`, so the viewer does not send input.
 The server rejects touches, typing, hardware buttons, rotation, clipboard changes,
 opening URLs, and camera/microphone forwarding with this token. Screenshots and
 accessibility reads remain available through the streaming socket.
