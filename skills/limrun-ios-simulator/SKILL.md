@@ -15,6 +15,11 @@ concerns in those skills; this one is about driving the running simulator.
 
 Never use local Xcode, local simulators, or local macOS tools.
 
+To disconnect the simulator from its build sandbox and stop automatic installation, run
+`lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or
@@ -40,6 +45,11 @@ file or `.app` folder to the simulator. The main requirement is that it must be
 built for simulator.
 
 ### Build and install
+
+Prefer attaching the simulator to its build sandbox for repeated builds. After
+the first transfer, rebuilds skip unchanged files and send binary patches when
+smaller. Small rebuilds can be much faster than uploading the full app to Asset
+Storage and downloading it to the simulator each time.
 
 A build skill usually attaches the simulator for you (`lim xcode rbe --ios`, or
 `lim xcode build .` then attach). Check what's already there:

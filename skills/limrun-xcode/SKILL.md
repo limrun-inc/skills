@@ -282,8 +282,11 @@ also match the directory path itself, as above.
 
 ## Run on a simulator
 
-`lim xcode build` is build-and-install. Don't attach a simulator until the user
-needs to see or interact with the app. Check / attach:
+When the user needs to run or interact with the app, prefer attaching a simulator
+to the Xcode sandbox for rebuilds. After the first transfer, rebuilds skip unchanged
+files and send binary patches when smaller. Small rebuilds can be much faster than
+uploading the full app to Asset Storage and downloading it to the simulator each time.
+Check the existing attachment before creating a simulator:
 
 ```bash
 lim xcode get             # is a simulator already attached?
@@ -299,6 +302,10 @@ Markdown link, such as `[Live simulator](<signed-stream-url>)`.
 When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
 the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
+
+To disconnect the simulator from its build sandbox and stop automatic installation, run
+`lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
 
 ## Run tests (XCTest)
 

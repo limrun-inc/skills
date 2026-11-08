@@ -142,6 +142,11 @@ lim xcode attach-simulator <ios-instance-id> --id <xcode-instance-id>
 
 After the attach, every successful `lim xcode build` installs and launches the app on the attached simulator.
 
+Prefer this attachment for native rebuilds. It skips unchanged files and sends
+binary patches when smaller. Small rebuilds can be much faster than uploading
+and downloading the full app through Asset Storage each time. Omit `--upload`
+on rebuilds unless you also need to save a reusable dev-client asset.
+
 ## Start Metro Through Limrun on iOS
 
 This flow is for iOS. Android uses `adb reverse`; skip to **Start Metro on

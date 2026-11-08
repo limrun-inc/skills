@@ -31,6 +31,10 @@ lim gradle --help
 lim gradle build --help
 ```
 
+To disconnect the emulator from its build sandbox and stop automatic installation, run
+`lim gradle detach-emulator --id <gradle-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
 ## Build an APK
 
 Instead of `./gradlew`, build with:
@@ -125,25 +129,30 @@ and download before deleting the instance.
 
 ## Run it on an emulator
 
-Upload the built APK as a named asset, then install it on an Android instance:
+Prefer attaching the emulator to the Gradle sandbox for repeated builds. After
+the first transfer, rebuilds reuse the previous APK and send a binary patch when
+smaller. Small rebuilds can be much faster than uploading the full APK to Asset
+Storage and downloading it to the emulator each time.
+
+Build once, create an emulator if needed, then attach it to the sandbox. Attachment
+installs the latest retained APK, and later successful APK builds install automatically:
 
 ```bash
-lim gradle build . --upload myapp.apk
-lim android create --install-asset=myapp.apk
+lim gradle build .
+lim android create --no-open --no-connect
+lim gradle attach-emulator <android-instance-id> --id <gradle-instance-id>
 ```
 
+Reuse an existing emulator when one is already running. Share its signed stream
+URL as a Markdown link, such as `[Live emulator](<signed-stream-url>)`.
+
+Use `lim gradle build . --upload myapp.apk` when you also need a reusable asset.
 Build uploads default to a 14-day TTL: each build pushes the asset's expiry
 to 14 days from that upload. Pass `--upload-ttl` with a Go duration (e.g.
 `720h`; `1d` is invalid) to change it.
 
-Share the signed stream URL from the create output with the user as a
-Markdown link, such as `[Live emulator](<signed-stream-url>)`. For rebuild
-iterations, patch the installed APK in place instead of recreating the
-instance:
-
-```bash
-lim android sync ./path/to/app-debug.apk
-```
+For an APK built outside the sandbox, patch the running emulator with
+`lim android sync ./path/to/app-debug.apk`.
 
 For everything else on the device (tapping, typing, element tree, screenshots,
 video, logcat over adb), use **limrun-android-emulator**.
