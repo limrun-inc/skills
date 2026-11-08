@@ -70,8 +70,9 @@ API and supplies `metadata.name: "workspace-123/build"` in the instance create b
 `all` permits creating, reading, updating, and deleting that named instance;
 `read` lists and reads matching instances without control credentials. Use the
 returned instance ID in subsequent management URLs. To run builds or control a
-device, use the returned `status.apiUrl` and `status.token`, not the name-scoped
-token. Revoking the name-scoped token does not revoke that instance token.
+device, use the returned `status.apiUrl` with the same name-scoped `all` token
+or the returned `status.token`. Revoking the name-scoped token does not revoke
+that separate instance token.
 
 After a successful create, use the returned instance ID for GET, PATCH, and DELETE.
 DELETE returns `200` when termination is requested or the instance is already absent.
@@ -97,7 +98,11 @@ Name patterns support `*` and `?`, including across `/` separators.
 `workspace-123/*` matches `workspace-123/build` and `workspace-123/build/attempt-1`,
 but not `workspace-123` or `workspace-1234/build`. Delegating
 a pattern requires a resource-wide grant. Name-targeted instance access tokens
-accept only `read` and `all`. Keep API-key grants and workload asset roles within
+accept `read` and `all`; iOS and Android also accept `watch` and `stream`.
+For example, `ios:name/workspace-123/*:watch` permits viewing matching simulators
+without input; `stream` also permits viewer interaction. Supply the streaming
+URL alongside the token. Neither streaming action grants metadata reads or listing.
+Keep API-key grants and workload asset roles within
 their existing target restrictions.
 
 ## Create and revoke with the CLI
