@@ -488,3 +488,18 @@ lim android delete <android-instance-id>
   instance" above; pass `--id` when in doubt.
 - **Build errors are the build skill's job.** If the APK isn't building, the
   failure is upstream; go back to **limrun-gradle**.
+
+
+## Watch-only sharing
+
+To share a screen without allowing interaction, mint an access token with
+`android:<instance-id>:view` using `lim access-token create --permission`.
+Provide the instance's `status.endpointWebSocketUrl` alongside the token: `view`
+does not allow fetching the instance record. Set `readOnly` on `RemoteControl`,
+or `readOnly: true` in `createDeviceStream`, so the viewer does not send input.
+The server rejects touches, typing, hardware buttons, rotation, clipboard changes,
+opening URLs, and camera/microphone forwarding with this token. Screenshots and
+accessibility reads remain available through the streaming socket.
+
+`stream` and `status.streamToken` remain interactive. Device API and app-management
+commands in this skill require an instance token with `all`.
