@@ -639,3 +639,18 @@ lim ios delete
   `lim ios list-apps` after a successful install.
 - **Build errors are the build skill's job.** If the app isn't installing, the
   failure is upstream; go back to `limrun-bazel` / `limrun-xcode`.
+
+
+## Watch-only sharing
+
+To share a screen without allowing interaction, mint an access token with
+`ios:<instance-id>:watch` using `lim access-token create --permission`.
+Provide the instance's `status.endpointWebSocketUrl` alongside the token: `watch`
+does not allow fetching the instance record. Set `watchOnly` on `RemoteControl`,
+or `watchOnly: true` in `createDeviceStream`, so the viewer does not send input.
+The server rejects touches, typing, hardware buttons, rotation, clipboard changes,
+opening URLs, and camera/microphone forwarding with this token. Screenshots and
+accessibility reads remain available through the streaming socket.
+
+`stream` and `status.streamToken` remain interactive. Device API and app-management
+commands in this skill require an instance token with `all`.
