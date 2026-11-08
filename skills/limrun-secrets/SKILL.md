@@ -93,3 +93,12 @@ and `limit`/`offset` paginate visible metadata. Get one record or delete it at
 Confirm the user intends that deletion when their request is ambiguous.
 An operation failure may leave `pending` or `deleting` metadata while it
 retries; do not claim success from the initial request alone.
+
+## Issuer diagnostics
+
+Production uses one public issuer across regions:
+`https://api.limrun.com/identity`. Its discovery document is at
+`/identity/.well-known/openid-configuration` and public keys at `/identity/jwks`
+on `api.limrun.com`; these GET requests need no credential. Do not look for
+regional `/secret-issuer` endpoints. The secret API returns a Google access
+token, not a token to verify against Limrun's public JWKS.
