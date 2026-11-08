@@ -73,13 +73,8 @@ returned instance ID in subsequent management URLs. To run builds or control a
 device, use the returned `status.apiUrl` and `status.token`, not the name-scoped
 token. Revoking the name-scoped token does not revoke that instance token.
 
-A GET immediately after creating an instance with a custom name can return `404`
-before the instance becomes visible. Retry GET with the returned ID; do not create a replacement solely
-because of that response.
-DELETE returns `503` when it cannot confirm whether the instance exists. Retry with
-the same ID. Unknown or already-removed IDs can also return `503`; this response
-does not confirm termination. Use GET to inspect the instance's state if retries
-continue to fail.
+After a successful create, use the returned instance ID for GET, PATCH, and DELETE.
+DELETE returns `200` when termination is requested or the instance is already absent.
 
 Names are immutable and unique per organization, region, and instance type.
 They default to the instance ID when omitted. A name contains 1 to 128 characters,
