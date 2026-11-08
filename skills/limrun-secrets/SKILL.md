@@ -26,6 +26,21 @@ a pattern permits delegation of matching concrete names, not another pattern.
 API keys use wildcard targets. Signed access tokens and workload roles can
 carry concrete targets.
 
+## Storage location
+
+Organizations default to `us`. For EU payload storage, an organization
+administrator must set `secretStorageLocation` to `eu` with
+`PATCH /organizations/{organizationId}` before creating secrets. This endpoint
+uses the organization's UUID and a user session with organization-management
+permission; secret-scoped API keys and workload identities cannot change it.
+`GET /organizations/{organizationId}` returns the current setting.
+
+Both values, `eu` and `us`, apply to payload storage, not caller location or
+account metadata. Check the returned secret's `storageLocation` when the user
+has a residency requirement. A location change returns `409` while any secret
+exists, including pending or deleting containers. Do not delete secrets merely
+to change residency without an explicit instruction to discard their values.
+
 ## Transfer a value
 
 1. Resolve the intended organization and configured API URLs. For a user or CI
