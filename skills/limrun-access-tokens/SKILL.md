@@ -50,6 +50,7 @@ Other accepted grants include:
 | Permission | Purpose |
 | --- | --- |
 | `asset:<target>:<action>` | Asset access. Targets can be an asset ID, `name/<name-or-pattern>`, or `*`. Actions are `read`, `create`, `upload`, `update`, `delete`, and `all`; `create` requires a name target or `*`. |
+| `secret:<target>:<action>` | Secret grants. Targets are a TID, `name/<name-or-pattern>`, or `*`; actions are `read`, `write`, `delete`, and `all`. Use the separate secret exchange described in the `limrun-secrets` skill. |
 | `device:*:install` | Physical-device installation; also needs `asset:<target>:read` for the asset. |
 | `applerelay:*:connect` | Apple Account authentication relay access. |
 | `remotecache:*:read` or `remotecache:*:all` | Read the organization's Bazel cache, or read and write it. |
@@ -57,7 +58,7 @@ Other accepted grants include:
 
 For asset pattern delegation, organization roles, or workload-role permissions,
 consult [Permissions and access tokens](https://docs.limrun.com/docs/reference/permissions).
-Workload roles grant asset access from inside an instance; they do not grant
+Workload roles grant asset and secret access from inside an instance; they do not grant
 another client control of it.
 
 ## Create and revoke with the CLI
