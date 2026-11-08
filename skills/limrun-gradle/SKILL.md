@@ -31,6 +31,10 @@ lim gradle --help
 lim gradle build --help
 ```
 
+To disconnect the emulator from its build sandbox and stop automatic installation, run
+`lim gradle detach-emulator --id <gradle-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
 ## Build an APK
 
 Instead of `./gradlew`, build with:

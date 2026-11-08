@@ -15,6 +15,11 @@ driving the running emulator.
 
 Never use a local emulator, a local Android SDK, or Android Studio.
 
+To disconnect the emulator from its build sandbox and stop automatic installation, run
+`lim gradle detach-emulator --id <gradle-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or

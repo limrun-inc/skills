@@ -15,6 +15,11 @@ concerns in those skills; this one is about driving the running simulator.
 
 Never use local Xcode, local simulators, or local macOS tools.
 
+To disconnect the simulator from its build sandbox and stop automatic installation, run
+`lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
+
 ## Auth and CLI
 
 Install if needed: `npm install --global lim`. Auth is `lim login` or

@@ -300,6 +300,10 @@ When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
 the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
 
+To disconnect the simulator from its build sandbox and stop automatic installation, run
+`lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
 ## Run tests (XCTest)
 
 `lim xcode test` builds the scheme's test targets on the sandbox, runs them on
