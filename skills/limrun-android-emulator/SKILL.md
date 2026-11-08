@@ -38,13 +38,22 @@ need adb right away.
 
 ### Build and install
 
-Upload the APK built by **limrun-gradle** as a named asset, then create an
-emulator with it pre-installed:
+For APKs built with **limrun-gradle**, prefer attaching the emulator to the
+Gradle sandbox. After the first transfer, rebuilds reuse the previous APK and
+send a binary patch when smaller. Small rebuilds can be much faster than uploading
+the full APK to Asset Storage and downloading it to the emulator each time.
+
+Build once, create an emulator if needed, then attach it. Attachment installs the
+latest retained APK, and later successful APK builds install automatically:
 
 ```bash
-lim gradle build . --upload myapp.apk
-lim android create --install-asset myapp.apk --no-open --no-connect
+lim gradle build .
+lim android create --no-open --no-connect
+lim gradle attach-emulator <android-instance-id> --id <gradle-instance-id>
 ```
+
+Reuse an existing emulator when one is already running. Use Asset Storage when
+you need a reusable APK for other instances.
 
 Create blocks until the instance is ready to drive; no boot wait is needed.
 The create output includes a signed stream URL; share it with the user as a

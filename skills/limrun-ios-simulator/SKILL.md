@@ -46,6 +46,11 @@ built for simulator.
 
 ### Build and install
 
+Prefer attaching the simulator to its build sandbox for repeated builds. After
+the first transfer, rebuilds skip unchanged files and send binary patches when
+smaller. Small rebuilds can be much faster than uploading the full app to Asset
+Storage and downloading it to the simulator each time.
+
 A build skill usually attaches the simulator for you (`lim xcode rbe --ios`, or
 `lim xcode build .` then attach). Check what's already there:
 
