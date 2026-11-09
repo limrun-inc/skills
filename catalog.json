@@ -40,6 +40,10 @@
     {
       "name": "limrun-access-tokens",
       "defaultSelected": false
+    },
+    {
+      "name": "limrun-secrets",
+      "defaultSelected": false
     }
   ]
 }
