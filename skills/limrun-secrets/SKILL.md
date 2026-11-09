@@ -38,8 +38,7 @@ replacement without reading it. The trash icon opens a deletion confirmation. Th
 transfers values directly to Google. Do not copy revealed values into chat.
 Use REST for binary payloads.
 
-The Secrets page shows the current storage location. Follow **Change in
-organization settings** to the **Secret storage** section. Admins can choose
+Storage location is in **Settings → Organization → Secret storage**. Admins can choose
 **US · US East** or **EU · Europe Central** and select **Save location** before
 creating secrets. US is the default. A ready container
 may have no saved value after an upload failure; use the pencil icon and **Save** to retry the
