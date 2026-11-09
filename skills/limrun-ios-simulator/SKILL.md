@@ -139,14 +139,49 @@ await client.tapDisplay('inner', inner.width / 2, inner.height / 2);
 ```
 
 `setDuoOrientation` accepts `portrait`, `landscape-left`, `landscape-right`,
-and `pud` (upside down). Display screenshots are upright and report dimensions
-in points; `tapDisplay` uses those coordinates. Use `outer` for the cover or
-`inner` for the unfolding display. A display that iOS has turned off returns a
-black image.
+and `pud` (upside down). Use `outer` for the cover or `inner` for the unfolding
+display. Display screenshots are upright and use point dimensions by default;
+`tapDisplay` uses points. With `{ size: 'full' }`, screenshot dimensions are
+native pixels instead. See "Screenshots and video" for format and resolution
+options. An explicit display target does not activate that display; a display
+that iOS has turned off returns a black image.
 
-Use these display-specific methods for Duo automation. Existing screenshot,
-recording, and accessibility commands do not automatically follow the inner
-display. The 3D viewer supports single-finger touch and drag. Rotating the view
+For gestures, use `client.performActions(actions, { display: 'inner' })` with
+`touchDown`, `touchMove`, and `touchUp` in upright screenshot points. Insert a
+`wait` to hold a touch. For two fingers, supply `x2` and `y2` together on
+each down, move, and up action. `client.scroll('down', 300, { display: 'inner' })` uses
+the same display. Omitting `display` follows the active panel for taps, scrolls,
+and raw gestures. The CLI follows the same default: `lim ios tap`, `scroll`,
+`swipe`, and `perform` accept `--display inner|outer` as an override. Each new action resolves
+the active panel. A held raw touch keeps its original panel until touch-up.
+
+Default screenshots capture the active display. Default recordings follow the
+active display across folds, keeping the initial canvas size and letterboxing
+other aspect ratios. Use `screenshotDisplay('inner')` or CLI
+`screenshot --display inner` to select one panel. Use `startRecording({ display: 'inner' })`
+or CLI `record start --display inner` to keep recording that panel. These
+overrides also accept `outer`.
+
+`tapElement`, its scroll search, and batched element taps follow the active
+display. `elementTree()` reads the frontmost app, including on the active inner
+display, and preserves Apple's reported accessibility frames. On Duo, the
+application root can stay at 669 × 951 points while its window and descendants
+use the upright inner display's 951 × 669 point coordinates. Use the `width`
+and `height` from a default, point-sized `screenshot()` or `screenshotDisplay()`
+for the canvas. Do not clip, scale, or rotate descendants using the root's size.
+If a renderer needs a root that fills the canvas, resize a presentation copy
+and preserve the original tree. Apps in iPhone compatibility mode can report
+app-local frames inside a centered window, so check their window placement
+before mapping coordinates.
+
+Read `(await client.getFoldState())?.displays.filter(display => display.active)`
+to identify active panels. The hinge angle alone does not identify the active
+panel. Automatic input, selector actions, and screenshots require exactly one
+active panel; retry after the fold settles if none or both report active.
+If the activity query fails, `getFoldState()` still returns geometry but omits
+`active`. Hinge, orientation, and unsolicited fold-state responses also omit it.
+
+The 3D viewer supports single-finger touch and drag. Rotating the view
 changes the camera; **Rotate device** changes native orientation. **Laptop view**
 sets the hinge and orientation; it does not enable Apple's separate Table Mode.
 
