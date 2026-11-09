@@ -36,8 +36,10 @@ for generic text values up to 64 KiB, **View** then **Reveal value** for reads,
 transfers values directly to Google. Do not copy revealed values into chat.
 Use REST for binary payloads.
 
-Admins can choose **US · US East** or **EU · Europe Central** and select
-**Save location** before creating secrets. US is the default. A ready container
+The Secrets page shows the current storage location. Follow **Change in
+organization settings** to the **Secret storage** section. Admins can choose
+**US · US East** or **EU · Europe Central** and select **Save location** before
+creating secrets. US is the default. A ready container
 may have no saved value after an upload failure; use **Update** to retry the
 write. A timeout may have created a version, so do not report it as definitely
 failed or retry without considering duplicate versions.
