@@ -453,13 +453,13 @@ Quote wildcards. Block from creation, so the first page is already blocked:
 lim android create --blocked-domain facebook.com --blocked-domain '*.facebook.com'
 ```
 
-On a running instance, `set` replaces the whole list and no domains unblocks
-everything:
+On a running instance, edit the blocklist one change at a time:
 
 ```bash
-lim android blocked-domains set instagram.com '*.instagram.com' --id <android-instance-id>
-lim android blocked-domains list --id <android-instance-id>
-lim android blocked-domains set --id <android-instance-id>   # unblock everything
+lim android blocklist add instagram.com '*.instagram.com' --id <android-instance-id>
+lim android blocklist remove instagram.com --id <android-instance-id>   # '*.instagram.com' stays
+lim android blocklist list --id <android-instance-id>
+lim android blocklist clear --id <android-instance-id>                  # unblock everything
 ```
 
 URLs, IP addresses, ports, and international names are refused with the name

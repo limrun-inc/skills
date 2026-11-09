@@ -346,13 +346,13 @@ Quote wildcards. Block from creation, so the first page is already blocked:
 lim ios create --blocked-domain facebook.com --blocked-domain '*.facebook.com'
 ```
 
-On a running instance, `set` replaces the whole list and no domains unblocks
-everything:
+On a running instance, edit the blocklist one change at a time:
 
 ```bash
-lim ios blocked-domains set instagram.com '*.instagram.com' --id <ios-instance-id>
-lim ios blocked-domains list --id <ios-instance-id>
-lim ios blocked-domains set --id <ios-instance-id>   # unblock everything
+lim ios blocklist add instagram.com '*.instagram.com' --id <ios-instance-id>
+lim ios blocklist remove instagram.com --id <ios-instance-id>   # '*.instagram.com' stays
+lim ios blocklist list --id <ios-instance-id>
+lim ios blocklist clear --id <ios-instance-id>                  # unblock everything
 ```
 
 URLs, IP addresses, ports, and international names are refused with the name
