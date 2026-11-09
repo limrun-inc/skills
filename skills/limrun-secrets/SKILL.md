@@ -132,3 +132,18 @@ Production uses one public issuer across regions:
 on `api.limrun.com`; these GET requests need no credential. Do not look for
 regional `/secret-issuer` endpoints. The secret API returns a Google access
 token, not a token to verify against Limrun's public JWKS.
+
+## Console store connections
+
+The Secrets page offers **Connect App Store Connect** and **Connect Play Console**
+for every organization, subject to secret permissions. Apple sign-in creates or
+reuses an App Manager API key at `<team-id>/APP_STORE_CONNECT_API_KEY`; it requires
+read and write permission. Play can use a short-lived Google sign-in token with
+`cloud-platform` scope to list a project's service accounts and create a key, or
+accept an existing service-account JSON file. It requires write permission for
+the selected secret name. Google IAM permissions and the organization's key
+creation policy still apply, and Play Console permissions must be granted to the
+service account separately. Key values travel from the browser directly to
+Google secret storage. A failed save can be retried while the dialog remains
+open without creating another provider key. Deleting a secret does not revoke
+its provider key.
