@@ -525,4 +525,4 @@ lim android set file-from-secret '~/.npmrc=packages/npmrc'
 lim android set file-from-secret --unset '~/.npmrc'
 ```
 
-Use quoted `~/` destinations. ADB files use `/data/local/tmp/limrun-home` as `HOME`; sandbox tools receive saved files in their own home. Command files are removed after execution; saved files refresh on the next command and remain. Unsetting removes the file on the next command. Existing files are not overwritten. Do not print file contents or copy them into artifacts.
+Quote `~/` for the remote home. Other paths resolve relative to the shell or tool's working directory, ignoring leading slashes. A `cd` inside the command does not relocate files already placed before execution. ADB files use `/data/local/tmp/limrun-home` as `HOME`; sandbox tools receive saved files in their own home. Command files are removed after execution; saved files refresh on the next command and remain. Unsetting removes the file on the next command. Existing files are not overwritten. Do not print file contents or copy them into artifacts.
