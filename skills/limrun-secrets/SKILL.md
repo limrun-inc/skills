@@ -31,8 +31,10 @@ carry concrete targets.
 For users working in a browser, open
 [Secrets](https://console.limrun.com/secrets). The page is available to all
 organizations, with actions controlled by secret permissions. Use **New secret**
-for generic text values up to 64 KiB, **View** then **Reveal value** for reads,
-**Update** for a new version, and **Delete** to remove all versions. The browser
+for generic text values up to 64 KiB. Click the masked value or eye icon to
+reveal it inline. Use the pencil icon and **Save** for a new version, or
+**Cancel** to discard edits. Reveal first to edit existing text, or enter a
+replacement without reading it. The trash icon opens a deletion confirmation. The browser
 transfers values directly to Google. Do not copy revealed values into chat.
 Use REST for binary payloads.
 
@@ -40,7 +42,7 @@ The Secrets page shows the current storage location. Follow **Change in
 organization settings** to the **Secret storage** section. Admins can choose
 **US · US East** or **EU · Europe Central** and select **Save location** before
 creating secrets. US is the default. A ready container
-may have no saved value after an upload failure; use **Update** to retry the
+may have no saved value after an upload failure; use the pencil icon and **Save** to retry the
 write. A timeout may have created a version, so do not report it as definitely
 failed or retry without considering duplicate versions.
 
