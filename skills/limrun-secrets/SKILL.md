@@ -121,7 +121,10 @@ container without writing a value. A failed create-or-reuse request is
 `secret.metadata.ensure`. `secret.access_token.create` records the grant request;
 check its outcome and permissions. It does not prove a value transfer.
 `secret.read` and `secret.write` are reserved for actual value access and are
-not currently emitted in Limrun's Audit Logs.
+not currently emitted in Limrun's Audit Logs. New events capture the API-key
+name or signed-in user's email at the time of the action, so renaming or
+deleting that identity does not change the recorded name. Signed tokens appear
+as `Access token`; workloads appear as `Instance`.
 
 Production uses one public issuer across regions:
 `https://api.limrun.com/identity`. Its discovery document is at
