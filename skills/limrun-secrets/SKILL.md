@@ -115,6 +115,14 @@ retries; do not claim success from the initial request alone.
 
 ## Issuer diagnostics
 
+Audit actions `secret.metadata.create`, `secret.metadata.reuse`, and
+`secret.metadata.read` describe container metadata. Reuse returns the existing
+container without writing a value. A failed create-or-reuse request is
+`secret.metadata.ensure`. `secret.access_token.create` records the grant request;
+check its outcome and permissions. It does not prove a value transfer.
+`secret.read` and `secret.write` are reserved for actual value access and are
+not currently emitted in Limrun's Audit Logs.
+
 Production uses one public issuer across regions:
 `https://api.limrun.com/identity`. Its discovery document is at
 `/identity/.well-known/openid-configuration` and public keys at `/identity/jwks`
