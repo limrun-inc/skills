@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services, play a video file as the camera, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services or a private tunnel, play a video file as the camera, send all traffic through the user's proxy and trust its CA, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -10,10 +10,15 @@ effort: high
 Interact with an app running on a Limrun cloud iOS simulator, from any
 environment (Linux, Windows, macOS, VM, container). This skill is build-agnostic:
 it assumes the app was already built and installed by a build skill
-(`limrun-xcode-bazel` for Bazel, `limrun-xcode` for xcodebuild). Keep build
+(`limrun-bazel` for Bazel, `limrun-xcode` for xcodebuild). Keep build
 concerns in those skills; this one is about driving the running simulator.
 
 Never use local Xcode, local simulators, or local macOS tools.
+
+To disconnect the simulator from its build sandbox and stop automatic installation, run
+`lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
 
 ## Auth and CLI
 
@@ -21,6 +26,16 @@ Install if needed: `npm install --global lim`. Auth is `lim login` or
 `LIM_API_KEY` (it may already be set in the user's environment even when `.env` and the shell do not show it; check before asking for it). The CLI is the source of truth:
 the commands in this skill are verified, but if a flag errors or you need one
 not shown here, check `lim ios <subcommand> --help` instead of guessing.
+
+## Choose the device model and iOS version
+
+`lim ios create` takes `--model iphone|iphone-duo|ipad|watch` (default
+`iphone`) and `--os-version 26|27`. iPhone and iPad run both versions, iPhone
+Duo runs 27, and Apple Watch runs 26; the default is 26, or 27 on iPhone Duo.
+
+```bash
+lim ios create --model ipad --os-version 27
+```
 
 ## Installing an app bundle
 
@@ -30,6 +45,11 @@ file or `.app` folder to the simulator. The main requirement is that it must be
 built for simulator.
 
 ### Build and install
+
+Prefer attaching the simulator to its build sandbox for repeated builds. After
+the first transfer, rebuilds skip unchanged files and send binary patches when
+smaller. Small rebuilds can be much faster than uploading the full app to Asset
+Storage and downloading it to the simulator each time.
 
 A build skill usually attaches the simulator for you (`lim xcode rbe --ios`, or
 `lim xcode build .` then attach). Check what's already there:
@@ -55,6 +75,11 @@ skips opening the URL locally and still prints it for sharing.
 `lim xcode get` prints a Limrun console URL instead. It opens the same live
 view but requires a console login, so prefer the signed stream URL for sharing.
 If the console URL is all you have, share it and mention it needs login.
+
+Signed links open the shared device workspace without login. Full instance tokens
+show Inspect, Connect, and the logs, events, and network inspector. Stream-only
+tokens show the screen and input controls without those tools. Stop and app
+selection require the authenticated console.
 
 ### Install app from local
 
@@ -114,10 +139,12 @@ await client.tapDisplay('inner', inner.width / 2, inner.height / 2);
 ```
 
 `setDuoOrientation` accepts `portrait`, `landscape-left`, `landscape-right`,
-and `pud` (upside down). Display screenshots are upright and report dimensions
-in points; `tapDisplay` uses those coordinates. Use `outer` for the cover or
-`inner` for the unfolding display. A display that iOS has turned off returns a
-black image.
+and `pud` (upside down). Use `outer` for the cover or `inner` for the unfolding
+display. Display screenshots are upright and use point dimensions by default;
+`tapDisplay` uses points. With `{ size: 'full' }`, screenshot dimensions are
+native pixels instead. See "Screenshots and video" for format and resolution
+options. An explicit display target does not activate that display; a display
+that iOS has turned off returns a black image.
 
 For gestures, use `client.performActions(actions, { display: 'inner' })` with
 `touchDown`, `touchMove`, and `touchUp` in upright screenshot points. Insert a
@@ -128,22 +155,33 @@ and raw gestures. The CLI follows the same default: `lim ios tap`, `scroll`,
 `swipe`, and `perform` accept `--display inner|outer` as an override. Each new action resolves
 the active panel. A held raw touch keeps its original panel until touch-up.
 
+Default screenshots capture the active display. Default recordings follow the
+active display across folds, keeping the initial canvas size and letterboxing
+other aspect ratios. Use `screenshotDisplay('inner')` or CLI
+`screenshot --display inner` to select one panel. Use `startRecording({ display: 'inner' })`
+or CLI `record start --display inner` to keep recording that panel. These
+overrides also accept `outer`.
+
 `tapElement`, its scroll search, and batched element taps follow the active
-display. The element tree preserves Apple's reported accessibility frames. The
-application root can report portrait bounds while its windows and descendants
-match the upright screenshot. Use `screenshotDisplay`'s `width` and `height` for
-the capture canvas. Do not infer a coordinate transform from the root size.
-Full-screen descendants can already match the capture; compatibility-mode apps
-can report app-local frames inside a centered window. Any root resizing for
-rendering belongs in a separate presentation copy of the tree.
+display. `elementTree()` reads the frontmost app, including on the active inner
+display, and preserves Apple's reported accessibility frames. On Duo, the
+application root can stay at 669 × 951 points while its window and descendants
+use the upright inner display's 951 × 669 point coordinates. Use the `width`
+and `height` from a default, point-sized `screenshot()` or `screenshotDisplay()`
+for the canvas. Do not clip, scale, or rotate descendants using the root's size.
+If a renderer needs a root that fills the canvas, resize a presentation copy
+and preserve the original tree. Apps in iPhone compatibility mode can report
+app-local frames inside a centered window, so check their window placement
+before mapping coordinates.
+
 Read `(await client.getFoldState())?.displays.filter(display => display.active)`
-to identify active panels. Automatic input and selector actions require exactly one active panel;
-retry after the fold settles if both report active. The flag comes from native
-state and is absent when the query fails, on older servers, and on other
-fold-state responses. Geometry remains available when the activity query fails. Default screenshots capture the active display. Recordings follow native activity across folds,
-keeping the initial canvas size and letterboxing other aspect ratios. Use
-`lim ios record start --display inner|outer` or SDK `startRecording({ display: 'inner' })`
-to keep recording one panel. Screenshot overrides use `--display` or `screenshotDisplay`. The 3D viewer supports single-finger touch and drag. Rotating the view
+to identify active panels. The hinge angle alone does not identify the active
+panel. Automatic input, selector actions, and screenshots require exactly one
+active panel; retry after the fold settles if none or both report active.
+If the activity query fails, `getFoldState()` still returns geometry but omits
+`active`. Hinge, orientation, and unsolicited fold-state responses also omit it.
+
+The 3D viewer supports single-finger touch and drag. Rotating the view
 changes the camera; **Rotate device** changes native orientation. **Laptop view**
 sets the hinge and orientation; it does not enable Apple's separate Table Mode.
 
@@ -229,6 +267,73 @@ CA, so **apps with certificate pinning fail through inspected selectors**:
 leave the pinned host out of the selectors or pass `--no-inspect` to keep TLS
 end to end (no summaries, HAR, or persistence).
 
+## Reaching services in a private network through a private tunnel
+
+An organization can run a private tunnel: a connector inside its network,
+created by an admin with `lim tunnel create` or in the console (Network) and
+run with `lim tunnel run`, that serves every instance naming it. When the user names one, pass it at
+create time instead of starting a tunnel yourself:
+
+```bash
+lim ios create --tunnel <tunnel-name>
+```
+
+The app reaches the tunnel's selectors, such as `localhost:3000` or
+`*.internal.example`, at those addresses. They resolve on the connector's
+machine, not on yours. The tunnel takes the instance's one destination
+tunnel, so do not start or stop `lim ios tunnel` on it.
+
+Creation checks the tunnel and fails when it is not usable:
+
+- `tunnel <name> does not exist`: the name is wrong or the tunnel was not
+  created. Ask the user for the right name.
+- `tunnel <name> is offline`: no connector is running. Ask the user to
+  start it.
+- `did not attach within 30s`: the connector cannot attach the instance.
+  Ask the user to check the connector's output.
+
+Retrying the create in a loop does not help in any of these cases.
+
+The tunnel's token belongs on the connector's machine. Never ask the user to
+paste it into the conversation.
+
+## Send all device traffic through a proxy
+
+Tunnels carry only declared destinations; there is no catch-all selector. When
+the user wants all traffic, Safari included, to leave through their proxy (for
+example a recording proxy), point the simulator's system proxy at a proxy the
+tunnel reaches. Tunnel inspection passes requests meant for the proxy through as
+sent.
+
+```bash
+lim ios tunnel --selector localhost:3128 --detach --id <ios-instance-id>
+lim ios proxy set localhost:3128 --id <ios-instance-id>
+# later, before stopping the tunnel:
+lim ios proxy clear --id <ios-instance-id>
+```
+
+With a private tunnel whose selector is the proxy, only `lim ios proxy set` is
+needed. A proxy elsewhere in the user's network works the same way:
+`--selector proxy.example.internal` and `lim ios proxy set
+proxy.example.internal:3128`. Requests to `localhost` stay direct. New
+connections use the proxy at once; apps keep connections they opened before
+until relaunched. `lim ios proxy clear` restores the previous settings.
+
+## Trust a CA certificate
+
+Add a PEM CA certificate to the simulator's trusted roots, for example the CA
+of the user's recording proxy, so the proxy can read HTTPS traffic:
+
+```bash
+lim ios ca add ./proxy-ca.pem --id <ios-instance-id>
+```
+
+Safari and apps trust it on their next connection, with no restart, for the
+life of the instance. Only one CA certificate per file; leaf certificates are
+rejected. Apps that pin certificates, and the simulator's Apple services,
+still reject it. To look at the app's traffic without a proxy of the user's
+own, use tunnel inspection (above) instead.
+
 ## Launching the app
 
 The build skills reinstall and relaunch the app after every successful build,
@@ -238,18 +343,52 @@ fresh attach to an old build, or after a terminate), launch it by bundle ID:
 ```bash
 lim ios launch-app <bundle-id>                            # foregrounds it if already running
 lim ios launch-app <bundle-id> --mode RelaunchIfRunning   # restart for a clean state
+lim ios launch-app <bundle-id> --env API_URL=https://api.example.com --env FEATURE_FLAG=1
 lim ios terminate-app <bundle-id>                         # stop it, e.g. to reset app state
 ```
 
 If you don't know the bundle ID, run `lim ios list-apps`.
 
+`--env KEY=VALUE` is repeatable and restarts the app so the variables take effect.
+An explicit `--mode ForegroundIfRunning` with variables is rejected. Use `KEY=`
+for an empty value; the last occurrence of a key wins. Managed Detox launches
+can combine `--runtime detox` with `--env`.
+
 `launch-app` streams the app's logs and returns when the app exits or the
 command is interrupted. Pass `--detach` to launch and return immediately.
+When the app ends, `launch-app` prints the exit reason (`crash`, `exit`, or
+`terminated`). After a crash it adds the exception and signal, the crash
+message (for example a Swift `Fatal error` line or an uncaught exception's
+reason), and the crashed thread's frames with the app's own function names.
+That report is the way to see why an app died; frames carry no file and line,
+which need the build's dSYM (`atos -l <load address>` with the address from
+the report's `Binary Images` lines).
+
+A React Native or Expo red error screen is not an exit: the app process keeps
+running, so nothing is reported. In the TypeScript SDK, `launchApp`'s
+`onExit(logs, info)` gets the same report, and
+`monitorApp(bundleId, { onExit })` reports every exit of an app you did not
+launch, for example one opened with `lim ios open-url` or relaunched by a test
+runner, until `stop()`. `watchApp`, which reports only the next exit, is
+deprecated.
+
+While the app runs, `launch-app` also prints each main-thread hang: a hang
+starts once the main thread hasn't answered for 1 second, and each report
+gives its age, the thread's state and CPU time, and the top of its stack.
+`running` with CPU time close to the age means the app kept its main thread
+busy; `waiting` with little CPU time means it waited, and the top frame shows
+on what. The hang's end gives its length. Hangs explain an app that freezes
+or automation calls that stall, since reading the screen waits for the main
+thread. In the TypeScript SDK, `launchApp`'s `onHang` gets the same reports,
+and `monitorApp(bundleId, { onHang })` reports every hang of the app, across
+relaunches, until `stop()`.
 
 ## App logs
 
-Log commands print recent lines and exit. Pass `--follow` only to keep
-streaming until interrupted.
+App logs cover an installed app however it was opened, including a tap or
+`lim ios open-url`, so there is no need to relaunch it to read them. Log
+commands print recent lines and exit. Pass `--follow` only to keep streaming
+until interrupted.
 
 ```bash
 lim ios launch-app <bundle-id> --detach   # launch and return, no log stream
@@ -259,6 +398,11 @@ lim ios app-log <bundle-id> --follow      # stream until interrupted
 lim ios syslog                            # up to 100 captured syslog lines, then exit
 lim ios syslog --follow                   # stream simulator syslog
 ```
+
+If an app dies at launch and its logs show nothing, launch it with
+`lim ios launch-app <bundle-id>`. When the app ends before its code runs, for
+example because dyld cannot load one of its frameworks, that launch prints
+dyld's reason. An app opened by a tap or `lim ios open-url` cannot report it.
 
 Syslog snapshots read the buffer filled by the current or an earlier syslog
 stream. An empty buffer returns no lines. Snapshot reads need a runtime with
@@ -358,7 +502,11 @@ Screenshot takes a **positional path** (not `-o`):
 ```bash
 lim ios screenshot screenshot.png
 lim ios screenshot screenshot.png --id <ios-instance-id>
+lim ios screenshot app-store.png --format png --size full --id <ios-instance-id>
 ```
+
+Use `--format png --size full` for a full-resolution PNG without alpha, including screenshots intended for store uploads. Combine it with `--display inner` or `--display outer` on Duo. The SDK equivalent is `client.screenshot({ format: 'png', size: 'full' })`; it returns base64 PNG data and pixel dimensions. `--format` accepts `jpeg` or `png` and defaults to `jpeg`. `--size` accepts `scaled` or `full` and defaults to `scaled`. Choose them independently. `scaled` uses point dimensions; `full` preserves native pixel resolution. Tap coordinates remain in points, so use `tapWithScreenSize` for coordinates measured in a native screenshot.
+
 
 Use the element tree for functional assertions (element existence, labels, state
 changes) and screenshots only for visual properties. For anything involving
@@ -477,11 +625,25 @@ echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios"
 ```
 
 Once the command finishes, you can give the following URL to the user to
-click to see a simulator where this bundle is pre-installed.
+click to open a simulator stream while the console installs this bundle.
 
 ```
 https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
 ```
+
+For nonsecret iOS app configuration, append repeatable URL-encoded `env=KEY=VALUE`
+parameters, for example `&env=FEATURE_FLAG%3D1&env=API_URL%3Dhttps%3A%2F%2Fapi.example.com`.
+Use `URLSearchParams.append("env", "KEY=VALUE")` when constructing links. The app
+receives these variables on its first launch. Values are visible in the link
+and browser history.
+
+Add `openUrl` to open a URL or app deep link after launch, for example
+`&openUrl=myapp%3A%2F%2Fcheckout`. Use `URLSearchParams.set("openUrl", url)` to
+encode the full URL and its query string. This works with or without `env`;
+the stream stays visible while the app installs, launches, and opens the URL.
+An `Installing <asset name>` overlay shows installation progress and disappears
+when the preview is ready.
+
 
 ## Cleanup
 
@@ -511,4 +673,4 @@ lim ios delete
 - **Bundle ID discovery.** If you don't know the bundle ID, run
   `lim ios list-apps` after a successful install.
 - **Build errors are the build skill's job.** If the app isn't installing, the
-  failure is upstream; go back to `limrun-xcode-bazel` / `limrun-xcode`.
+  failure is upstream; go back to `limrun-bazel` / `limrun-xcode`.

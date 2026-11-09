@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, send all traffic through the user's proxy, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', 'route all traffic through my proxy', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -14,6 +14,11 @@ build-agnostic: it assumes the APK was already built, usually by
 driving the running emulator.
 
 Never use a local emulator, a local Android SDK, or Android Studio.
+
+To disconnect the emulator from its build sandbox and stop automatic installation, run
+`lim gradle detach-emulator --id <gradle-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
 
 ## Auth and CLI
 
@@ -33,13 +38,22 @@ need adb right away.
 
 ### Build and install
 
-Upload the APK built by **limrun-gradle** as a named asset, then create an
-emulator with it pre-installed:
+For APKs built with **limrun-gradle**, prefer attaching the emulator to the
+Gradle sandbox. After the first transfer, rebuilds reuse the previous APK and
+send a binary patch when smaller. Small rebuilds can be much faster than uploading
+the full APK to Asset Storage and downloading it to the emulator each time.
+
+Build once, create an emulator if needed, then attach it. Attachment installs the
+latest retained APK, and later successful APK builds install automatically:
 
 ```bash
-lim gradle build . --upload myapp.apk
-lim android create --install-asset myapp.apk --no-open --no-connect
+lim gradle build .
+lim android create --no-open --no-connect
+lim gradle attach-emulator <android-instance-id> --id <gradle-instance-id>
 ```
+
+Reuse an existing emulator when one is already running. Use Asset Storage when
+you need a reusable APK for other instances.
 
 Create blocks until the instance is ready to drive; no boot wait is needed.
 The create output includes a signed stream URL; share it with the user as a
@@ -47,6 +61,11 @@ Markdown link, like `[Live emulator](<signed-stream-url>)`. If you have a
 browser the user can see, open the URL there and tell them. Create also
 prints a console URL: it opens the same live view but requires a console
 login, so prefer the signed stream URL for sharing.
+
+Signed links open the shared device workspace without login. Full instance tokens
+show Inspect, Connect, and the logs, events, and network inspector. Stream-only
+tokens show the screen and input controls without those tools. Stop and app
+selection require the authenticated console.
 
 Useful create flags: `--reuse-if-exists` (reuse a running instance with the
 same labels), `--rm` (delete when the CLI exits), `--jurisdiction us|eu|as`
@@ -352,6 +371,61 @@ CA, so **apps with certificate pinning fail through inspected domain
 selectors**: leave the pinned host out of the selectors or pass
 `--no-inspect` to relay bytes opaquely (no summaries, HAR, or persistence).
 
+## Reach services in a private network through a private tunnel
+
+An organization can run a private tunnel: a connector inside its network,
+created by an admin with `lim tunnel create` or in the console (Network) and
+run with `lim tunnel run`, that serves every instance naming it. When the user names one, pass it at
+create time instead of starting a tunnel yourself:
+
+```bash
+lim android create --tunnel <tunnel-name>
+```
+
+The app reaches the tunnel's selectors at the addresses they name, and exact
+selectors are also reachable as `10.0.2.2:<port>`. Selectors resolve on the
+connector's machine, not on yours. Android instances attach only when every
+exact selector uses port 1024 or higher. The tunnel takes the instance's one
+destination tunnel, so do not start or stop `lim android tunnel` on it.
+
+Creation checks the tunnel and fails when it is not usable:
+
+- `tunnel <name> does not exist`: the name is wrong or the tunnel was not
+  created. Ask the user for the right name.
+- `tunnel <name> is offline`: no connector is running. Ask the user to
+  start it.
+- `did not attach within 30s`: the connector cannot attach the instance, or
+  an exact selector uses a port below 1024. Ask the user to check the
+  connector's output, or to move the service to a port of 1024 or higher.
+
+Retrying the create in a loop does not help in any of these cases.
+
+The tunnel's token belongs on the connector's machine. Never ask the user to
+paste it into the conversation.
+
+## Send all device traffic through a proxy
+
+Tunnels carry only declared destinations; there is no catch-all selector. When
+the user wants all traffic to leave through their proxy (for example a
+recording proxy), point the emulator's global HTTP proxy at a proxy the tunnel
+reaches. Tunnel inspection passes requests meant for the proxy through as
+sent. Use a port other than 8080 for a `localhost` proxy; the
+emulator already uses 8080.
+
+```bash
+lim android tunnel --selector localhost:3128 --detach --id <android-instance-id>
+lim android proxy set localhost:3128 --id <android-instance-id>
+# later, before stopping the tunnel:
+lim android proxy clear --id <android-instance-id>
+```
+
+With a private tunnel whose selector is the proxy, only `lim android proxy set`
+is needed. A proxy elsewhere in the user's network works the same way:
+`--selector proxy.example.internal` and `lim android proxy set
+proxy.example.internal:3128`. While the proxy is set and the tunnel is down,
+Chrome's requests fail instead of going direct. To read HTTPS in the proxy,
+trust its CA (below).
+
 ## Trust a CA certificate
 
 Add a PEM CA certificate to the emulator's trust stores, for example the root
@@ -379,8 +453,13 @@ lim asset push ./app-debug.apk -n ${ASSET_NAME}
 echo "https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=android"
 ```
 
-Opening the link in the Limrun console provisions an emulator with the APK
-pre-installed.
+Opening the link in the Limrun console provisions an emulator and starts
+streaming while the console installs the APK. An `Installing <asset name>`
+overlay stays visible during installation. Add `openUrl` to open a URL or app deep link after launch, for
+example `&openUrl=myapp%3A%2F%2Fcheckout`. Use
+`URLSearchParams.set("openUrl", url)` to encode the full URL and its query string.
+The stream stays visible while the app installs, launches, and opens the URL.
+The overlay disappears when the preview is ready.
 
 ## Cleanup
 

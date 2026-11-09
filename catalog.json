@@ -26,12 +26,20 @@
       "defaultSelected": false
     },
     {
+      "name": "limrun-bazel",
+      "defaultSelected": false
+    },
+    {
       "name": "limrun-gradle",
       "defaultSelected": true
     },
     {
       "name": "limrun-android-emulator",
       "defaultSelected": true
+    },
+    {
+      "name": "limrun-access-tokens",
+      "defaultSelected": false
     }
   ]
 }

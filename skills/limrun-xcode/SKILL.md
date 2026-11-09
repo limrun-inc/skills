@@ -16,7 +16,7 @@ and verified on a Limrun simulator.
 
 For driving the app once it's running (tap, type, element tree, screenshot,
 record), use the **`limrun-ios-simulator`** skill. For Bazel workspaces, use
-**`limrun-xcode-bazel`** instead of this skill.
+**`limrun-bazel`** instead of this skill.
 
 ## Auth and CLI
 
@@ -57,6 +57,11 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 lim xcode build . --configuration Debug
 ```
 
+For Expo SDK 57 and later, add `--expo-no-clean` to pass `--no-clean` to
+prebuild and preserve the existing `ios/` directory. This flag does not force
+prebuild to run; combine it with `--expo-force-prebuild` when needed.
+Omitting the flag keeps the installed Expo CLI's default.
+
 ### Detached builds and logs
 
 Use `--detach` to return once the build is accepted; a webhook is optional.
@@ -71,9 +76,9 @@ lim xcode logs --follow
 
 ### Pick the Xcode version
 
-A sandbox builds with its node's default Xcode (26.4 today). The fleet carries
-one released (GA) Xcode per major plus one beta while Apple seeds one: today
-26.4 GA, 27.0 GA and 27.1 beta. Two selectors cover them:
+A sandbox builds with its node's default Xcode (27.1 today). The fleet carries
+the released (GA) Xcodes it supports plus one beta while Apple seeds one: today
+26.4, 27.0 and 27.1, all GA. Two selectors cover them:
 
 - A bare major (`27`) binds the newest GA release of that major, never a beta,
   and follows Apple's point releases on its own. Use it for App Store builds.
@@ -86,8 +91,8 @@ and new sandbox follows it, and the flag overrides it for one command:
 lim xcode version list      # Select is the value to type, Channel is ga or beta; * marks the one in use
 lim xcode use xcode@27      # prefer the Xcode 27 GA for this workspace; switches the remembered sandbox now
 lim xcode build .           # builds with 27
-lim xcode version           # "27.0 (27A266a)" shows the sandbox's current Xcode
-lim xcode version set 27.1  # pin the 27.1 beta instead
+lim xcode version           # "27.1 (27A9275)" shows the sandbox's current Xcode
+lim xcode version set 26.4  # pin 26.4 instead, for a project not ready for Xcode 27
 lim xcode build . --xcode-version 26   # one-off override, not remembered
 lim xcode version unset     # forget the preference; the sandbox goes back to the node default
 ```
@@ -172,6 +177,20 @@ save key if snapshots were already enabled; it does not restore or enable them.
 See the [disk snapshot guide](https://docs.limrun.com/docs/ios/snapshots) for skipped
 saves, cold builds, and SDK usage.
 
+## Private dependency credentials
+
+Copy existing credential files with `--additional-file`, also supported by `sync`:
+
+```bash
+lim xcode build . \
+  --additional-file "$HOME/.npmrc=~/.npmrc" \
+  --additional-file "$HOME/.netrc=~/.netrc"
+```
+
+Remote `~/` targets the sandbox home; other destinations are workspace-relative.
+Repeat the flags on later syncs to retain the files. Pass `--env` for environment
+variables referenced by the configuration.
+
 ## Developer tool versions
 
 After syncing, `lim xcode use` selects tools in the sandbox and installs missing versions.
@@ -209,6 +228,8 @@ lim xcode run --env API_ENV=development -- npm run generate
 lim xcode run --no-sync -- make api
 ```
 
+Wait for sync to succeed before executing. If you get `workspace sync is still in progress`, retry after sync succeeds.
+
 The sandbox includes Node, Ruby, CMake, Mint, mise, and Homebrew. Tool installs
 made with mise, Mint, or Homebrew stay in the instance's sandbox home and
 remain available on later commands on that instance:
@@ -220,6 +241,16 @@ lim xcode run -- brew install tree
 ```
 
 Commands are one-shot and non-interactive. There is no TTY or stdin channel.
+
+Use the remote `$TMPDIR` for temporary files instead of `/tmp` or `/private/tmp`.
+
+## Download sandbox files
+
+Use `lim xcode pull-file <remote-path> [destination] --id <instance-ID>`.
+Paths can be absolute or relative to the synced project root.
+Never use build or run logs to transfer files, including text, binary, or base64 content.
+Wait for the command writing the file to finish. Archive directories first,
+and download before deleting the instance.
 
 ## Generated Xcode projects (XcodeGen)
 
@@ -251,8 +282,11 @@ also match the directory path itself, as above.
 
 ## Run on a simulator
 
-`lim xcode build` is build-and-install. Don't attach a simulator until the user
-needs to see or interact with the app. Check / attach:
+When the user needs to run or interact with the app, prefer attaching a simulator
+to the Xcode sandbox for rebuilds. After the first transfer, rebuilds skip unchanged
+files and send binary patches when smaller. Small rebuilds can be much faster than
+uploading the full app to Asset Storage and downloading it to the simulator each time.
+Check the existing attachment before creating a simulator:
 
 ```bash
 lim xcode get             # is a simulator already attached?
@@ -268,6 +302,10 @@ Markdown link, such as `[Live simulator](<signed-stream-url>)`.
 When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
 the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
+
+To disconnect the simulator from its build sandbox and stop automatic installation, run
+`lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
 
 ## Run tests (XCTest)
 
@@ -288,21 +326,40 @@ project has test targets). `--xcode-version 27` builds the tests with that
 major's GA (`27.1` selects the beta); the simulator keeps the fleet default
 runtime, so the run warns and proceeds (runtime-dependent failures are possible).
 
-Select a subset with xcodebuild's identifier format
-`Target[/Class[/method]]`; repeat the flag for multiple entries. The two flags
-are mutually exclusive:
+`--model` (`iphone`, `iphone-duo`, `ipad`) and `--os-version` (`26`, `27`)
+choose the simulator the run creates; iPhone and iPad run both versions,
+iPhone Duo runs 27. Either flag creates a fresh sandbox and simulator instead
+of reusing the last ones, and neither combines with `--id` or `--build-only`:
+
+```bash
+lim xcode test . --model ipad --os-version 27
+```
+
+Select a subset with xcodebuild's identifier format:
+`Target[/Class[/method]]` for XCTest, `Target/Suite[/test()]` for Swift
+Testing. Repeat the flag for multiple entries. The two flags are mutually
+exclusive:
 
 ```bash
 lim xcode test . --only-testing MyAppTests/LoginTests/testValidLogin
+lim xcode test . --only-testing MyAppTests/CartSuite
+lim xcode test . --only-testing 'MyAppTests/CartSuite/addsItem()'
 lim xcode test . --skip-testing MyAppUITests
 ```
 
-A bare target name selects or skips that whole target. An `--only-testing`
+A Swift Testing suite selects its nested suites too. A function needs its
+parentheses, with argument labels for a parameterized test
+(`addsItems(count:)`); without them it matches nothing. A selection that
+matches nothing runs zero cases and still passes, so check the summary
+counts. A bare target name selects or skips that whole target. An `--only-testing`
 entry naming a target the build did not produce fails the run instead of
 silently running everything.
 
-For machine consumption, `--json` streams the raw per-case events as NDJSON
-and ends with a `{"exitCode": N}` record:
+A failed case prints its first failure as `file:line: message`, with the file
+relative to the synced project; a failure without a location (a crash) shows
+only the message. For machine consumption, `--json` streams the raw per-case
+events as NDJSON (failed cases carry `failureMessage`, `failureFile` and
+`failureLine`) and ends with a `{"exitCode": N}` record:
 
 ```bash
 lim xcode test . --json > results.ndjson
@@ -503,6 +560,11 @@ key above must be set; then no post-upload steps exist at all.
 
 ## Preview builds
 
+For repeatable previews on pull requests, prefer the packaged
+[iOS preview action](https://github.com/limrun-inc/ios-preview-action).
+It builds and uploads the app, updates the PR preview comment, and cleans up the
+builder; see the repository for inputs and workflow examples.
+
 Only create a reusable preview asset when the user asks for a preview build or
 when you're opening a PR. Build and upload:
 
@@ -521,15 +583,24 @@ Then construct the preview link and include it in your last message (and in the
 PR, if you're opening one):
 
 ```
-https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
+https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
 
 ## Gotchas
 
 - **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
-- **The embedded Xcode sandbox is gone.** The TypeScript SDK (0.54.0+) and
-  `lim` (0.35.0+) no longer create an Xcode sandbox inside an iOS instance.
-  Symptoms after an upgrade: `'sandbox' does not exist in type 'Spec'` on
+- **A project mise file installs tools the build never uses.** The first
+  build or run in a sandbox runs `mise install` for every `[tools]` entry in the
+  synced mise files, so a monorepo's root `mise.toml` full of databases and
+  cloud CLIs slows it down or fails it. Keep using the project file when it
+  works. If it doesn't, add a `mise.limrun.toml` beside it listing only the
+  build's tools (for example node and pnpm); in that directory Limrun reads it
+  instead of the other mise files.
+- **The embedded Xcode sandbox is gone.** The API rejects an iOS create with
+  `spec.sandbox.xcode.enabled` (`400 The embedded Xcode sandbox
+  (spec.sandbox.xcode) was removed`), and the TypeScript SDK (0.54.0+) and
+  `lim` (0.35.0+) no longer offer it. If an old `lim` sent the request,
+  upgrade it. Other symptoms: `'sandbox' does not exist in type 'Spec'` on
   `iosInstances.create`, `Property 'sandbox' does not exist on type 'Status'`
   where code reads `status.sandbox.xcode.url`, or `Expected an Xcode instance
   (sandbox_...), got ios_...` from a `lim xcode` command. Create the Xcode
@@ -538,7 +609,7 @@ https://console.limrun.com/preview?asset=${ASSET_NAME}&platform=ios
   simulator; in the SDK, `xcodeInstances.create` then `attachNewSimulator()` or
   `attachSimulator(iosInstance)` on its client. Pass the `sandbox_` ID to
   `lim xcode` commands and the `ios_` ID to `lim ios` commands. Details:
-  https://docs.limrun.com/docs/ios/build-with-xcode#moving-off-the-embedded-xcode-sandbox
+  https://docs.limrun.com/docs/ios/build-with-xcode#move-off-the-embedded-xcode-sandbox
 - **Instance ID for `lim ios` commands.** They resolve the current instance
   from the git worktree of your cwd and can fail with `No instance ID provided
   and no recent ios instance found`. Get the ID from `lim xcode get` and pass

@@ -31,6 +31,10 @@ lim gradle --help
 lim gradle build --help
 ```
 
+To disconnect the emulator from its build sandbox and stop automatic installation, run
+`lim gradle detach-emulator --id <gradle-instance-id>`. Both instances,
+installed apps, and retained builds remain available. Repeated detach requests succeed.
+
 ## Build an APK
 
 Instead of `./gradlew`, build with:
@@ -57,15 +61,34 @@ lim gradle build . --project-path android
 
 Expo managed-workflow projects (no `android/` directory) are detected
 automatically: the sandbox installs dependencies and runs `expo prebuild`
-before Gradle. Setting `--expo-app-dir` (monorepos) or `--abi` forces that
-pipeline and errors when no Expo app is detected:
+before Gradle. Setting `--expo-app-dir` (monorepos), `--expo-no-clean`, or `--abi`
+forces that pipeline and errors when no Expo app is detected:
 
 ```bash
 lim gradle build ./my-monorepo --expo-app-dir apps/mobile
 ```
 
+For Expo SDK 57 and later, add `--expo-no-clean` to pass `--no-clean` to
+prebuild and preserve the existing `android/` directory. Prebuild still skips
+an unchanged generated project or a complete client-synced native project.
+Omitting the flag keeps the installed Expo CLI's default.
+
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
+
+## Private dependency credentials
+
+Copy existing credential files with `--additional-file`, also supported by `sync`:
+
+```bash
+lim gradle build . \
+  --additional-file "$HOME/.npmrc=~/.npmrc" \
+  --additional-file "$HOME/.netrc=~/.netrc"
+```
+
+Remote `~/` targets the sandbox home; other destinations are workspace-relative.
+Repeat the flags on later syncs to retain the files. Pass `--env` for environment
+variables referenced by the configuration.
 
 ## Detached builds and logs
 
@@ -94,27 +117,42 @@ lim gradle run --env APP_ENV=staging -- npm run generate
 lim gradle build . --env APP_ENV=staging
 ```
 
+Wait for sync to succeed before executing. If you get `workspace sync is still in progress`, retry after sync succeeds.
+
+## Download sandbox files
+
+Use `lim gradle pull-file <remote-path> [destination] --id <instance-ID>`.
+Paths can be absolute or relative to the synced project root.
+Never use build or run logs to transfer files, including text, binary, or base64 content.
+Wait for the command writing the file to finish. Archive directories first,
+and download before deleting the instance.
+
 ## Run it on an emulator
 
-Upload the built APK as a named asset, then install it on an Android instance:
+Prefer attaching the emulator to the Gradle sandbox for repeated builds. After
+the first transfer, rebuilds reuse the previous APK and send a binary patch when
+smaller. Small rebuilds can be much faster than uploading the full APK to Asset
+Storage and downloading it to the emulator each time.
+
+Build once, create an emulator if needed, then attach it to the sandbox. Attachment
+installs the latest retained APK, and later successful APK builds install automatically:
 
 ```bash
-lim gradle build . --upload myapp.apk
-lim android create --install-asset=myapp.apk
+lim gradle build .
+lim android create --no-open --no-connect
+lim gradle attach-emulator <android-instance-id> --id <gradle-instance-id>
 ```
 
+Reuse an existing emulator when one is already running. Share its signed stream
+URL as a Markdown link, such as `[Live emulator](<signed-stream-url>)`.
+
+Use `lim gradle build . --upload myapp.apk` when you also need a reusable asset.
 Build uploads default to a 14-day TTL: each build pushes the asset's expiry
 to 14 days from that upload. Pass `--upload-ttl` with a Go duration (e.g.
 `720h`; `1d` is invalid) to change it.
 
-Share the signed stream URL from the create output with the user as a
-Markdown link, such as `[Live emulator](<signed-stream-url>)`. For rebuild
-iterations, patch the installed APK in place instead of recreating the
-instance:
-
-```bash
-lim android sync ./path/to/app-debug.apk
-```
+For an APK built outside the sandbox, patch the running emulator with
+`lim android sync ./path/to/app-debug.apk`.
 
 For everything else on the device (tapping, typing, element tree, screenshots,
 video, logcat over adb), use **limrun-android-emulator**.
@@ -225,9 +263,23 @@ Failure strings to recognize on the `--sign` path:
   unsigned bundle; the signing config was not applied. Not a problem in the
   user's code; retry, and report it if it persists.
 
+## Android previews on pull requests
+
+For repeatable previews on pull requests, prefer the packaged
+[Android preview action](https://github.com/limrun-inc/android-preview-action).
+It builds and uploads the app, updates the PR preview comment, and cleans up the
+builder; see the repository for inputs and workflow examples.
+
 ## Gotchas
 
 - **Build errors are part of the job.** If a build fails, read the error output, fix the code, and rebuild before reporting back.
+- **A project mise file installs tools the build never uses.** The first
+  build or run in a sandbox runs `mise install` for every `[tools]` entry in the
+  synced mise files, so a monorepo's root `mise.toml` full of databases and
+  cloud CLIs slows it down or fails it. Keep using the project file when it
+  works. If it doesn't, add a `mise.limrun.toml` beside it listing only the
+  build's tools (for example node and pnpm); in that directory Limrun reads it
+  instead of the other mise files.
 - **Instance reuse is per git worktree.** Commands resolve the remembered
   instance from the worktree of your cwd; pass `--id <gradle-instance-id>`
   (from `lim gradle list`) to target a specific one.

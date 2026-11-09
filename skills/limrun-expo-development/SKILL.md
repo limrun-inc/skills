@@ -11,6 +11,8 @@ Use this skill for Expo / React Native-specific setup and dev-client iteration, 
 
 All builds and device operations must run on Limrun. Do not use local Xcode, local simulators, a local Android SDK, or local emulators; local `adb` is used only to talk to the remote emulator through the CLI's tunnel.
 
+In Xcode sandbox commands, use the remote `$TMPDIR` instead of `/tmp` or `/private/tmp`.
+
 ## Expo Readiness
 
 Before changing Expo dependencies or app config, check the app's Expo SDK version and use the matching Expo versioned docs.
@@ -140,6 +142,11 @@ lim xcode attach-simulator <ios-instance-id> --id <xcode-instance-id>
 
 After the attach, every successful `lim xcode build` installs and launches the app on the attached simulator.
 
+Prefer this attachment for native rebuilds. It skips unchanged files and sends
+binary patches when smaller. Small rebuilds can be much faster than uploading
+and downloading the full app through Asset Storage each time. Omit `--upload`
+on rebuilds unless you also need to save a reusable dev-client asset.
+
 ## Start Metro Through Limrun on iOS
 
 This flow is for iOS. Android uses `adb reverse`; skip to **Start Metro on
@@ -166,6 +173,11 @@ bundle URLs, and deep links. Set it inline so it takes precedence over project d
 values. Keep Metro and the detached tunnel running while the user iterates.
 Run Metro as a managed background process, or copy the printed `TUNNEL_URL` into
 a second terminal before launching the app.
+
+Metro keeps talking to the app through the tunnel, and that traffic counts as
+simulator activity, so the simulator stays alive while Metro runs even when
+nobody touches it. To let it reach its inactivity timeout between sessions, add
+`--no-reset-inactivity-timeout` to `lim ios tunnel` (`lim` 0.50.0 or later).
 
 If port 8081 is already occupied, choose another explicit port and use the same
 value for the tunnel selector, `TUNNEL_URL`, and Expo's `--port`. Selector sets
