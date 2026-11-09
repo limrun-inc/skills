@@ -64,9 +64,12 @@ to change residency without an explicit instruction to discard their values.
 
 1. Resolve the intended organization and configured API URLs. For a user or CI
    client, use an existing Limrun API credential in the Authorization header.
-2. Ensure metadata with `PUT /v1/organizations/{org}/secrets`, body
+2. Create metadata with `POST /v1/organizations/{org}/secrets`, body
    `{"name":"signing/ios","type":"signing-key"}`. This operation never accepts
-   a payload. Save the returned `id` and require `state: "ready"`.
+   a payload. Creation returns `201`; a name already used in this organization
+   returns `409`. Save the returned `id` and require `state: "ready"`. For an
+   intentional update, resolve the existing ID with `GET` and request a write
+   grant. Do not treat a conflict as permission to overwrite a value.
 3. Request `POST /v1/secrets/access_tokens` at the regional API URL with
    `{"target":"name/signing/ios","action":"write"}`. A TID can replace the name.
 4. Send the base64-encoded bytes directly to
@@ -115,10 +118,8 @@ retries; do not claim success from the initial request alone.
 
 ## Issuer diagnostics
 
-Audit actions `secret.metadata.create`, `secret.metadata.reuse`, and
-`secret.metadata.read` describe container metadata. Reuse returns the existing
-container without writing a value. A failed create-or-reuse request is
-`secret.metadata.ensure`. `secret.access_token.create` records the grant request;
+Audit actions `secret.metadata.create` and `secret.metadata.read` describe
+container metadata. `secret.access_token.create` records the grant request;
 check its outcome and permissions. It does not prove a value transfer.
 `secret.read` and `secret.write` are reserved for actual value access and are
 not currently emitted in Limrun's Audit Logs. New events capture the API-key
