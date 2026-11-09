@@ -26,6 +26,22 @@ a pattern permits delegation of matching concrete names, not another pattern.
 API keys use wildcard targets. Signed access tokens and workload roles can
 carry concrete targets.
 
+## Console workflow
+
+For users working in a browser, open
+[Secrets](https://console.limrun.com/secrets). The page is available to all
+organizations, with actions controlled by secret permissions. Use **New secret**
+for generic text values up to 64 KiB, **View** then **Reveal value** for reads,
+**Update** for a new version, and **Delete** to remove all versions. The browser
+transfers values directly to Google. Do not copy revealed values into chat.
+Use REST for binary payloads.
+
+Admins can choose **US · US East** or **EU · Europe Central** and select
+**Save location** before creating secrets. US is the default. A ready container
+may have no saved value after an upload failure; use **Update** to retry the
+write. A timeout may have created a version, so do not report it as definitely
+failed or retry without considering duplicate versions.
+
 ## Storage location
 
 Organizations default to `us`. For EU payload storage, an organization
