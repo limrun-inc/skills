@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, send all traffic through the user's proxy, trust a custom CA certificate, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', 'route all traffic through my proxy', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, send all traffic through the user's proxy, trust a custom CA certificate, block domains, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', 'route all traffic through my proxy', 'block this site', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -440,6 +440,33 @@ restart, for the life of the instance. Only one CA certificate per file;
 leaf certificates are rejected. Apps that pin certificates still reject it.
 To look at the app's HTTP and HTTPS traffic, use tunnel inspection (above)
 instead: it needs no CA of the user's own.
+
+## Block domains
+
+Keep the emulator's browser and apps away from sites, for example so an agent
+driving the app cannot wander off to social networks. A blocked name does not
+resolve on the device. Each entry is an exact name or a `*.` wildcard that
+covers subdomains but not the name itself, so a whole site takes both entries.
+Quote wildcards. Block from creation, so the first page is already blocked:
+
+```bash
+lim android create --blocked-domain facebook.com --blocked-domain '*.facebook.com'
+```
+
+On a running instance, `set` replaces the whole list and no domains unblocks
+everything:
+
+```bash
+lim android blocked-domains set instagram.com '*.instagram.com' --id <android-instance-id>
+lim android blocked-domains list --id <android-instance-id>
+lim android blocked-domains set --id <android-instance-id>   # unblock everything
+```
+
+URLs, IP addresses, ports, and international names are refused with the name
+to send instead; paths cannot be blocked. Chrome and apps that already hold a
+connection keep it until relaunched. Apps that resolve names over HTTPS
+themselves, or connect to IP addresses, are not blocked. A blocked name wins
+over a tunnel selector for the same name.
 
 ## Preview URL for humans
 
