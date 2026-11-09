@@ -32,13 +32,6 @@ If you prefer your agent's own plugin or skills mechanism:
 The plugin bundles all skills plus the remote MCP server at `https://mcp.limrun.com/mcp`
 (OAuth sign-in on first use, or set an org API key as a bearer token).
 
-## Invoice emails
-
-Organization admins can receive future paid invoices by opening [Billing](https://console.limrun.com/billing)
-and turning on **Email invoices automatically**. Emails go to the billing address saved in Stripe.
-This setting applies to the selected organization and requires a signed-in member with billing management
-permission; API keys cannot change it. See [Receive invoice emails](https://docs.limrun.com/docs/billing).
-
 ## Maintaining
 
 `distribution.json` is the single source of truth for publishing metadata. Every manifest
