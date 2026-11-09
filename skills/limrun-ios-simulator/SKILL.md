@@ -674,3 +674,17 @@ lim ios delete
   `lim ios list-apps` after a successful install.
 - **Build errors are the build skill's job.** If the app isn't installing, the
   failure is upstream; go back to `limrun-bazel` / `limrun-xcode`.
+
+## Stored credentials for app launches
+
+For apps that read credentials from their environment, use references to generic organization secrets:
+
+```bash
+lim ios launch-app com.example.app --env-from-secret API_TOKEN=testing/api-token
+lim ios set env-from-secret API_TOKEN=testing/api-token
+lim ios set env-from-secret --unset API_TOKEN
+```
+
+Saved bindings apply to subsequent app launches, simulator commands, and XCTest hosts on this instance. App launches with bindings relaunch the process to apply the value. `lim ios simctl` also accepts `--env-from-secret NAME=secret/name` before `--`. `create --env-from-secret` saves defaults at creation; `set env-from-secret --clear` removes all defaults.
+
+The simulator fetches values with workload identity. The CLI adds exact secret read permissions only when the caller can delegate them. Do not fetch or print the value locally as a workaround for permission errors. Removing a binding preserves delegated permissions.

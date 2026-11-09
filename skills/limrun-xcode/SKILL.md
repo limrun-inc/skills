@@ -641,3 +641,20 @@ https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
   p12 lacks its CA chain, so re-export it with the chain; `code signature
   verification failed` means the platform's post-sign check rejected the
   artifact, which is not a code problem, so retry or report it.
+
+## Private dependencies
+
+Use a generic organization secret when a remote build needs an npm token, GitHub PAT, or another private repository credential. Pass references, never fetch values into the CLI or print them:
+
+```bash
+lim xcode build --env-from-secret NPM_TOKEN=packages/npm
+lim xcode set env-from-secret NPM_TOKEN=packages/npm
+lim xcode run -- npm ci
+lim xcode set env-from-secret --unset NPM_TOKEN
+```
+
+The project's `.npmrc` must use `${NPM_TOKEN}`. The workload fetches the latest value before each operation, including dependency installation. A command binding overrides the saved binding for the same variable. Secret values override ordinary `--env` values. `create --env-from-secret` saves defaults when creating an instance; `set env-from-secret --clear` removes all saved bindings. Reusing an existing instance preserves its bindings and role.
+
+The CLI preserves the instance's existing role and adds exact `secret:name/<name>:read` permissions when needed. The caller must be able to delegate them. If permission is denied, report the required permission; do not copy values through a different credential path. Removing bindings leaves role permissions unchanged. Workload code can read these environment variables, so do not echo them or write them into build artifacts.
+
+For npm and a GitHub credential-helper example that keeps the PAT out of Git URLs, see https://docs.limrun.com/docs/ios/build-with-xcode#install-private-dependencies.

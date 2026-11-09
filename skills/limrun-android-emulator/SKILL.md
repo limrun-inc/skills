@@ -502,3 +502,17 @@ lim android delete <android-instance-id>
   instance" above; pass `--id` when in doubt.
 - **Build errors are the build skill's job.** If the APK isn't building, the
   failure is upstream; go back to **limrun-gradle**.
+
+## Stored credentials for shell commands and tools
+
+Bind generic organization secrets to variables used by Android shell commands:
+
+```bash
+lim android adb-shell --env-from-secret TEST_API_TOKEN=testing/api-token -- sh -c 'test -n "$TEST_API_TOKEN"'
+lim android set env-from-secret TEST_API_TOKEN=testing/api-token
+lim android set env-from-secret --unset TEST_API_TOKEN
+```
+
+The check confirms presence without printing the token. Saved bindings apply to subsequent shell commands and newly started sandbox tools, including Playwright. Android apps launched through Activity Manager do not inherit these variables. Existing tool processes need a restart to receive changed bindings. `create --env-from-secret` saves defaults at creation; `set env-from-secret --clear` removes all defaults.
+
+The workload fetches values using workload identity. The CLI adds exact secret read permissions when the caller can delegate them. Do not fetch or print the value locally as a workaround for permission errors. Removing bindings preserves delegated permissions.

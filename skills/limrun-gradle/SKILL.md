@@ -299,3 +299,20 @@ builder; see the repository for inputs and workflow examples.
   files (including nested ones) are honored. Use `--ignore <regex>` for other
   large local artifacts and `--include <regex>` to force-sync gitignored
   inputs the build needs.
+
+## Private dependencies
+
+Use a generic organization secret when a remote build needs an npm token, GitHub PAT, or another private repository credential. Pass references, never fetch values into the CLI or print them:
+
+```bash
+lim gradle build --env-from-secret NPM_TOKEN=packages/npm
+lim gradle set env-from-secret NPM_TOKEN=packages/npm
+lim gradle run -- npm ci
+lim gradle set env-from-secret --unset NPM_TOKEN
+```
+
+The project's `.npmrc` must use `${NPM_TOKEN}`. The workload fetches the latest value before each operation, including dependency installation. A command binding overrides the saved binding for the same variable. Secret values override ordinary `--env` values. `create --env-from-secret` saves defaults when creating an instance; `set env-from-secret --clear` removes all saved bindings. Reusing an existing instance preserves its bindings and role.
+
+The CLI preserves the instance's existing role and adds exact `secret:name/<name>:read` permissions when needed. The caller must be able to delegate them. If permission is denied, report the required permission; do not copy values through a different credential path. Removing bindings leaves role permissions unchanged. Workload code can read these environment variables, so do not echo them or write them into build artifacts.
+
+For npm and a GitHub credential-helper example that keeps the PAT out of Git URLs, see https://docs.limrun.com/docs/android/build-with-gradle#install-private-dependencies.
