@@ -14,9 +14,10 @@ do not invent a `lim secret` command.
 
 Every secret has a `secret_…` TID and an organization-unique name. Permissions
 are `secret:<target>:<action>`. Targets are a TID, `name/<name-or-pattern>`, or
-`*`. Actions are `read`, `write`, `delete`, and `all`. Read permits enabled
+`*`. Actions are `read`, `write`, `update`, `delete`, and `all`. Read permits enabled
 versions, write creates the container or adds versions, and delete removes the
-container and all versions. Any matching action exposes metadata.
+container and all versions. Update replaces descriptive metadata without value
+access. Any matching action exposes metadata.
 
 Use the returned TID when a grant must stop matching after deletion and
 recreation. Use `name/signing/ios` when the grant should follow that name.
@@ -107,18 +108,36 @@ Role changes prevent future grants, but already-issued Google tokens remain
 usable until expiry. User and API-key revocation also depend on regional
 replication. Do not promise immediate revocation of existing Google tokens.
 
+Workloads can also create containers with regional `POST /v1/secrets` and
+replace metadata with `PATCH /v1/secrets/{secretTID}`, using the same original
+workload identity. Creation requires a matching `write` grant in the role;
+metadata replacement requires `update`. These routes also accept organization
+credentials and signed access tokens.
+
 ## Metadata and deletion
 
 List with `GET /v1/organizations/{org}/secrets`; `nameFilter` is an exact name,
 and `limit`/`offset` paginate visible metadata. Get one record or delete it at
 `/v1/organizations/{org}/secrets/{secretTID}`. Deletion removes every version.
+Creation accepts an optional `metadata` JSON object. It defaults to `{}` and
+supports nested JSON up to 16 KiB encoded. Keep sensitive values out of metadata:
+it goes through Limrun APIs and is visible with any matching secret permission.
+Do not infer metadata claims from the type or treat them as verified authority.
+
+Use `PATCH /v1/organizations/{org}/secrets/{secretTID}` with
+`{"metadata":{"bundleIDs":["com.example.app"]}}` to replace the whole object.
+This requires `secret:<target>:update`; read or write alone is insufficient.
+Use `{"metadata":{}}` to clear it. Name, type, and secret value do not change.
+In the console, the info icon opens details and **Edit metadata** edits this
+object without revealing a value. New secrets accept **Type and metadata**.
+
 Confirm the user intends that deletion when their request is ambiguous.
 An operation failure may leave `pending` or `deleting` metadata while it
 retries; do not claim success from the initial request alone.
 
 ## Issuer diagnostics
 
-Audit actions `secret.metadata.create` and `secret.metadata.read` describe
+Audit actions `secret.metadata.create`, `secret.metadata.update`, and `secret.metadata.read` describe
 container metadata. `secret.access_token.create` records the grant request;
 check its outcome and permissions. It does not prove a value transfer.
 `secret.read` and `secret.write` are reserved for actual value access and are
