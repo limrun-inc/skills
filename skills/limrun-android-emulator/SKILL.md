@@ -516,13 +516,3 @@ lim android set env-from-secret --unset TEST_API_TOKEN
 The check confirms presence without printing the token. Saved bindings apply to subsequent shell commands and newly started sandbox tools, including Playwright. Android apps launched through Activity Manager do not inherit these variables. Existing tool processes need a restart to receive changed bindings. `create --env-from-secret` saves defaults at creation; `set env-from-secret --clear` removes all defaults.
 
 The workload fetches values using workload identity. The CLI adds exact secret read permissions when the caller can delegate them. Do not fetch or print the value locally as a workaround for permission errors. Removing bindings preserves delegated permissions.
-
-For file-based tool authentication, save the full configuration as a generic secret and use:
-
-```bash
-lim android adb-shell --file-from-secret '~/.npmrc=packages/npmrc' -- sh -c 'test -s "$HOME/.npmrc"'
-lim android set file-from-secret '~/.npmrc=packages/npmrc'
-lim android set file-from-secret --unset '~/.npmrc'
-```
-
-Quote `~/` for the remote home. Other paths resolve relative to the shell or tool's working directory, ignoring leading slashes. A `cd` inside the command does not relocate files already placed before execution. ADB files use `/data/local/tmp/limrun-home` as `HOME`; sandbox tools receive saved files in their own home. Command files are removed after execution; saved files refresh on the next command and remain. Unsetting removes the file on the next command. Existing files are not overwritten. Do not print file contents or copy them into artifacts.
