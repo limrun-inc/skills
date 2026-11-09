@@ -37,7 +37,10 @@ reveal it inline. Use the pencil icon and **Save** for a new version, or
 **Cancel** to discard edits. Reveal first to edit existing text, or enter a
 replacement without reading it. The trash icon opens a deletion confirmation. The browser
 transfers values directly to Google. Do not copy revealed values into chat.
-Use REST for binary payloads.
+Use REST for binary payloads. While storage is being prepared, wait for value
+controls to become enabled. After a create timeout, the dialog retains the entered
+value and can offer **Use existing secret**. Choose it only if adding a version to
+that named secret is intended; the failed response cannot prove who created it.
 
 Storage location is in **Settings → Organization → Secret storage**. Admins can choose
 **US · US East** or **EU · Europe Central** and select **Save location** before
