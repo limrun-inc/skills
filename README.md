@@ -35,7 +35,7 @@ The plugin bundles all skills plus the remote MCP server at `https://mcp.limrun.
 ## Invoice emails
 
 Organization admins can receive future paid invoices by opening [Billing](https://console.limrun.com/billing)
-and turning on **Email paid invoices**. Emails go to the billing address saved in Stripe.
+and turning on **Email invoices**. Emails go to the billing address saved in Stripe.
 This setting applies to the selected organization and requires a signed-in member with billing management
 permission; API keys cannot change it. See [Receive invoice emails](https://docs.limrun.com/docs/billing).
 
