@@ -179,17 +179,21 @@ saves, cold builds, and SDK usage.
 
 ## Private dependency credentials
 
-Copy existing credential files with `--additional-file`, also supported by `sync`:
+Prefer stored credentials when the organization has them. Store complete `.npmrc` or `.netrc` contents as generic secrets, then bind remote files:
 
 ```bash
-lim xcode build . \
-  --additional-file "$HOME/.npmrc=~/.npmrc" \
-  --additional-file "$HOME/.netrc=~/.netrc"
+lim xcode build --file-from-secret '~/.npmrc=packages/npmrc'
+lim xcode run --file-from-secret '~/.netrc=github/netrc' -- \
+  git -c credential.helper= clone https://github.com/OWNER/REPOSITORY.git vendor/private-library
+lim xcode set file-from-secret '~/.npmrc=packages/npmrc'
+lim xcode set file-from-secret --unset '~/.npmrc'
 ```
 
-Remote `~/` targets the sandbox home; other destinations are workspace-relative.
-Repeat the flags on later syncs to retain the files. Pass `--env` for environment
-variables referenced by the configuration.
+Quote `~/` to keep it remote. Other paths are relative to the workspace root. Files are available before dependency installation, use mode `0600`, and cannot overwrite existing files. A per-command binding is removed on completion, failure, or cancellation; with `--detach`, cleanup waits for remote completion. Saved files refresh on the next command and remain afterward. Unsetting a binding removes its file on the next command. `--clear` removes all saved bindings. Temporary overrides of saved files restore the saved file afterward.
+
+The CLI delegates exact secret read permissions when authorized; workloads fetch the bytes. Do not retrieve values locally or print files to debug authentication. A GitHub `.netrc` needs the host, login, and PAT; package registries need their own complete configuration. Use `run --no-sync` after cloning if subsequent commands must retain remote-only files. For environment-based authentication, see "Private dependencies" below.
+
+If the user already has credential files locally and wants to copy them, `--additional-file "$HOME/.npmrc=~/.npmrc"` remains available on build and sync. Repeat it on later syncs to retain that uploaded file. Do not combine it with a secret binding for the same destination.
 
 ## Developer tool versions
 
