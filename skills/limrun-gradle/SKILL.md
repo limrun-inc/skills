@@ -78,17 +78,21 @@ builds, use **`limrun-expo-development`**.
 
 ## Private dependency credentials
 
-Copy existing credential files with `--additional-file`, also supported by `sync`:
+Prefer stored credentials when the organization has them. Store complete `.npmrc` or `.netrc` contents as generic secrets, then bind remote files:
 
 ```bash
-lim gradle build . \
-  --additional-file "$HOME/.npmrc=~/.npmrc" \
-  --additional-file "$HOME/.netrc=~/.netrc"
+lim gradle build --file-from-secret '~/.npmrc=packages/npmrc'
+lim gradle run --file-from-secret '~/.netrc=github/netrc' -- \
+  git -c credential.helper= clone https://github.com/OWNER/REPOSITORY.git vendor/private-library
+lim gradle set file-from-secret '~/.npmrc=packages/npmrc'
+lim gradle set file-from-secret --unset '~/.npmrc'
 ```
 
-Remote `~/` targets the sandbox home; other destinations are workspace-relative.
-Repeat the flags on later syncs to retain the files. Pass `--env` for environment
-variables referenced by the configuration.
+Quote `~/` to keep it remote. Other paths are relative to the command's working directory; ignore leading slashes. `/etc/var` and `etc/var` both target `<working-directory>/etc/var`. For `run apps/mobile`, resolve them under `apps/mobile`. Files are available before dependency installation, use mode `0600`, and cannot overwrite existing files. A per-command binding is removed on completion, failure, or cancellation; with `--detach`, cleanup waits for remote completion. Saved files refresh on the next command and remain afterward. Unsetting a binding removes its file on the next command. `--clear` removes all saved bindings. Temporary overrides of saved files restore the saved file afterward.
+
+The CLI delegates exact secret read permissions when authorized; workloads fetch the bytes. Do not retrieve values locally or print files to debug authentication. A GitHub `.netrc` needs the host, login, and PAT; package registries need their own complete configuration. Use `run --no-sync` after cloning if subsequent commands must retain remote-only files. For environment-based authentication, see "Private dependencies" below.
+
+If the user already has credential files locally and wants to copy them, `--additional-file "$HOME/.npmrc=~/.npmrc"` remains available on build and sync. Repeat it on later syncs to retain that uploaded file. Do not combine it with a secret binding for the same destination.
 
 ## Detached builds and logs
 
@@ -299,3 +303,56 @@ builder; see the repository for inputs and workflow examples.
   files (including nested ones) are honored. Use `--ignore <regex>` for other
   large local artifacts and `--include <regex>` to force-sync gitignored
   inputs the build needs.
+
+## Private dependencies
+
+Use CLI 0.53.1 or later with `LIM_API_KEY` set. Create the organization secret before binding it to a workload, then save a value supplied by the user:
+
+```bash
+lim secret create packages/npm --metadata '{"purpose":"private dependencies"}'
+lim secret write packages/npm "$TOKEN"
+```
+
+`create` stores metadata only and defaults to type `generic`. If the name exists, it returns 409. Inspect `lim secret get packages/npm`; reuse that secret only if it is the intended one. Do not overwrite its value unless the user intends to update it.
+
+`write` requires exactly one input source: the value argument, `--file PATH`, or `--stdin`. Choose one of these alternatives when the value comes from a file or a pipe:
+
+```bash
+lim secret write packages/npm --file ./token
+printf %s "$TOKEN" | lim secret write packages/npm --stdin
+```
+
+`--file -` also reads stdin. Piped input is never consumed implicitly. File and stdin input preserve exact bytes, including newlines. Values must be nonempty and at most 64 KiB. Do not print them.
+
+Manage metadata without fetching a value:
+
+```bash
+lim secret get --limit 25 --offset 0
+lim secret list --name packages/npm --json
+lim secret get packages/npm --json
+lim secret update packages/npm --metadata '{"purpose":"private dependencies"}'
+lim secret update packages/npm --metadata '{}'
+```
+
+`get` without a target lists visible secrets; `list` is an alias. `--name` is an exact listing filter. Listing defaults to 50 records, with a maximum `--limit` of 100. Targets accept exact names, `name/packages/npm`, or secret IDs, never wildcard patterns.
+
+`update` replaces the entire metadata object; `'{}'` clears it. Metadata is a non-sensitive JSON object of at most 16 KiB. It never changes the name, type, or value, and requires `secret:<target>:update` rather than value read/write permission.
+
+Only fetch a value locally when the task requires it. `lim secret read packages/npm --output ./token` creates a private file and refuses to overwrite an existing path. Without `--output`, `read` writes raw bytes to stdout with no added newline; `read --json` returns `{"encoding":"base64","data":"…"}`, which still contains the credential.
+
+Workload bindings do not need a local read. `lim secret delete packages/npm` permanently removes the container and all versions; do not use it to resolve a creation conflict. Keep credentials out of metadata.
+
+Use a generic organization secret when a remote build needs an npm token, GitHub PAT, or another private repository credential. Pass references, never fetch values into the CLI or print them:
+
+```bash
+lim gradle build --env-from-secret NPM_TOKEN=packages/npm
+lim gradle set env-from-secret NPM_TOKEN=packages/npm
+lim gradle run -- npm ci
+lim gradle set env-from-secret --unset NPM_TOKEN
+```
+
+The project's `.npmrc` must use `${NPM_TOKEN}`. The workload fetches the latest value before each operation, including dependency installation. A command binding overrides the saved binding for the same variable. Secret values override ordinary `--env` values. `create --env-from-secret` saves defaults when creating an instance; `set env-from-secret --clear` removes all saved bindings. Reusing an existing instance preserves its bindings and role.
+
+The CLI preserves the instance's existing role and adds exact `secret:name/<name>:read` permissions when needed. The caller must be able to delegate them. If permission is denied, report the required permission; do not copy values through a different credential path. Removing bindings leaves role permissions unchanged. Workload code can read these environment variables, so do not echo them or write them into build artifacts.
+
+For npm and a GitHub credential-helper example that keeps the PAT out of Git URLs, see https://docs.limrun.com/docs/android/build-with-gradle#install-private-dependencies.

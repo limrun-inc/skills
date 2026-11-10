@@ -703,3 +703,53 @@ lim ios delete
   `lim ios list-apps` after a successful install.
 - **Build errors are the build skill's job.** If the app isn't installing, the
   failure is upstream; go back to `limrun-bazel` / `limrun-xcode`.
+
+## Stored credentials for app launches
+
+Use CLI 0.53.1 or later with `LIM_API_KEY` set. Create the organization secret before binding it to a workload, then save a value supplied by the user:
+
+```bash
+lim secret create testing/api-token --metadata '{"purpose":"app testing"}'
+lim secret write testing/api-token "$TOKEN"
+```
+
+`create` stores metadata only and defaults to type `generic`. If the name exists, it returns 409. Inspect `lim secret get testing/api-token`; reuse that secret only if it is the intended one. Do not overwrite its value unless the user intends to update it.
+
+`write` requires exactly one input source: the value argument, `--file PATH`, or `--stdin`. Choose one of these alternatives when the value comes from a file or a pipe:
+
+```bash
+lim secret write testing/api-token --file ./token
+printf %s "$TOKEN" | lim secret write testing/api-token --stdin
+```
+
+`--file -` also reads stdin. Piped input is never consumed implicitly. File and stdin input preserve exact bytes, including newlines. Values must be nonempty and at most 64 KiB. Do not print them.
+
+Manage metadata without fetching a value:
+
+```bash
+lim secret get --limit 25 --offset 0
+lim secret list --name testing/api-token --json
+lim secret get testing/api-token --json
+lim secret update testing/api-token --metadata '{"purpose":"app testing"}'
+lim secret update testing/api-token --metadata '{}'
+```
+
+`get` without a target lists visible secrets; `list` is an alias. `--name` is an exact listing filter. Listing defaults to 50 records, with a maximum `--limit` of 100. Targets accept exact names, `name/testing/api-token`, or secret IDs, never wildcard patterns.
+
+`update` replaces the entire metadata object; `'{}'` clears it. Metadata is a non-sensitive JSON object of at most 16 KiB. It never changes the name, type, or value, and requires `secret:<target>:update` rather than value read/write permission.
+
+Only fetch a value locally when the task requires it. `lim secret read testing/api-token --output ./token` creates a private file and refuses to overwrite an existing path. Without `--output`, `read` writes raw bytes to stdout with no added newline; `read --json` returns `{"encoding":"base64","data":"…"}`, which still contains the credential.
+
+Workload bindings do not need a local read. `lim secret delete testing/api-token` permanently removes the container and all versions; do not use it to resolve a creation conflict. Keep credentials out of metadata.
+
+For apps that read credentials from their environment, use references to generic organization secrets:
+
+```bash
+lim ios launch-app com.example.app --env-from-secret API_TOKEN=testing/api-token
+lim ios set env-from-secret API_TOKEN=testing/api-token
+lim ios set env-from-secret --unset API_TOKEN
+```
+
+Saved bindings apply to subsequent app launches, simulator commands, and XCTest hosts on this instance. App launches with bindings relaunch the process to apply the value. `lim ios simctl` also accepts `--env-from-secret NAME=secret/name` before `--`. `create --env-from-secret` saves defaults at creation; `set env-from-secret --clear` removes all defaults.
+
+The simulator fetches values with workload identity. The CLI adds exact secret read permissions only when the caller can delegate them. Do not fetch or print the value locally as a workaround for permission errors. Removing a binding preserves delegated permissions.

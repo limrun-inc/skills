@@ -530,3 +530,53 @@ lim android delete <android-instance-id>
   instance" above; pass `--id` when in doubt.
 - **Build errors are the build skill's job.** If the APK isn't building, the
   failure is upstream; go back to **limrun-gradle**.
+
+## Stored credentials for shell commands and tools
+
+Use CLI 0.53.1 or later with `LIM_API_KEY` set. Create the organization secret before binding it to a workload, then save a value supplied by the user:
+
+```bash
+lim secret create testing/api-token --metadata '{"purpose":"app testing"}'
+lim secret write testing/api-token "$TOKEN"
+```
+
+`create` stores metadata only and defaults to type `generic`. If the name exists, it returns 409. Inspect `lim secret get testing/api-token`; reuse that secret only if it is the intended one. Do not overwrite its value unless the user intends to update it.
+
+`write` requires exactly one input source: the value argument, `--file PATH`, or `--stdin`. Choose one of these alternatives when the value comes from a file or a pipe:
+
+```bash
+lim secret write testing/api-token --file ./token
+printf %s "$TOKEN" | lim secret write testing/api-token --stdin
+```
+
+`--file -` also reads stdin. Piped input is never consumed implicitly. File and stdin input preserve exact bytes, including newlines. Values must be nonempty and at most 64 KiB. Do not print them.
+
+Manage metadata without fetching a value:
+
+```bash
+lim secret get --limit 25 --offset 0
+lim secret list --name testing/api-token --json
+lim secret get testing/api-token --json
+lim secret update testing/api-token --metadata '{"purpose":"app testing"}'
+lim secret update testing/api-token --metadata '{}'
+```
+
+`get` without a target lists visible secrets; `list` is an alias. `--name` is an exact listing filter. Listing defaults to 50 records, with a maximum `--limit` of 100. Targets accept exact names, `name/testing/api-token`, or secret IDs, never wildcard patterns.
+
+`update` replaces the entire metadata object; `'{}'` clears it. Metadata is a non-sensitive JSON object of at most 16 KiB. It never changes the name, type, or value, and requires `secret:<target>:update` rather than value read/write permission.
+
+Only fetch a value locally when the task requires it. `lim secret read testing/api-token --output ./token` creates a private file and refuses to overwrite an existing path. Without `--output`, `read` writes raw bytes to stdout with no added newline; `read --json` returns `{"encoding":"base64","data":"…"}`, which still contains the credential.
+
+Workload bindings do not need a local read. `lim secret delete testing/api-token` permanently removes the container and all versions; do not use it to resolve a creation conflict. Keep credentials out of metadata.
+
+Bind generic organization secrets to variables used by Android shell commands:
+
+```bash
+lim android adb-shell --env-from-secret TEST_API_TOKEN=testing/api-token -- sh -c 'test -n "$TEST_API_TOKEN"'
+lim android set env-from-secret TEST_API_TOKEN=testing/api-token
+lim android set env-from-secret --unset TEST_API_TOKEN
+```
+
+The check confirms presence without printing the token. Saved bindings apply to subsequent shell commands and newly started sandbox tools, including Playwright. Android apps launched through Activity Manager do not inherit these variables. Existing tool processes need a restart to receive changed bindings. `create --env-from-secret` saves defaults at creation; `set env-from-secret --clear` removes all defaults.
+
+The workload fetches values using workload identity. The CLI adds exact secret read permissions when the caller can delegate them. Do not fetch or print the value locally as a workaround for permission errors. Removing bindings preserves delegated permissions.
