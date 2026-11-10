@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services or a private tunnel, play a video file as the camera, send all traffic through the user's proxy and trust its CA, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services or a private tunnel, play a video file as the camera, send all traffic through the user's proxy and trust its CA, block domains, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'block this site', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -333,6 +333,35 @@ life of the instance. Only one CA certificate per file; leaf certificates are
 rejected. Apps that pin certificates, and the simulator's Apple services,
 still reject it. To look at the app's traffic without a proxy of the user's
 own, use tunnel inspection (above) instead.
+
+## Block domains
+
+Keep the simulator's browser and apps away from sites, for example so an agent
+driving the app cannot wander off to social networks. A blocked name does not
+resolve on the device. Each entry is an exact name or a `*.` wildcard that
+covers subdomains but not the name itself, so a whole site takes both entries.
+Quote wildcards. Blocking needs `lim` 0.53.0 or later. Block from creation, so
+the first page is already blocked:
+
+```bash
+lim ios create --blocked-domain facebook.com --blocked-domain '*.facebook.com'
+```
+
+On a running instance, edit the blocklist one change at a time:
+
+```bash
+lim ios blocklist add instagram.com '*.instagram.com' --id <ios-instance-id>
+lim ios blocklist remove instagram.com --id <ios-instance-id>   # '*.instagram.com' stays
+lim ios blocklist list --id <ios-instance-id>
+lim ios blocklist clear --id <ios-instance-id>                  # unblock everything
+```
+
+URLs, IP addresses, ports, and international names are refused with the name
+to send instead; paths cannot be blocked. Safari and apps that already hold a
+connection keep it until relaunched. Apps that resolve names over HTTPS
+themselves, or connect to IP addresses, are not blocked. A blocked name wins
+over a tunnel selector for the same name. Apple Watch simulators cannot block
+domains.
 
 ## Launching the app
 
