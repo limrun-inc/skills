@@ -677,6 +677,18 @@ lim ios delete
 
 ## Stored credentials for app launches
 
+Create the organization secret before binding it to a workload. With `LIM_API_KEY` set, save a value supplied by the user:
+
+```bash
+lim secret create testing/api-token --type generic
+lim secret write testing/api-token "$TOKEN"
+# Alternatively, choose one explicit input source:
+lim secret write testing/api-token --file ./token
+printf %s "$TOKEN" | lim secret write testing/api-token --stdin
+```
+
+`write` takes the value as its second argument by default. File and stdin input preserve exact bytes, including newlines. Do not print values. `get` lists or fetches metadata, `update --metadata '{"purpose":"private dependencies"}'` replaces descriptive metadata, and `delete` removes the secret and all versions. `read` retrieves the value and is unnecessary for workload bindings. Keep credentials out of metadata.
+
 For apps that read credentials from their environment, use references to generic organization secrets:
 
 ```bash

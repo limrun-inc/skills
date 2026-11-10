@@ -648,6 +648,18 @@ https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 
 ## Private dependencies
 
+Create the organization secret before binding it to a workload. With `LIM_API_KEY` set, save a value supplied by the user:
+
+```bash
+lim secret create packages/npm --type generic
+lim secret write packages/npm "$TOKEN"
+# Alternatively, choose one explicit input source:
+lim secret write packages/npm --file ./token
+printf %s "$TOKEN" | lim secret write packages/npm --stdin
+```
+
+`write` takes the value as its second argument by default. File and stdin input preserve exact bytes, including newlines. Do not print values. `get` lists or fetches metadata, `update --metadata '{"purpose":"private dependencies"}'` replaces descriptive metadata, and `delete` removes the secret and all versions. `read` retrieves the value and is unnecessary for workload bindings. Keep credentials out of metadata.
+
 Use a generic organization secret when a remote build needs an npm token, GitHub PAT, or another private repository credential. Pass references, never fetch values into the CLI or print them:
 
 ```bash
