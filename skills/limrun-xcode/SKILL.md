@@ -648,17 +648,41 @@ https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 
 ## Private dependencies
 
-Create the organization secret before binding it to a workload. With `LIM_API_KEY` set, save a value supplied by the user:
+Use CLI 0.53.1 or later with `LIM_API_KEY` set. Create the organization secret before binding it to a workload, then save a value supplied by the user:
 
 ```bash
-lim secret create packages/npm --type generic
+lim secret create packages/npm --metadata '{"purpose":"private dependencies"}'
 lim secret write packages/npm "$TOKEN"
-# Alternatively, choose one explicit input source:
+```
+
+`create` stores metadata only and defaults to type `generic`. If the name exists, it returns 409. Inspect `lim secret get packages/npm`; reuse that secret only if it is the intended one. Do not overwrite its value unless the user intends to update it.
+
+`write` requires exactly one input source: the value argument, `--file PATH`, or `--stdin`. Choose one of these alternatives when the value comes from a file or a pipe:
+
+```bash
 lim secret write packages/npm --file ./token
 printf %s "$TOKEN" | lim secret write packages/npm --stdin
 ```
 
-`write` takes the value as its second argument by default. File and stdin input preserve exact bytes, including newlines. Do not print values. `get` lists or fetches metadata, `update --metadata '{"purpose":"private dependencies"}'` replaces descriptive metadata, and `delete` removes the secret and all versions. `read` retrieves the value and is unnecessary for workload bindings. Keep credentials out of metadata.
+`--file -` also reads stdin. Piped input is never consumed implicitly. File and stdin input preserve exact bytes, including newlines. Values must be nonempty and at most 64 KiB. Do not print them.
+
+Manage metadata without fetching a value:
+
+```bash
+lim secret get --limit 25 --offset 0
+lim secret list --name packages/npm --json
+lim secret get packages/npm --json
+lim secret update packages/npm --metadata '{"purpose":"private dependencies"}'
+lim secret update packages/npm --metadata '{}'
+```
+
+`get` without a target lists visible secrets; `list` is an alias. `--name` is an exact listing filter. Listing defaults to 50 records, with a maximum `--limit` of 100. Targets accept exact names, `name/packages/npm`, or secret IDs, never wildcard patterns.
+
+`update` replaces the entire metadata object; `'{}'` clears it. Metadata is a non-sensitive JSON object of at most 16 KiB. It never changes the name, type, or value, and requires `secret:<target>:update` rather than value read/write permission.
+
+Only fetch a value locally when the task requires it. `lim secret read packages/npm --output ./token` creates a private file and refuses to overwrite an existing path. Without `--output`, `read` writes raw bytes to stdout with no added newline; `read --json` returns `{"encoding":"base64","data":"…"}`, which still contains the credential.
+
+Workload bindings do not need a local read. `lim secret delete packages/npm` permanently removes the container and all versions; do not use it to resolve a creation conflict. Keep credentials out of metadata.
 
 Use a generic organization secret when a remote build needs an npm token, GitHub PAT, or another private repository credential. Pass references, never fetch values into the CLI or print them:
 
