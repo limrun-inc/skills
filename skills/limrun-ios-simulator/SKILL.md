@@ -340,7 +340,8 @@ Keep the simulator's browser and apps away from sites, for example so an agent
 driving the app cannot wander off to social networks. A blocked name does not
 resolve on the device. Each entry is an exact name or a `*.` wildcard that
 covers subdomains but not the name itself, so a whole site takes both entries.
-Quote wildcards. Block from creation, so the first page is already blocked:
+Quote wildcards. Blocking needs `lim` 0.53.0 or later. Block from creation, so
+the first page is already blocked:
 
 ```bash
 lim ios create --blocked-domain facebook.com --blocked-domain '*.facebook.com'
