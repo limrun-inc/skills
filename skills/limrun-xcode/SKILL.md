@@ -371,8 +371,8 @@ products stay on the sandbox for a later run.
 `--result-bundle <path>` runs the tests through Apple's `xcodebuild` and
 downloads the run's `.xcresult` to a local path that must not exist yet, also
 when tests fail. `--coverage` builds with code coverage and collects it into
-the bundle, so a test run with `--coverage` needs `--result-bundle` too. Both
-need `lim` 0.53.0 or later. With `--json`, the exit record carries
+the bundle, so a test run with `--coverage` needs `--result-bundle` too. These
+flags and `--without-building` need `lim` 0.53.0 or later. With `--json`, the exit record carries
 `resultBundle`, the absolute local path:
 
 ```bash
@@ -381,7 +381,7 @@ lim xcode test . --result-bundle Tests.xcresult --coverage
 
 The bundle holds each test's result, the attachments tests add, and for a
 failed UI test the app's UI hierarchy; it has no screen recording of a failed
-test. Reading it needs Xcode's tools on a Mac
+test. Reading it needs the tools of Xcode 16.3 or later on a Mac
 (`xcrun xcresulttool get test-results summary --path <bundle>`,
 `xcrun xccov view --report --json <bundle>`), so on other machines take the
 results from the streamed lines or `--json` and keep the bundle as an artifact.
@@ -390,7 +390,9 @@ results from the streamed lines or `--json` and keep the bundle as an artifact.
 without syncing or building. It takes no project path and rejects the build,
 sync and simulator flags; it accepts the selection, `--result-bundle` and
 `--coverage` (which needs products built with `--coverage`). Use it to rerun a
-failed test, or to split a suite into one run and one bundle per class:
+failed test, or to split a suite into one run and one bundle per class. A
+rerun never creates a sandbox: it uses the last one, or the one `--id` names,
+which must then have a simulator attached:
 
 ```bash
 lim xcode test . --only-testing MyAppUITests/LoginTests --result-bundle Login.xcresult --coverage
