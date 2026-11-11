@@ -228,9 +228,9 @@ header. JSON output reports `instanceId`, `localHost`, `localPort`, and
 
 Start the server inside the simulator separately and bind it to the simulator's
 assigned IP or `0.0.0.0`. A server bound only to simulator `127.0.0.1` is not
-reachable. The forward supports TCP, including HTTP and WebSockets. Older CLI or
-simulator versions require the client to send data first. UDP is not supported.
-To reach a server on your machine from the simulator, use `lim ios tunnel`
+reachable. The forward supports TCP protocols where the client sends first,
+including HTTP and WebSockets, but not UDP or protocols where the server sends
+first. To reach a server on your machine from the simulator, use `lim ios tunnel`
 below instead.
 
 ## Reaching services on the local machine
