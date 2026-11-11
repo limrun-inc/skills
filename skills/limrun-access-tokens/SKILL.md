@@ -16,7 +16,9 @@ Use `lim login` or an existing `LIM_API_KEY`. Install the CLI if needed with
 `lim access-token create --help` or `lim access-token revoke --help` and the
 installed CLI version.
 
-The caller needs `accesstoken:*:all` and must hold every permission it delegates.
+Exchange requires no `accesstoken` management permission. The caller must hold
+every permission it delegates. Revoking a token by ID still requires explicit
+`accesstoken` permission within its organization.
 An access token cannot expand the caller's permissions. Permission strings use
 `resource:target:action`; the action wildcard is `all`, not `*`.
 
@@ -109,10 +111,25 @@ The SDK revoke method takes an ID. Use `accessTokens` and `permissions` in new i
 routes are `POST /v1/access_tokens` and `DELETE /v1/access_tokens/{id}`;
 authenticate with the API key in the Authorization Bearer header.
 
+## Revoke the presented token
+
+An access token can revoke itself without a separate management credential. Send
+`DELETE /v1/access_tokens/self` to the director API URL used for exchange, with
+that access token in the Authorization Bearer header. No `accesstoken` permission
+is required. The server takes the organization and token ID from verified claims;
+a request cannot select another token, its parent credential, or its siblings.
+
+Opaque API keys, tokens without a `jti`, and private-tunnel credentials cannot use
+this route. Existing CLI and SDK revoke-by-ID calls still require explicit
+revocation permission. Once revocation propagates, further requests with the
+revoked token fail authentication, including repeated self-revocation requests.
+
 ## Lifetime and revocation
 
 Tokens created with an API key or CLI login default to one hour.
 `--ttl-seconds` and `ttlSeconds` accept integers from 1 through 14,400.
+A signed token can call the REST exchange with an explicit supported subset of
+its permissions, but the new token cannot outlive it.
 
 The management and registry APIs check revocation after it propagates. Instance
 endpoints verify tokens offline and continue accepting them until expiry or
