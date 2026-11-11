@@ -16,7 +16,7 @@ Use `lim login` or an existing `LIM_API_KEY`. Install the CLI if needed with
 `lim access-token create --help` or `lim access-token revoke --help` and the
 installed CLI version.
 
-Use `POST /v1/access_tokens/self` for REST exchange; `POST /v1/access_tokens` remains compatible.
+Use `POST /v1/access_tokens` for REST exchange.
 Exchange requires no `accesstoken` management permission. The caller must hold
 every permission it delegates. Revoking a token by ID still requires explicit
 `accesstoken` permission within its organization.
@@ -109,13 +109,13 @@ await lim.accessTokens.revoke(access.id);
 ```
 
 The SDK revoke method takes an ID. Use `accessTokens` and `permissions` in new integrations. For REST, the matching
-routes are `POST /v1/access_tokens/self` and `DELETE /v1/access_tokens/{id}`;
+routes are `POST /v1/access_tokens` and `DELETE /v1/access_tokens/{id}`;
 authenticate with the API key in the Authorization Bearer header.
 
 ## Revoke the presented token
 
 An access token can revoke itself without a separate management credential. Send
-`DELETE /v1/access_tokens/self` to the director API URL used for exchange, with
+`DELETE /v1/access_tokens` to the director API URL used for exchange, with
 that access token in the Authorization Bearer header. No `accesstoken` permission
 is required. The server takes the organization and token ID from verified claims;
 a request cannot select another token, its parent credential, or its siblings.
