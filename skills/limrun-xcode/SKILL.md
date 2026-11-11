@@ -381,10 +381,30 @@ lim xcode test . --result-bundle Tests.xcresult --coverage
 
 The bundle holds each test's result, the attachments tests add, and for a
 failed UI test the app's UI hierarchy; it has no screen recording of a failed
-test. Reading it needs the tools of Xcode 16.3 or later on a Mac
+test. Reading it needs the tools of Xcode 16.3 or later
 (`xcrun xcresulttool get test-results summary --path <bundle>`,
-`xcrun xccov view --report --json <bundle>`), so on other machines take the
-results from the streamed lines or `--json` and keep the bundle as an artifact.
+`xcrun xccov view --report --json <bundle>`), which exist only on macOS.
+
+Without a Mac, run those tools on the Xcode sandbox. Save the bundle inside the
+project directory, so the sync of `lim xcode run` uploads it, and run the tool
+on the same relative path:
+
+```bash
+lim xcode run --quiet --include '\.xcresult' -- xcrun xcresulttool get test-results summary --path Tests.xcresult > summary.json
+lim xcode run --quiet --include '\.xcresult' -- xcrun xccov view --report --json Tests.xcresult > coverage.json
+```
+
+`--quiet` keeps the CLI's progress lines out of stdout, and the command exits
+with the tool's exit code. `--include '\.xcresult'` syncs a bundle that
+`.gitignore` excludes. Pass it on every call, because a sync without it removes
+the bundle from the sandbox again, and match an ignored parent directory too
+(`--include '^out(/|$)'` for `out/Tests.xcresult`). Ignore the
+`CoreSimulatorService connection became invalid` line that `xccov` prints to
+stderr on the sandbox. To keep a directory a tool wrote there, such as exported
+attachments or a merged bundle, zip it with
+`lim xcode run --quiet --no-sync -- ditto -c -k <dir> <dir>.zip`, download it
+with `lim xcode pull-file <dir>.zip`, and unpack it with
+`unzip -q <dir>.zip -d <dir>`.
 
 `--without-building` reruns the tests the sandbox last built for testing,
 without syncing or building. It takes no project path and rejects the build,
@@ -401,7 +421,8 @@ lim xcode test --without-building --only-testing MyAppUITests/CartTests --result
 
 One run, build included, can take up to one hour, so split a longer suite into
 several reruns; `xcrun xcresulttool merge A.xcresult B.xcresult --output-path
-All.xcresult` combines their bundles on a Mac. A rerun fails with `no test
+All.xcresult` combines their bundles, on a Mac or through `lim xcode run` on
+the sandbox as above. A rerun fails with `no test
 products to rerun` when nothing is built for testing yet, or after a later
 build, another synced project or an Xcode switch; run `lim xcode test` without
 the flag again.
