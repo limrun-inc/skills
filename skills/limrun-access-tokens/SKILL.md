@@ -130,7 +130,9 @@ revoked token fail authentication, including repeated self-revocation requests.
 Tokens created with an API key or CLI login default to one hour.
 `--ttl-seconds` and `ttlSeconds` accept integers from 1 through 14,400.
 A signed token can call the REST exchange with an explicit supported subset of
-its permissions, but the new token cannot outlive it.
+its permissions. Every exchanged token is capped at its source credential's
+expiration, including API keys, sessions, workload identities, and signed tokens.
+Use the returned `expiresAt` as the actual expiration.
 
 The management and registry APIs check revocation after it propagates. Instance
 endpoints verify tokens offline and continue accepting them until expiry or
