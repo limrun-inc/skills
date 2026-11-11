@@ -441,13 +441,14 @@ stream. An empty buffer returns no lines. Snapshot reads need a runtime with
 
 `lim ios perf` reads the CPU and memory of the apps you installed, the figures
 Xcode's debug gauges show, and exits. The instance samples every running app
-once a second and keeps the last ten minutes, so the command answers at once,
-even about an app that already stopped. System apps are not measured. CPU
-counts one busy core as 100%, and memory is the app's physical footprint.
+once a second and keeps the last ten minutes, so the command answers at once
+and lists an app that stopped in that time as stopped. System apps are not
+measured. CPU counts one busy core as 100%, and memory is the app's physical
+footprint.
 
 ```bash
 lim ios perf                                 # each app now: CPU, memory, peak, threads, busiest threads
-lim ios perf --app <bundle-id> --since 2m    # average and highest CPU, peak memory over 2 minutes
+lim ios perf --app <bundle-id> --since 2m    # average and highest CPU, highest memory over 2 minutes
 lim ios perf --since 5m --json               # the summary plus every sample, for scripts
 lim ios perf --follow                        # stream one line per app per second
 ```
