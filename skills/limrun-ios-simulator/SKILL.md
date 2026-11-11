@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, screenshot, record video, connect the app to local services or a private tunnel, play a video file as the camera, send all traffic through the user's proxy and trust its CA, block domains, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'block this site', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, check the app's CPU and memory, screenshot, record video, connect the app to local services or a private tunnel, play a video file as the camera, send all traffic through the user's proxy and trust its CA, block domains, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'how much memory does it use', 'is it using too much CPU', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'block this site', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -437,6 +437,31 @@ Syslog snapshots read the buffer filled by the current or an earlier syslog
 stream. An empty buffer returns no lines. Snapshot reads need a runtime with
 `syslogTail` support.
 
+## App performance
+
+`lim ios perf` reads the CPU and memory of the apps you installed, the figures
+Xcode's debug gauges show, and exits. The instance samples every running app
+once a second and keeps the last ten minutes, so the command answers at once
+and lists an app that stopped in that time as stopped. System apps are not
+measured. CPU counts one busy core as 100%, and memory is the app's physical
+footprint.
+
+```bash
+lim ios perf                                 # each app now: CPU, memory, peak, threads, busiest threads
+lim ios perf --app <bundle-id> --since 2m    # average and highest CPU, highest memory over 2 minutes
+lim ios perf --since 5m --json               # the summary plus every sample, for scripts
+lim ios perf --follow                        # stream one line per app per second
+```
+
+Check performance after a change that might slow the app down or hold on to
+memory: run the flow, then compare a `--since` summary with one from before the
+change. The figures come from the Mac that runs the simulator, which has no iOS
+memory limit, so compare the app with its own earlier numbers rather than with
+a device's budget.
+
+To keep the samples of a whole test run, create the instance with
+`lim ios create --perf` and list the saved files with `lim ios perf-captures`.
+
 ## Testing changes
 
 When simulator interaction is part of the task, test new or changed
@@ -461,6 +486,8 @@ elements and containers with unknown or empty bounds. A retained container has
 bounds, so elements clipped by a scroll view or covered by another view can remain.
 Scroll and read again to discover newly visible content. Use the full tree if you need offscreen content
 or children that extend beyond an offscreen parent's bounds.
+
+`--visible-only` is unsupported on iPhone Duo; omit the flag to read the full tree there.
 
 `lim ios info` reads current orientation without fetching the accessibility tree.
 When available, `orientation` is `portrait`, `portraitUpsideDown`, `landscapeLeft`,
