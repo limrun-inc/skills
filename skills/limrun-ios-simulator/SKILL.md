@@ -448,6 +448,26 @@ tree to see what's on screen before acting:
 lim ios element-tree
 ```
 
+For large trees, opt in to skipping offscreen branches while reading:
+
+```bash
+lim ios element-tree --visible-only --json
+lim ios info --json
+```
+
+The default still reads the full tree. `--visible-only` keeps partially visible
+elements and containers with unknown or empty bounds. A retained container has
+`has_offscreen_children: true` when descendants were omitted. It checks display
+bounds, so elements clipped by a scroll view or covered by another view can remain.
+Scroll and read again to discover newly visible content. Use the full tree if you need offscreen content
+or children that extend beyond an offscreen parent's bounds.
+
+`lim ios info` reads current orientation without fetching the accessibility tree.
+When available, `orientation` is `portrait`, `portraitUpsideDown`, `landscapeLeft`,
+or `landscapeRight`; `displayWidth` and `displayHeight` are the current dimensions
+in points. The existing `screenWidth` and `screenHeight` retain their meaning.
+These additions require a CLI and simulator version that support them.
+
 ## Interacting with the app
 
 Prefer tapping by accessibility id, then by label, then coordinates as a last
