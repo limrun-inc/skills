@@ -487,7 +487,8 @@ bounds, so elements clipped by a scroll view or covered by another view can rema
 Scroll and read again to discover newly visible content. Use the full tree if you need offscreen content
 or children that extend beyond an offscreen parent's bounds.
 
-`--visible-only` is unsupported on iPhone Duo; omit the flag to read the full tree there.
+On iPhone Duo, `--visible-only` uses the active display’s current dimensions after
+folding or rotation.
 
 `lim ios info` reads current orientation without fetching the accessibility tree.
 When available, `orientation` is `portrait`, `portraitUpsideDown`, `landscapeLeft`,
