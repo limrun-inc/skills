@@ -207,6 +207,13 @@ all `lim ios` calls for the rest of the session (screenshot, tap, type,
 element-tree, record). Alternatively, `git init` the project so the workspace
 resolves on its own. When controlling multiple instances, always pass `--id`.
 
+## Accessing HTTP servers inside the simulator
+
+To connect a local tool to an HTTP server running inside the simulator, use
+`lim ios forward <local-port>:<remote-port>` and keep it running. The tool connects to `http://127.0.0.1:<local-port>`; the CLI handles
+Limrun authentication. See [port forwarding](https://docs.limrun.com/docs/ios/run-simulator#access-a-server-inside-the-simulator)
+for server requirements and examples.
+
 ## Reaching services on the local machine
 
 Destination tunnels let an iPhone simulator app keep calling its normal
@@ -247,12 +254,6 @@ lim ios tunnel stop --id <ios-instance-id>
 If the simulator attempts a route while its local service is stopped, the
 tunnel remains active and reports `connection_refused`; restart the service
 without recreating the simulator or tunnel.
-
-To connect a local tool to an HTTP server running inside the simulator, use
-`lim ios forward <local-port>:<remote-port>` and keep
-it running. The tool connects to `http://127.0.0.1:<local-port>`; the CLI handles
-Limrun authentication. See [port forwarding](https://docs.limrun.com/docs/ios/run-simulator#access-a-server-inside-the-simulator)
-for server requirements and examples.
 
 ### Inspect HTTP traffic, capture HAR, persist a network log
 
