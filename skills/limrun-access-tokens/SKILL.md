@@ -60,6 +60,22 @@ consult [Permissions and access tokens](https://docs.limrun.com/docs/reference/p
 Workload roles grant asset access from inside an instance; they do not grant
 another client control of it.
 
+## Install a named asset through an instance
+
+Delegate `asset:name/<asset-name>:read` in the instance's `spec.role.permissions`.
+A TypeScript device client can then call `ios.installApp({ assetName: 'app.zip' })`
+or `android.sendAsset({ assetName: 'app.apk' })` without fetching a download URL.
+In Go, use `iosClient.InstallAppByName(ctx, "app.zip", nil)` or
+`androidClient.InstallAppByName(ctx, "app.apk")`. Android's `SendAssetByName`
+remains a deprecated compatibility alias.
+The client still needs full control of the instance. The instance checks its
+current role for each named install; an asset ID grant or matching name pattern
+also works. Keep URL strings for callers that already have download URLs.
+See [install by asset name](https://docs.limrun.com/docs/platform/asset-storage#install-by-asset-name)
+for raw WebSocket messages and Android split APKs. Use `id` for request
+correlation and `assetName` or `assetNames` for the source. Android still accepts
+the legacy `appInstallation.name` identifier.
+
 ## Create and revoke with the CLI
 
 ```bash
