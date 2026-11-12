@@ -249,7 +249,7 @@ tunnel remains active and reports `connection_refused`; restart the service
 without recreating the simulator or tunnel.
 
 To connect a local tool to an HTTP server running inside the simulator, use
-`lim ios forward <local-port>:<remote-port> --id <ios-instance-id>` and keep
+`lim ios forward <local-port>:<remote-port>` and keep
 it running. The tool connects to `http://127.0.0.1:<local-port>`; the CLI handles
 Limrun authentication. See [port forwarding](https://docs.limrun.com/docs/ios/run-simulator#access-a-server-inside-the-simulator)
 for server requirements and examples.
