@@ -510,8 +510,8 @@ lim ios element-tree --visible-only --json
 Leave out the flag to read the full tree. On iPhone Duo, it uses the active
 display after folding or rotation.
 
-- A returned container has `has_offscreen_children: true` when content below it
-  was skipped. Scroll, then read again to find newly visible content.
+- `has_offscreen_children: true` means some elements inside that container were
+  skipped. Scroll, then read again to find newly visible content.
 - Partly visible elements and elements with missing or zero-size frames are kept.
   The check uses screen boundaries, so elements covered by another view or clipped
   inside a scroll view can still appear.
@@ -529,8 +529,8 @@ lim ios info --json
 `orientation` reports `portrait`, `portraitUpsideDown`, `landscapeLeft`, or
 `landscapeRight`. `displayWidth` and `displayHeight` give the current display size
 in points. These fields are absent when the simulator cannot report them.
-`screenWidth` and `screenHeight` still describe the input-coordinate space;
-they do not change meaning after rotation.
+`screenWidth` and `screenHeight` are for touch coordinates; use the new display
+fields to check the size after rotation.
 
 ## Interacting with the app
 
