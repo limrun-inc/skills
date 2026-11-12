@@ -716,6 +716,10 @@ lim ios delete
 
 ## Gotchas
 
+- If a `wait: true` create fails while installing or launching an `initialAssets`
+  app, the API returns HTTP 400 and terminates the failed instance. The TypeScript
+  SDK does not automatically retry this response. Inspect the error before
+  creating another instance; do not repeatedly create with the same failing app.
 - **Instance resolution can miss in a non-git dir.** See "Targeting the right
   instance" above; pass `--id` when in doubt.
 - **`element-tree` can be large.** Pipe through `grep` / `jq` to extract what you
