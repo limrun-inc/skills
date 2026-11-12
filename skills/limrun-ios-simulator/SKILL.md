@@ -469,6 +469,36 @@ a device's budget.
 To keep the samples of a whole test run, create the instance with
 `lim ios create --perf` and list the saved files with `lim ios perf-captures`.
 
+## Debugging with LLDB
+
+`lim ios lldb` attaches LLDB to a running app. LLDB runs next to the simulator,
+so it works from Linux, and the arguments after `--` go to `lldb` unchanged.
+The app must be a debug build, because LLDB needs the `get-task-allow`
+entitlement that Xcode adds to those, and it must already be running.
+
+```bash
+# One-shot: run the commands, print the output, exit
+lim ios lldb --bundle-id <bundle-id> -- --batch -o "bt all" -o "frame variable"
+
+# Symbols in a separate .dSYM: upload and load them first
+lim ios lldb --bundle-id <bundle-id> --dsym ./MyApp.app.dSYM -- --batch \
+  -o "breakpoint set -f ContentView.swift -l 42" -o "continue" -o "frame variable"
+
+# A script on standard input, for when a failing command must not end the run
+printf 'bt\nframe variable\n' | lim ios lldb --bundle-id <bundle-id>
+```
+
+Always pass `--batch` unless you feed standard input: without it the session
+waits for input until the input ends. In batch mode LLDB stops at the first
+failing command, and `continue` waits until the app stops again, so trigger
+the code path from another command (`lim ios tap`, `lim ios open-url`) while
+the session waits. The app keeps running after LLDB detaches.
+
+A simulator runs one LLDB session at a time. Backtraces, breakpoints,
+stepping, `frame variable`, Objective-C expressions and Python scripting work.
+Swift expression evaluation (`expr`, and `po` on Swift values) is not
+available yet; read Swift values with `frame variable`.
+
 ## Testing changes
 
 When simulator interaction is part of the task, test new or changed
