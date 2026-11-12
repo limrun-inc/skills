@@ -65,6 +65,8 @@ another client control of it.
 Delegate `asset:name/<asset-name>:read` in the instance's `spec.role.permissions`.
 A TypeScript device client can then call `ios.installApp({ assetName: 'app.zip' })`
 or `android.sendAsset({ assetName: 'app.apk' })` without fetching a download URL.
+In Go, use `iosClient.InstallAppByName(ctx, "app.zip", nil)` or
+`androidClient.SendAssetByName(ctx, "app.apk")`.
 The client still needs full control of the instance. The instance checks its
 current role for each named install; an asset ID grant or matching name pattern
 also works. Keep URL strings for callers that already have download URLs.
