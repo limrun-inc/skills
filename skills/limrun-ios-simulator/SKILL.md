@@ -499,6 +499,39 @@ tree to see what's on screen before acting:
 lim ios element-tree
 ```
 
+For screens with many offscreen elements, use `--visible-only` to skip offscreen
+branches before reading their labels and children. This reduces the work needed
+to read the tree. Requires CLI `0.56.0` or later and simulator support:
+
+```bash
+lim ios element-tree --visible-only --json
+```
+
+Leave out the flag to read the full tree. On iPhone Duo, it uses the active
+display after folding or rotation.
+
+- `has_offscreen_children: true` means some elements inside that container were
+  skipped. Scroll, then read again to find newly visible content.
+- Partly visible elements and elements with missing or zero-size frames are kept.
+  The check uses screen boundaries, so elements covered by another view or clipped
+  inside a scroll view can still appear.
+- An offscreen parent and all its children are skipped. Use the full tree if you
+  need offscreen content or children that extend onto the screen from an offscreen
+  parent.
+
+To check the current orientation and display size after rotating or folding,
+read device info. This does not read the element tree:
+
+```bash
+lim ios info --json
+```
+
+`orientation` reports `portrait`, `portraitUpsideDown`, `landscapeLeft`, or
+`landscapeRight`. `displayWidth` and `displayHeight` give the current display size
+in points. These fields are absent when the simulator cannot report them.
+`screenWidth` and `screenHeight` are for touch coordinates; use the new display
+fields to check the size after rotation.
+
 ## Interacting with the app
 
 Prefer tapping by accessibility id, then by label, then coordinates as a last
