@@ -207,31 +207,12 @@ all `lim ios` calls for the rest of the session (screenshot, tap, type,
 element-tree, record). Alternatively, `git init` the project so the workspace
 resolves on its own. When controlling multiple instances, always pass `--id`.
 
-## Accessing a server inside the simulator
+## Accessing HTTP servers inside the simulator
 
-Use `lim ios forward` when a tool on your machine needs to reach an HTTP or
-WebSocket server running inside the simulator:
-
-```bash
-lim ios forward 8100 --id <ios-instance-id>
-# In another terminal, with WebDriverAgent already running:
-curl http://127.0.0.1:8100/status
-
-lim ios forward 8080:3000 --id <ios-instance-id>    # local 8080 to simulator 3000
-lim ios forward 0:8100 --id <ios-instance-id> --json # choose an available local port
-```
-
-Keep the process running while the local tool uses it, then stop it with Ctrl+C.
-The listener binds to `127.0.0.1`; local clients need no Limrun authorization
-header. JSON output reports `instanceId`, `localHost`, `localPort`, and
-`remotePort` once the forward is ready and the command stays running.
-
-Start the server inside the simulator separately and bind it to the simulator's
-assigned IP or `0.0.0.0`. A server bound only to simulator `127.0.0.1` is not
-reachable. The forward supports TCP protocols where the client sends first,
-including HTTP and WebSockets, but not UDP or protocols where the server sends
-first. To reach a server on your machine from the simulator, use `lim ios tunnel`
-below instead.
+To connect a local tool to an HTTP server running inside the simulator, use
+`lim ios forward <local-port>:<remote-port>` and keep it running. The tool connects to `http://127.0.0.1:<local-port>`; the CLI handles
+Limrun authentication. See [port forwarding](https://docs.limrun.com/docs/ios/run-simulator#access-a-server-inside-the-simulator)
+for server requirements and examples.
 
 ## Reaching services on the local machine
 
