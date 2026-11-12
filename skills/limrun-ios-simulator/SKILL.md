@@ -473,28 +473,38 @@ tree to see what's on screen before acting:
 lim ios element-tree
 ```
 
-For large trees, opt in to skipping offscreen branches while reading:
+For screens with many offscreen elements, use `--visible-only` to skip offscreen
+branches before reading their labels and children. This reduces the work needed
+to read the tree. Requires CLI `0.56.0` or later and simulator support:
 
 ```bash
 lim ios element-tree --visible-only --json
+```
+
+Leave out the flag to read the full tree. On iPhone Duo, it uses the active
+display after folding or rotation.
+
+- A returned container has `has_offscreen_children: true` when content below it
+  was skipped. Scroll, then read again to find newly visible content.
+- Partly visible elements and elements with missing or zero-size frames are kept.
+  The check uses screen boundaries, so elements covered by another view or clipped
+  inside a scroll view can still appear.
+- An offscreen parent and all its children are skipped. Use the full tree if you
+  need offscreen content or children that extend onto the screen from an offscreen
+  parent.
+
+To check the current orientation and display size after rotating or folding,
+read device info. This does not read the element tree:
+
+```bash
 lim ios info --json
 ```
 
-The default still reads the full tree. `--visible-only` keeps partially visible
-elements and containers with unknown or empty bounds. A retained container has
-`has_offscreen_children: true` when descendants were omitted. It checks display
-bounds, so elements clipped by a scroll view or covered by another view can remain.
-Scroll and read again to discover newly visible content. Use the full tree if you need offscreen content
-or children that extend beyond an offscreen parent's bounds.
-
-On iPhone Duo, `--visible-only` uses the active display’s current dimensions after
-folding or rotation.
-
-`lim ios info` reads current orientation without fetching the accessibility tree.
-When available, `orientation` is `portrait`, `portraitUpsideDown`, `landscapeLeft`,
-or `landscapeRight`; `displayWidth` and `displayHeight` are the current dimensions
-in points. The existing `screenWidth` and `screenHeight` retain their meaning.
-These additions require a CLI and simulator version that support them.
+`orientation` reports `portrait`, `portraitUpsideDown`, `landscapeLeft`, or
+`landscapeRight`. `displayWidth` and `displayHeight` give the current display size
+in points. These fields are absent when the simulator cannot report them.
+`screenWidth` and `screenHeight` still describe the input-coordinate space;
+they do not change meaning after rotation.
 
 ## Interacting with the app
 
