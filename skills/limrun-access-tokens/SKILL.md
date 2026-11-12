@@ -69,7 +69,9 @@ The client still needs full control of the instance. The instance checks its
 current role for each named install; an asset ID grant or matching name pattern
 also works. Keep URL strings for callers that already have download URLs.
 See [install by asset name](https://docs.limrun.com/docs/platform/asset-storage#install-by-asset-name)
-for raw WebSocket messages and Android split APKs.
+for raw WebSocket messages and Android split APKs. Use `id` for request
+correlation and `assetName` or `assetNames` for the source. Android still accepts
+the legacy `appInstallation.name` identifier.
 
 ## Create and revoke with the CLI
 
