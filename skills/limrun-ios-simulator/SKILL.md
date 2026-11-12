@@ -233,6 +233,38 @@ including HTTP and WebSockets, but not UDP or protocols where the server sends
 first. To reach a server on your machine from the simulator, use `lim ios tunnel`
 below instead.
 
+### Connecting Appium to forwarded WebDriverAgent
+
+Use CLI 0.55.0 or newer and the Limrun XCUITest driver. Install WebDriverAgent
+on the instance first. If it is not running, launch it, then keep the forward
+running on the same machine as the Appium server:
+
+```bash
+lim ios simctl --id <ios-instance-id> -- launch booted com.facebook.WebDriverAgentRunner.xctrunner
+lim ios forward 8100 --id <ios-instance-id>
+```
+
+Check `http://127.0.0.1:8100/status` from another terminal before creating the
+Appium session. In the Appium capabilities, set these entries:
+
+```ts
+'appium:webDriverAgentUrl': 'http://127.0.0.1:8100',
+'appium:wdaLocalPort': 8100,
+```
+
+Remove `appium:wdaRequestHeaders`; localhost WDA requests need no Authorization
+header. Keep `appium:automationName: '@limrun/xcuitest'`, the simulator's
+`appium:udid`, `appium:limInstanceApiUrl`, and `appium:limInstanceToken`.
+The driver still needs the instance API and token for simulator control, file
+uploads, and Safari Web Inspector. CLI forwarding replaces only the WDA
+connection and requires no SDK forwarding code.
+
+If you choose a different local port, use that port in both the URL and
+`appium:wdaLocalPort`. With `0:8100 --json`, wait for readiness and use its
+`localPort`. Delete the Appium session before stopping the forward.
+See the [Appium guide](https://docs.limrun.com/docs/testing/appium#connect-appium-through-localhost)
+for WDA installation and complete capabilities.
+
 ## Reaching services on the local machine
 
 Destination tunnels let an iPhone simulator app keep calling its normal
