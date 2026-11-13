@@ -488,6 +488,13 @@ lim ios lldb --bundle-id <bundle-id> --dsym ./MyApp.app.dSYM -- --batch \
 printf 'bt\nframe variable\n' | lim ios lldb --bundle-id <bundle-id>
 ```
 
+An app that `lim xcode build` installed on an attached simulator needs no
+`--dsym`: the Xcode instance sends the build's debug symbols to the simulator
+when the session starts, so file and line breakpoints and `frame variable`
+work right after the build. This covers the latest successful build of the
+workspace's Xcode instance. If a later build failed, build again first. Use
+`--dsym` for an app built anywhere else, and for Bazel builds.
+
 Always pass `--batch` unless you feed standard input: without it the session
 waits for input until the input ends. In batch mode LLDB stops at the first
 failing command, and `continue` waits until the app stops again, so trigger

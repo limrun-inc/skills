@@ -303,6 +303,11 @@ When a simulator is attached, every successful `lim xcode build` automatically
 reinstalls and relaunches the app, no separate install step. To tap, type, read
 the element tree, screenshot, or record, switch to **`limrun-ios-simulator`**.
 
+To debug the installed build, run `lim ios lldb --bundle-id <bundle-id> -- --batch -o "<command>"`.
+Its debug symbols load automatically, so breakpoints by file and line and
+`frame variable` work without a `.dSYM`. See **`limrun-ios-simulator`** for the
+LLDB workflow.
+
 To disconnect the simulator from its build sandbox and stop automatic installation, run
 `lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
 installed apps, and retained builds remain available. Repeated detach requests succeed.
