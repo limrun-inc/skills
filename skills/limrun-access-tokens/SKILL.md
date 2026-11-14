@@ -40,10 +40,10 @@ where supported. Give a device or build client the token and `status.apiUrl`.
 Have the trusted backend supply the endpoint URL alongside either token; access
 tokens are not a replacement for an API key across all SDK methods.
 
-Instance grants require a concrete ID. They do not grant organization-wide
-listing, instance creation, deletion, or role updates. Access-token create
-rejects instance `read`, `work`, and `tunnel` actions; the latter two belong to
-specialized build and private-tunnel flows.
+ID-targeted instance grants do not grant organization-wide listing, instance
+creation, deletion, or role updates. Access-token create rejects `read` on ID
+targets. The `work` and `tunnel` actions belong to specialized build and
+private-tunnel flows.
 
 Other accepted grants include:
 
@@ -59,6 +59,51 @@ For asset pattern delegation, organization roles, or workload-role permissions,
 consult [Permissions and access tokens](https://docs.limrun.com/docs/reference/permissions).
 Workload roles grant asset access from inside an instance; they do not grant
 another client control of it.
+
+## Grant access before creating an instance
+
+For iOS, Android, Xcode, or Gradle, use a name target such as
+`xcode:name/workspace-123/*:all`. Mint it with `lim access-token create --permission 'xcode:name/workspace-123/*:all' --ttl-seconds 900 --json`.
+
+The client passes the returned token as a bearer credential to the management
+API and supplies `metadata.name: "workspace-123/build"` in the instance create body.
+`all` permits creating, reading, updating, and deleting that named instance;
+`read` lists and reads matching instances without control credentials. Use the
+returned instance ID in subsequent management URLs. To run builds or control a
+device, use the returned `status.apiUrl` with the same name-scoped `all` token
+or the returned `status.token`. Revoking the name-scoped token does not revoke
+that separate instance token.
+
+After a successful create, use the returned instance ID for GET, PATCH, and DELETE.
+DELETE returns `200` when termination is requested or the instance is already absent.
+
+Names are immutable and unique per organization, region, and instance type.
+They default to the instance ID when omitted. A name contains 1 to 128 characters,
+including optional `/` separators. Each segment starts with a lowercase letter or digit and contains lowercase letters,
+digits, dots, underscores, or hyphens. Empty segments and `.` or `..` segments
+are not allowed.
+An occupied name returns `409`, including with `reuseIfExists=true`. Termination
+keeps the name occupied until cleanup finishes. Recreating it gets a fresh ID,
+and the name grant still applies. Each complete name can identify one live instance
+per region. A wildcard grant can cover multiple names and does not impose a shared
+limit on its prefix. Lists accept exact `name` and `region` filters but may lag
+creation.
+
+`xcode:name/*:all` covers every Xcode instance name in the organization, including
+default names, across regions and future creations. It imposes no fleet-size
+limit. Use an exact name to restrict an agent to one live instance per region.
+The bare `xcode:*:all` target is not accepted when minting an access token.
+
+Name patterns support `*` and `?`, including across `/` separators.
+`workspace-123/*` matches `workspace-123/build` and `workspace-123/build/attempt-1`,
+but not `workspace-123` or `workspace-1234/build`. Delegating
+a pattern requires a resource-wide grant. Name-targeted instance access tokens
+accept `read` and `all`; iOS and Android also accept `watch` and `stream`.
+For example, `ios:name/workspace-123/*:watch` permits viewing matching simulators
+without input; `stream` also permits viewer interaction. Supply the streaming
+URL alongside the token. Neither streaming action grants metadata reads or listing.
+Keep API-key grants and workload asset roles within
+their existing target restrictions.
 
 ## Create and revoke with the CLI
 
