@@ -384,6 +384,9 @@ lim ios terminate-app <bundle-id>                         # stop it, e.g. to res
 ```
 
 If you don't know the bundle ID, run `lim ios list-apps`.
+The PID column identifies apps running at query time. `lim ios list-apps --json`
+and TypeScript `listApps()` include `pid` only for running apps, including
+background apps. A PID does not indicate that the app is responsive.
 
 `--env KEY=VALUE` is repeatable and restarts the app so the variables take effect.
 An explicit `--mode ForegroundIfRunning` with variables is rejected. Use `KEY=`
