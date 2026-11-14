@@ -102,6 +102,16 @@ lim ios sync <path to .ipa file or .app folder>
 You can run the same command every time you need to install a new version of the
 bundle. It will patch with the difference and reload it in the simulator.
 
+To install an existing Asset Storage app, use:
+
+```bash
+lim ios install-app --asset-name releases/app.zip
+```
+
+The CLI grants the instance read access to that asset if needed, then installs
+by name. Existing role permissions stay in place. The caller must be allowed
+to delegate the updated role.
+
 ## Fold an iPhone Duo
 
 Create a Duo instance in a region that offers it:

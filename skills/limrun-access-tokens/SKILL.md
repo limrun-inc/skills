@@ -62,9 +62,17 @@ another client control of it.
 
 ## Install a named asset through an instance
 
-Delegate `asset:name/<asset-name>:read` in the instance's `spec.role.permissions`.
-A TypeScript device client can then call `ios.installApp({ assetName: 'app.zip' })`
-or `android.sendAsset({ assetName: 'app.apk' })` without fetching a download URL.
+For CLI installs, use `lim ios install-app --asset-name app.zip` or
+`lim android install-app --asset-name app.apk`. The CLI adds a missing exact
+asset read grant to the live instance role before installing and preserves
+existing permissions. Local uploads use the same named-install flow. The caller
+must be allowed to delegate the updated role, and the added grant persists.
+Catalog installs require an explicit `asset:*:read` grant.
+
+For direct SDK calls, delegate `asset:name/<asset-name>:read` in the instance's
+`spec.role.permissions`.
+A TypeScript device client can then call `ios.installAppByName('app.zip')`
+or `android.installAppByName('app.apk')` without fetching a download URL.
 In Go, use `iosClient.InstallAppByName(ctx, "app.zip", nil)` or
 `androidClient.InstallAppByName(ctx, "app.apk")`. Android's `SendAssetByName`
 remains a deprecated compatibility alias.

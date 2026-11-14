@@ -80,13 +80,16 @@ Create a new emulator, then install a local file or a URL:
 ```bash
 lim android create --no-open --no-connect
 lim android install-app ./app-debug.apk
+lim android install-app --asset-name releases/app.apk
 lim android install-app https://example.com/app.apk
 ```
 
 A local path is uploaded to Limrun Asset Storage first; a URL is fetched by
 the instance itself, which is much faster for large APKs than uploading from
-your machine. `install-app` returns as soon as the app is sent; the install
-finishes in the background within seconds. Newly installed apps land in the
+your machine. Local uploads and `--asset-name` install by name after the CLI
+adds a missing asset read grant to the instance role. Existing grants are
+preserved; the caller must be allowed to delegate the updated role.
+`install-app` waits for the instance to report the installation result. Newly installed apps land in the
 app drawer, not the home screen, so don't look for their icon; just launch
 the app with `lim android launch-app <package> --detach` (without `--detach`
 it blocks watching the app until it exits), or confirm with
@@ -510,9 +513,8 @@ lim android delete <android-instance-id>
   ARM command-line binaries are not supported under translation.
 - **Selectors match exactly.** `tap-element --text` and `find-element --text`
   need the full, exact string from `element-tree`; substrings match nothing.
-- **`install-app` returns before the install finishes.** The app lands a few
-  seconds later; verify with `find-element` or `pm list packages` before
-  launching. Prefer `install-app <URL>` or `create --install-asset` over raw
+- **Verify the installed app.** Use `find-element` or `pm list packages` to
+  confirm the package name before launching. Prefer `install-app <URL>` or `create --install-asset` over raw
   `adb install`: a big APK over `adb install` streams with zero progress
   output and looks hung for minutes, and killing it mid-stream corrupts the
   install.
