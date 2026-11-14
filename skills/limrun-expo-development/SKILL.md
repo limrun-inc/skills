@@ -98,7 +98,7 @@ fetches it server-side):
 
 ```bash
 lim gradle build . --upload "$ASSET_NAME"
-lim android install-app "<Download URL from the build output>" --id <android-instance-id>
+lim android install "<Download URL from the build output>" --id <android-instance-id>
 ```
 
 ### Fresh build on iOS

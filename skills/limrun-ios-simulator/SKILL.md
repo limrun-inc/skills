@@ -105,7 +105,7 @@ bundle. It will patch with the difference and reload it in the simulator.
 To install an existing Asset Storage app, use:
 
 ```bash
-lim ios install-app --asset-name releases/app.zip
+lim ios install --asset-name releases/app.zip
 ```
 
 The CLI grants the instance read access to that asset if needed, then installs

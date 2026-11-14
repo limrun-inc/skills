@@ -70,7 +70,7 @@ Bazel prints:
 
 ```bash
 lim ios create && lim ios sync bazel-bin/App/App.ipa
-lim android create && lim android install-app bazel-bin/app/app.apk
+lim android create && lim android install bazel-bin/app/app.apk
 ```
 
 Re-run `lim ios sync` after each rebuild; it sends only the difference. To

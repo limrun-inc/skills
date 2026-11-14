@@ -62,12 +62,13 @@ another client control of it.
 
 ## Install a named asset through an instance
 
-For CLI installs, use `lim ios install-app --asset-name app.zip` or
-`lim android install-app --asset-name app.apk`. The CLI adds a missing exact
+For CLI installs, use `lim ios install --asset-name app.zip` or
+`lim android install --asset-name app.apk`. The CLI adds a missing exact
 asset read grant to the live instance role before installing and preserves
 existing permissions. Local uploads use the same named-install flow. The caller
 must be allowed to delegate the updated role, and the added grant persists.
-Catalog installs require an explicit `asset:*:read` grant.
+Catalog installs require an explicit `asset:*:read` grant. The older
+`ios install-app` and `android install-app` commands remain aliases for `install`.
 
 For direct SDK calls, delegate `asset:name/<asset-name>:read` in the instance's
 `spec.role.permissions`.

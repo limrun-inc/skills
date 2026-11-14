@@ -87,7 +87,7 @@ is version-agnostic: the same runner serves Maestro 2.5.x through 2.7.x, so do
 not look for an asset matching your Maestro version.
 
 Install the app under test as usual (`lim ios create --install app.ipa`,
-`lim ios install-app`, or a build skill), then reference its bundle id via
+`lim ios install`, or a build skill), then reference its bundle id via
 `appId:` in the flow. For Expo Go testing, also preinstall
 `appstore/Expo-Go-54.0.6.tar.gz` and open the project URL with `openLink`
 (env vars must be prefixed `MAESTRO_` to be visible in flows):
