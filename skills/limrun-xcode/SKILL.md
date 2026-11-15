@@ -671,8 +671,9 @@ https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
   sandbox on its own and attach the simulator: `lim ios create --xcode`, or
   `lim xcode create --attach --simulator-id <ios-instance-id>` for an existing
   simulator; in the SDK, `xcodeInstances.create` then `attachNewSimulator()` or
-  `attachSimulator(iosInstance)` on its client. Pass the `sandbox_` ID to
-  `lim xcode` commands and the `ios_` ID to `lim ios` commands. Details:
+  `attachSimulator(iosInstance)` on its client. Pass the Xcode ID (`xcode_` or
+  `sandbox_`) to `lim xcode` commands and the `ios_` ID to `lim ios` commands.
+  Details:
   https://docs.limrun.com/docs/ios/build-with-xcode#move-off-the-embedded-xcode-sandbox
 - **Instance ID for `lim ios` commands.** They resolve the current instance
   from the git worktree of your cwd and can fail with `No instance ID provided

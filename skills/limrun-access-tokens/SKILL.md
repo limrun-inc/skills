@@ -28,7 +28,7 @@ For an existing instance, use its returned ID exactly:
 | --- | --- | --- |
 | iOS simulator | `ios`, `ios_` | `stream`, `all` |
 | Android emulator | `android`, `android_` | `stream`, `all` |
-| Xcode sandbox | `xcode`, `sandbox_` | `all` |
+| Xcode sandbox | `xcode`, `xcode_` or `sandbox_` | `all` |
 | Gradle sandbox | `gradle`, `gradle_` | `all` |
 
 `stream` permits interactive streaming, including touch and typing. Give the
