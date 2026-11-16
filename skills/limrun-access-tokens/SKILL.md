@@ -129,6 +129,10 @@ external JWT. The SDK exchanges it for a Limrun session and re-reads it on renew
 The runtime must rotate that source file. Federation uses a form-encoded token
 exchange at `https://sts.limrun.com/v1/access_tokens`; existing JSON issuance
 requests keep their request and response formats.
+For transient identity-provider failures, STS returns `503 temporarily_unavailable`.
+Honor `Retry-After` before retrying with backoff. Malformed JWKS and provider
+configuration errors return `400 invalid_request` with an `error_description`;
+ask an administrator to fix the provider instead of retrying automatically.
 
 TypeScript also accepts explicit `workloadTokenFile` and `bindingId` options:
 
