@@ -133,6 +133,12 @@ const lim = new Limrun({
 });
 ```
 
+Federation bindings accept only `ios`, `android`, `xcode`, `gradle`, `asset`,
+`secret`, `tunnel`, `nodepool`, `remotecache`, `remoteexecution`, `analytics`,
+`device`, `applerelay`, and `accesstoken` permissions. They reject `organization`,
+`member`, `billing`, `apikey`, and wildcard resource types such as `*:*:all`.
+Resource ID wildcards such as `xcode:*:all` remain valid.
+
 The binding grants a fixed permission list after verifying issuer, audience,
 signature, expiry, and both the provider and binding conditions. Add `accesstoken:*:all` to the
 binding only when the workload needs to delegate tokens. Derived tokens cannot
