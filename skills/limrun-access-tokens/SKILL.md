@@ -26,22 +26,22 @@ For an existing instance, use its returned ID exactly:
 
 | Instance | Resource and ID prefix | Accepted actions |
 | --- | --- | --- |
-| iOS simulator | `ios`, `ios_` | `stream`, `all` |
-| Android emulator | `android`, `android_` | `stream`, `all` |
-| Xcode sandbox | `xcode`, `sandbox_` | `all` |
-| Gradle sandbox | `gradle`, `gradle_` | `all` |
+| iOS simulator | `ios`, `ios_` | `stream`, `control`, `all` |
+| Android emulator | `android`, `android_` | `stream`, `control`, `all` |
+| Xcode sandbox | `xcode`, `sandbox_` | `control`, `all` |
+| Gradle sandbox | `gradle`, `gradle_` | `control`, `all` |
 
 `stream` permits interactive streaming, including touch and typing. Give the
 client the token and `status.endpointWebSocketUrl`. It cannot install or
 explicitly launch apps, use the device API or ADB, or fetch the instance record.
 
-`all` permits full control through the instance's endpoints, including streaming
+`control` permits runtime control through the instance's endpoints, including streaming
 where supported. Give a device or build client the token and `status.apiUrl`.
 Have the backend supply the endpoint URL alongside the token.
 
 Access tokens use the same endpoint permissions as API keys. Instance targets may
 be a concrete ID or `*`. Named grants permit operations on that instance; wildcard
-`all` also permits listing and creation. Instance `read`, build `work`, and device
+`all` also permits listing and lifecycle management. `create` requires a wildcard target. Instance `read`, build `work`, and device
 `tunnel` permissions can be delegated when held by the caller. Changing an instance
 role additionally requires authority to delegate its permissions. Organization,
 billing, membership, and API-key administration still require a member session.
@@ -70,7 +70,7 @@ lim access-token create \
   --json
 ```
 
-Use `all` for full instance control. Repeat `--permission` to combine grants,
+Use `control` for instance runtime access. The default `status.token` carries this permission. It cannot create, update, or delete instance records. Grant `create`, `update`, and `delete` separately for lifecycle management; `all` includes every action. Repeat `--permission` to combine grants,
 for example an asset read permission and `device:*:install`.
 
 The JSON response includes `id`, `token`, `permissions`, and `expiresAt`.
@@ -97,7 +97,7 @@ import Limrun from '@limrun/api';
 
 const lim = new Limrun(); // Reads LIM_API_KEY.
 const access = await lim.accessTokens.create({
-  permissions: [`xcode:${instance.metadata.id}:all`],
+  permissions: [`xcode:${instance.metadata.id}:control`],
   ttlSeconds: 900,
 });
 
