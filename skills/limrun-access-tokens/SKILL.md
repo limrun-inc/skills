@@ -37,13 +37,14 @@ explicitly launch apps, use the device API or ADB, or fetch the instance record.
 
 `all` permits full control through the instance's endpoints, including streaming
 where supported. Give a device or build client the token and `status.apiUrl`.
-Have the trusted backend supply the endpoint URL alongside either token; access
-tokens are not a replacement for an API key across all SDK methods.
+Have the backend supply the endpoint URL alongside the token.
 
-Instance grants require a concrete ID. They do not grant organization-wide
-listing, instance creation, deletion, or role updates. Access-token create
-rejects instance `read`, `work`, and `tunnel` actions; the latter two belong to
-specialized build and private-tunnel flows.
+Access tokens use the same endpoint permissions as API keys. Instance targets may
+be a concrete ID or `*`. Named grants permit operations on that instance; wildcard
+`all` also permits listing and creation. Instance `read`, build `work`, and device
+`tunnel` permissions can be delegated when held by the caller. Changing an instance
+role additionally requires authority to delegate its permissions. Organization,
+billing, membership, and API-key administration still require a member session.
 
 Other accepted grants include:
 
@@ -107,7 +108,30 @@ await lim.accessTokens.revoke(access.id);
 
 The SDK revoke method takes an ID. Use `accessTokens` and `permissions` in new integrations. For REST, the matching
 routes are `POST /v1/access_tokens` and `DELETE /v1/access_tokens/{id}`;
-authenticate with the API key in the Authorization Bearer header.
+authenticate with the customer credential in the Authorization Bearer header.
+
+## External workload identities
+
+For SDK code running in CI or another service, an organization admin can configure
+[workload identity federation](https://docs.limrun.com/docs/platform/workload-identity-federation).
+The TypeScript, Python, and Go SDKs read `LIMRUN_WORKLOAD_IDENTITY_TOKEN_FILE` and
+`LIMRUN_FEDERATION_BINDING_ID` when no API key is configured. The file contains the
+external JWT. The SDK exchanges it for a Limrun session and re-reads it on renewal.
+The runtime must rotate that source file.
+
+TypeScript also accepts explicit `workloadTokenFile` and `federationBindingId` options:
+
+```ts
+const lim = new Limrun({
+  workloadTokenFile: '/var/run/identity/token',
+  federationBindingId: 'federation_REPLACE_WITH_BINDING_ID',
+});
+```
+
+The binding grants a fixed permission list after verifying issuer, audience,
+signature, expiry, and the admin's claim condition. Add `accesstoken:*:all` to the
+binding only when the workload needs to delegate tokens. Derived tokens cannot
+outlive their source credential. The CLI still uses `lim login` or `LIM_API_KEY`.
 
 ## Lifetime and revocation
 
