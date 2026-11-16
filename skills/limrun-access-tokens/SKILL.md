@@ -117,7 +117,9 @@ For SDK code running in CI or another service, an organization admin can configu
 The TypeScript, Python, and Go SDKs read `LIMRUN_WORKLOAD_IDENTITY_TOKEN_FILE` and
 `LIMRUN_FEDERATION_BINDING_ID` when no API key is configured. The file contains the
 external JWT. The SDK exchanges it for a Limrun session and re-reads it on renewal.
-The runtime must rotate that source file.
+The runtime must rotate that source file. Federation uses a form-encoded token
+exchange at `https://sts.limrun.com/v1/access_tokens`; existing JSON issuance
+requests keep their request and response formats.
 
 TypeScript also accepts explicit `workloadTokenFile` and `federationBindingId` options:
 
