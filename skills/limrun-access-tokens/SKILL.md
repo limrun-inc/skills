@@ -129,10 +129,13 @@ external JWT. The SDK exchanges it for a Limrun session and re-reads it on renew
 The runtime must rotate that source file. Federation uses a form-encoded token
 exchange at `https://sts.limrun.com/v1/access_tokens`; existing JSON issuance
 requests keep their request and response formats.
-For transient identity-provider failures, STS returns `503 temporarily_unavailable`.
-Honor `Retry-After` before retrying with backoff. Malformed JWKS and provider
-configuration errors return `400 invalid_request` with an `error_description`;
-ask an administrator to fix the provider instead of retrying automatically.
+Limrun fetches signing keys when saving a provider and refreshes them periodically.
+Token exchanges use stored keys; an unknown signing key does not trigger a fetch.
+Publish new keys at least 48 minutes before using them and allow propagation time.
+Missing or expired keys return `503 temporarily_unavailable`; honor `Retry-After`
+before retrying with backoff. Malformed JWKS or invalid endpoint settings return
+`400` when saving a provider, while temporary fetch failures return `503`.
+
 
 TypeScript also accepts explicit `workloadTokenFile` and `bindingId` options:
 
