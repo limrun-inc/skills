@@ -129,7 +129,7 @@ TypeScript also accepts explicit `workloadTokenFile` and `bindingId` options:
 ```ts
 const lim = new Limrun({
   workloadTokenFile: '/var/run/identity/token',
-  bindingId: 'federation_REPLACE_WITH_BINDING_ID',
+  bindingId: 'binding_REPLACE_WITH_BINDING_ID',
 });
 ```
 
