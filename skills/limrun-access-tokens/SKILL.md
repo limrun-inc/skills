@@ -114,24 +114,27 @@ authenticate with the customer credential in the Authorization Bearer header.
 
 For SDK code running in CI or another service, an organization admin can configure
 [workload identity federation](https://docs.limrun.com/docs/platform/workload-identity-federation).
+The admin creates an identity provider with the issuer, JWKS URL, audience and
+provider condition, then creates bindings with workload conditions and fixed
+permissions. One provider can serve multiple bindings.
 The TypeScript, Python, and Go SDKs read `LIMRUN_WORKLOAD_IDENTITY_TOKEN_FILE` and
-`LIMRUN_FEDERATION_BINDING_ID` when no API key is configured. The file contains the
+`LIMRUN_WORKLOAD_IDENTITY_BINDING_ID` when no API key is configured. The file contains the
 external JWT. The SDK exchanges it for a Limrun session and re-reads it on renewal.
 The runtime must rotate that source file. Federation uses a form-encoded token
 exchange at `https://sts.limrun.com/v1/access_tokens`; existing JSON issuance
 requests keep their request and response formats.
 
-TypeScript also accepts explicit `workloadTokenFile` and `federationBindingId` options:
+TypeScript also accepts explicit `workloadTokenFile` and `bindingId` options:
 
 ```ts
 const lim = new Limrun({
   workloadTokenFile: '/var/run/identity/token',
-  federationBindingId: 'federation_REPLACE_WITH_BINDING_ID',
+  bindingId: 'federation_REPLACE_WITH_BINDING_ID',
 });
 ```
 
 The binding grants a fixed permission list after verifying issuer, audience,
-signature, expiry, and the admin's claim condition. Add `accesstoken:*:all` to the
+signature, expiry, and both the provider and binding conditions. Add `accesstoken:*:all` to the
 binding only when the workload needs to delegate tokens. Derived tokens cannot
 outlive their source credential. The CLI still uses `lim login` or `LIM_API_KEY`.
 
