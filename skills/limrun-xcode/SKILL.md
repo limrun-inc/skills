@@ -198,7 +198,11 @@ You can browse available versions with `lim xcode run -- mise ls-remote <tool>`
 and select one with `lim xcode use <tool>@<version>`. A synced `mise.limrun.toml`
 persists `[tools]` selections for future sandboxes. The default pnpm is 10.13.1,
 which predates the missing-tarball-integrity requirement. Explicit project and
-sandbox selections can choose another release; project pnpm pins stay exact.
+sandbox selections can choose another release. npm, pnpm, Yarn, and Bun pins stay exact
+in project mise files and `package.json`'s `packageManager` field. Declared versions
+are installed before the build; a changed detected selection triggers another install.
+Conflicting package-manager and lockfile declarations stop the build. Limrun preserves
+pnpm version delegation and Yarn's project-local executable settings.
 Run `lim xcode tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/ios/build-with-xcode)). Use major versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
 
 ```bash

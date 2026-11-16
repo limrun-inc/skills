@@ -109,8 +109,12 @@ You can browse available versions with `lim gradle run -- mise ls-remote <tool>`
 and select one with `lim gradle use <tool>@<version>`. A synced `mise.limrun.toml`
 persists `[tools]` selections for future sandboxes. The default pnpm is 10.13.1,
 which predates the missing-tarball-integrity requirement. Explicit project and
-sandbox selections can choose another release; project pnpm pins stay exact.
-Run `lim gradle tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/android/build-with-gradle)). Builds keep the project's `gradlew`; Android SDK/NDK/CMake use `sdkmanager`.
+sandbox selections can choose another release. npm, pnpm, Yarn, and Bun pins stay exact
+in project mise files and `package.json`'s `packageManager` field. Declared versions
+are installed before the build; a changed detected selection triggers another install.
+Conflicting package-manager and lockfile declarations stop the build. Limrun preserves
+pnpm version delegation and Yarn's project-local executable settings.
+Run `lim gradle tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/android/build-with-gradle)). Builds keep the project's `gradlew` and restore its executable bit in the sandbox if missing. Android SDK/NDK/CMake use `sdkmanager`. The image includes an SSH client for Git dependencies; private repositories still need credentials.
 
 ```bash
 lim gradle tools
