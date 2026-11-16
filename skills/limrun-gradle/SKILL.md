@@ -112,8 +112,9 @@ which predates the missing-tarball-integrity requirement. Explicit project and
 sandbox selections can choose another release. npm, pnpm, Yarn, and Bun pins stay exact
 in project mise files and `package.json`'s `packageManager` field. Declared versions
 are installed before the build; a changed detected selection triggers another install.
-Conflicting package-manager and lockfile declarations stop the build. Limrun preserves
-pnpm version delegation and Yarn's project-local executable settings.
+`packageManager` takes precedence over lockfiles. Without a supported declaration,
+Limrun infers the manager from lockfiles. pnpm version delegation and Yarn's
+project-local executable settings remain enabled.
 Run `lim gradle tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/android/build-with-gradle)). Builds keep the project's `gradlew` and restore its executable bit in the sandbox if missing. Android SDK/NDK/CMake use `sdkmanager`. The image includes an SSH client for Git dependencies; private repositories still need credentials.
 
 ```bash

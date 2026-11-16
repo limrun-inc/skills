@@ -201,8 +201,9 @@ which predates the missing-tarball-integrity requirement. Explicit project and
 sandbox selections can choose another release. npm, pnpm, Yarn, and Bun pins stay exact
 in project mise files and `package.json`'s `packageManager` field. Declared versions
 are installed before the build; a changed detected selection triggers another install.
-Conflicting package-manager and lockfile declarations stop the build. Limrun preserves
-pnpm version delegation and Yarn's project-local executable settings.
+`packageManager` takes precedence over lockfiles. Without a supported declaration,
+Limrun infers the manager from lockfiles. pnpm version delegation and Yarn's
+project-local executable settings remain enabled.
 Run `lim xcode tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/ios/build-with-xcode)). Use major versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
 
 ```bash
