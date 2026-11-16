@@ -46,6 +46,10 @@ be a concrete ID or `*`. Named grants permit operations on that instance; wildca
 role additionally requires authority to delegate its permissions. Organization,
 billing, membership, and API-key administration still require a member session.
 
+Reusing an instance through `reuseIfExists` requires `control` on the matched instance.
+A create-only credential receives `403` when a matching instance exists. Binding
+an Xcode cache key after creation requires `xcode:<instance-id>:update`.
+
 Other accepted grants include:
 
 | Permission | Purpose |
