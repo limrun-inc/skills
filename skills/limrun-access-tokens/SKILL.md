@@ -45,6 +45,8 @@ be a concrete ID or `*`. Named grants permit operations on that instance; wildca
 `tunnel` permissions can be delegated when held by the caller. Changing an instance
 role additionally requires authority to delegate its permissions. Organization,
 billing, membership, and API-key administration still require a member session.
+Issuing long-lived private-tunnel credentials requires an API key or member
+session with the required tunnel permission; access tokens cannot issue them.
 
 Reusing an instance through `reuseIfExists` requires `control` on the matched instance.
 A create-only credential receives `403` when a matching instance exists. Binding
@@ -156,4 +158,6 @@ Tokens created with an API key or CLI login default to one hour.
 The management and registry APIs check revocation after it propagates. Instance
 endpoints verify tokens offline and continue accepting them until expiry or
 instance termination. Revocation does not close existing connections or
-terminate the instance. Choose the lifetime with these limits in mind.
+terminate the instance. Revoking a parent does not revoke already-issued children,
+but every descendant is capped by its parent's expiry. Repeated delegation cannot
+extend the original token's lifetime. Choose the lifetime with these limits in mind.
