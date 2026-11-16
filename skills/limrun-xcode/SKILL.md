@@ -194,12 +194,17 @@ variables referenced by the configuration.
 ## Developer tool versions
 
 After syncing, `lim xcode use` selects tools in the sandbox and installs missing versions.
+You can browse available versions with `lim xcode run -- mise ls-remote <tool>`
+and select one with `lim xcode use <tool>@<version>`. A synced `mise.limrun.toml`
+persists `[tools]` selections for future sandboxes. The default pnpm is 10.13.1,
+which predates the missing-tarball-integrity requirement. Explicit project and
+sandbox selections can choose another release; project pnpm pins stay exact.
 Run `lim xcode tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/ios/build-with-xcode)). Use major versions, or major.minor for Ruby, Flutter, and pre-1.0 tools such as Mint.
 
 ```bash
 lim xcode tools
 # Node includes npm/npx, Ruby includes gem, Flutter includes Dart, CocoaPods includes cocoapods-patch.
-lim xcode use node@24 pnpm@10 yarn@4 bun@1 ruby@3.3 bundler@4 cocoapods@1 \
+lim xcode use node@24 pnpm@10.13.1 yarn@4 bun@1 ruby@3.3 bundler@4 cocoapods@1 \
   cmake@3 java@jetbrains-21 corretto@21 flutter@3.44 mint@0.18 \
   xcodegen@2 xcbeautify@3 zsign@1
 lim xcode tools install
@@ -649,6 +654,36 @@ PR, if you're opening one):
 ```
 https://console.limrun.com/stream?asset=${ASSET_NAME}&platform=ios
 ```
+
+## Failure hints and secrets
+
+Recognized build and command failures can include `Hint: You can ...` lines in live
+and saved logs. These describe available capabilities without guaranteeing a fix.
+Missing required files can use `--include <pattern>`, a regular expression relative
+to the sync root. For a tool mismatch, you can browse versions and select one with
+the commands above; a project file is only needed to persist the selection.
+
+You can create a secret with its initial value in one CLI call and bind it to a build:
+
+```bash
+lim secret create packages/npmrc --file .npmrc
+lim xcode build . --file-from-secret '~/.npmrc=packages/npmrc'
+printf %s "$NPM_TOKEN" | lim secret create packages/npm --stdin
+lim xcode build . --env-from-secret NPM_TOKEN=packages/npm
+```
+
+`lim secret create <name> <value>` also accepts a value argument. Choose at most one
+source: the argument, `--file`, or `--stdin`. File and stdin input preserve bytes,
+including newlines; values must contain 1 byte to 64 KiB. Without a value source,
+creation stores metadata only. Existing names return a conflict without writing a
+value; `lim secret write <name> --stdin` can update an existing secret.
+
+Creating with a value requires create and write permissions. If only the initial
+write fails, the CLI reports the created secret ID so you can retry the write.
+The binding flags delegate exact secret-read permissions when the caller can grant
+them. Environment bindings require the project to read the variable. A file path
+starting with `~/` targets the sandbox home; other paths are relative to the
+command's working directory.
 
 ## Gotchas
 
