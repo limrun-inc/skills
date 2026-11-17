@@ -713,6 +713,11 @@ lim ios notify post com.apple.BiometricKit_Sim.pearl.nomatch    # the next scan 
 
 ## Preview URL for humans
 
+> If an asset request returns HTTP `503` with `Retry-After: 5`, wait at least
+> five seconds before retrying. Keep the same asset name when retrying a create
+> or upload so an existing record can be reused. Stop after the configured retry
+> budget and report the failure.
+
 Upload the `.ipa` file directly or targz archive of the `.app` folder
 to Limrun Asset Storage and return a preview URL for the user to open it and
 test the app manually in the browser.
