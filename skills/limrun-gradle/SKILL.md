@@ -105,12 +105,22 @@ lim gradle logs --follow
 ## Tool versions and shell commands
 
 After syncing, `lim gradle use` selects tools in the sandbox and installs missing versions.
-Run `lim gradle tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/android/build-with-gradle)). Builds keep the project's `gradlew`; Android SDK/NDK/CMake use `sdkmanager`.
+You can browse available versions with `lim gradle run -- mise ls-remote <tool>`
+and select one with `lim gradle use <tool>@<version>`. A synced `mise.limrun.toml`
+persists `[tools]` selections for future sandboxes. The default pnpm is 10.13.1,
+which predates the missing-tarball-integrity requirement. Explicit project and
+sandbox selections can choose another release. npm, pnpm, Yarn, and Bun pins stay exact
+in project mise files and `package.json`'s `packageManager` field. Declared versions
+are installed before the build; a changed detected selection triggers another install.
+`packageManager` takes precedence over lockfiles. Without a supported declaration,
+Limrun infers the manager from lockfiles. pnpm version delegation and Yarn's
+project-local executable settings remain enabled.
+Run `lim gradle tools install` for synced project tool selections ([details](https://docs.limrun.com/docs/android/build-with-gradle)). Builds keep the project's `gradlew` and restore its executable bit in the sandbox if missing. Android SDK/NDK/CMake use `sdkmanager`. The image includes an SSH client for Git dependencies; private repositories still need credentials.
 
 ```bash
 lim gradle tools
 # Node includes npm/npx.
-lim gradle use node@24 pnpm@10 yarn@4 bun@1 java@temurin-17 bundletool@1
+lim gradle use node@24 pnpm@10.13.1 yarn@4 bun@1 java@temurin-17 bundletool@1
 lim gradle tools install
 lim gradle run -- mise use --pin node@24.5.0
 lim gradle run --env APP_ENV=staging -- npm run generate
@@ -269,6 +279,37 @@ For repeatable previews on pull requests, prefer the packaged
 [Android preview action](https://github.com/limrun-inc/android-preview-action).
 It builds and uploads the app, updates the PR preview comment, and cleans up the
 builder; see the repository for inputs and workflow examples.
+
+## Failure hints and secrets
+
+The CLI can display `Hint: You can ...` for recognized failures, including when
+reading saved logs. Hints describe available capabilities without guaranteeing a
+fix. SDK output and stored logs contain the original diagnostics; hints are CLI-only.
+Missing required files can use `--include <pattern>`, a regular expression relative
+to the sync root. For a tool mismatch, you can browse versions and select one with
+the commands above; a project file is only needed to persist the selection.
+
+You can create a secret with its initial value in one CLI call and bind it to a build:
+
+```bash
+lim secret create packages/npmrc --file .npmrc
+lim gradle build . --file-from-secret '~/.npmrc=packages/npmrc'
+printf %s "$NPM_TOKEN" | lim secret create packages/npm --stdin
+lim gradle build . --env-from-secret NPM_TOKEN=packages/npm
+```
+
+`lim secret create <name> <value>` also accepts a value argument. Choose at most one
+source: the argument, `--file`, or `--stdin`. File and stdin input preserve bytes,
+including newlines; values must contain 1 byte to 64 KiB. Without a value source,
+creation stores metadata only. Existing names return a conflict without writing a
+value; `lim secret write <name> --stdin` can update an existing secret.
+
+Creating with a value requires create and write permissions. If only the initial
+write fails, the CLI reports the created secret ID so you can retry the write.
+The binding flags delegate exact secret-read permissions when the caller can grant
+them. Environment bindings require the project to read the variable. A file path
+starting with `~/` targets the sandbox home; other paths are relative to the
+command's working directory.
 
 ## Gotchas
 
