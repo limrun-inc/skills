@@ -66,15 +66,11 @@ don't need to rebuild:
 lim ios create --attach
 ```
 
-If the create (or `lim xcode rbe --ios`) output includes a signed stream URL,
-share it with the user as a Markdown link, like
-`[Live simulator](<signed-stream-url>)`. If you have a browser the user can see,
-open the URL there and tell them. Otherwise pass `--no-open` to `create`: it
-skips opening the URL locally and still prints it for sharing.
-
-`lim xcode get` prints a Limrun console URL instead. It opens the same live
-view but requires a console login, so prefer the signed stream URL for sharing.
-If the console URL is all you have, share it and mention it needs login.
+Share the Console URL from create output as a Markdown link, such as
+`[Live simulator](<console-url>)`, and mention that it requires sign-in.
+Creation opens the Console URL by default. Use `--no-open` when you have no
+browser to show the user. With `--json`, creation returns `consoleUrl` without
+opening a browser. Signed stream URLs are omitted.
 
 Signed links open the shared device workspace without login. Full instance tokens
 show Inspect, Connect, and the logs, events, and network inspector. Stream-only
@@ -89,9 +85,8 @@ Create a new simulator:
 lim ios create
 ```
 
-Share the signed stream URL with the user as a Markdown link, like
-`[Live simulator](<signed-stream-url>)`. If you have a browser the user can see,
-open the URL there and tell them.
+Share the Console URL as `[Live simulator](<console-url>)` and mention that
+it requires sign-in.
 
 You can then run the following command to upload a bundle from local:
 

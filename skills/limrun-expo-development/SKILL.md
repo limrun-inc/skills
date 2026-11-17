@@ -63,6 +63,7 @@ When reusing the asset, create or reuse a device and install it:
 lim ios create \
   --reuse-if-exists \
   --install-asset "$ASSET_NAME" \
+  --no-open \
   --label repo=<repo> \
   --label agent=<agent>
 
@@ -131,8 +132,9 @@ lim ios create --attach \
   --label agent=<agent>
 ```
 
-Add `--no-open` to any `create` when you have no browser to show the user; it
-skips opening the stream URL and leaves the URL in the output to share.
+Pass `--no-open` when you have no browser to show the user. Share the printed
+Console URL and mention that it requires sign-in. With `--json`, the URL is
+available as `consoleUrl` and no browser opens.
 
 If an iOS simulator is already running from a reused asset and a later native rebuild becomes necessary, attach that same simulator instead of creating a second one:
 
