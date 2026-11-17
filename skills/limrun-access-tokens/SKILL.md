@@ -136,9 +136,8 @@ Missing or expired keys return `503 temporarily_unavailable`; honor `Retry-After
 before retrying with backoff. Malformed JWKS or invalid endpoint settings return
 `400` when saving a provider, while temporary fetch failures return `503`.
 
-The CLI reads the same variables. Run `lim whoami --permissions` to check the
-organization and permissions reported by Limrun; add `--json` for structured
-output. Workload identity takes precedence over a saved CLI login. Remove
+The CLI reads the same variables. Run `lim whoami` to check the
+organization and permissions reported by Limrun as JSON. Workload identity takes precedence over a saved CLI login. Remove
 `LIM_API_KEY` and omit `--api-key` when testing federation, since explicit API
 keys take precedence.
 
