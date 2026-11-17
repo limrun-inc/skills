@@ -282,8 +282,9 @@ builder; see the repository for inputs and workflow examples.
 
 ## Failure hints and secrets
 
-Recognized build and command failures can include `Hint: You can ...` lines in live
-and saved logs. These describe available capabilities without guaranteeing a fix.
+The CLI can display `Hint: You can ...` for recognized failures, including when
+reading saved logs. Hints describe available capabilities without guaranteeing a
+fix. SDK output and stored logs contain the original diagnostics; hints are CLI-only.
 Missing required files can use `--include <pattern>`, a regular expression relative
 to the sync root. For a tool mismatch, you can browse versions and select one with
 the commands above; a project file is only needed to persist the selection.
