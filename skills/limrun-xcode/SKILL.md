@@ -331,9 +331,9 @@ project has test targets). `--xcode-version 27` builds the tests with that
 major's GA (`27.1` selects the beta); the simulator keeps the fleet default
 runtime, so the run warns and proceeds (runtime-dependent failures are possible).
 
-`--model` (`iphone`, `iphone-duo`, `ipad`) and `--os-version` (`26`, `27`)
-choose the simulator the run creates; iPhone and iPad run both versions,
-iPhone Duo runs 27. Either flag creates a fresh sandbox and simulator instead
+`--model` (`iphone`, `iphone-se`, `iphone-17e`, `iphone-duo`, `ipad`) and
+`--os-version` (`26`, `27`) choose the simulator the run creates; iPhone and
+iPad run both versions, the others run 27. Either flag creates a fresh sandbox and simulator instead
 of reusing the last ones, and neither combines with `--id` or `--build-only`:
 
 ```bash
