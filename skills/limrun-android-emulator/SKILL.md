@@ -73,6 +73,9 @@ same labels), `--rm` (delete when the CLI exits), `--jurisdiction us|eu|as`
 `--inactivity-timeout` / `--hard-timeout`, `--display-name`, and `--label k=v`
 (find labeled instances later with `lim android list --label-selector k=v`).
 
+Omit `--hard-timeout` to use the organization's Android default. Pass a duration
+such as `2h` to override it, or `0` to disable the hard timeout for this emulator.
+
 ### Install app from local
 
 Create a new emulator, then install a local file or a URL:
