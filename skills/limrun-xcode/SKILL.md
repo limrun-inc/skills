@@ -57,6 +57,8 @@ for native Xcode builds, `Release` for React Native / Expo builds.
 lim xcode build . --configuration Debug
 ```
 
+Add `--clean` to recompile from a clean Xcode build folder and collect compiler warnings on a warm sandbox.
+
 For Expo SDK 57 and later, add `--expo-no-clean` to pass `--no-clean` to
 prebuild and preserve the existing `ios/` directory. This flag does not force
 prebuild to run; combine it with `--expo-force-prebuild` when needed.
@@ -331,7 +333,7 @@ project has test targets). `--xcode-version 27` builds the tests with that
 major's GA (`27.1` selects the beta); the simulator keeps the fleet default
 runtime, so the run warns and proceeds (runtime-dependent failures are possible).
 
-`--model` (`iphone`, `iphone-se`, `iphone-17e`, `iphone-duo`, `ipad`) and
+`--model` (`iphone`, `iphone-se`, `iphone-17e`, `iphone-16-pro-max`, `iphone-duo`, `ipad`, `ipad-pro-13`) and
 `--os-version` (`26`, `27`) choose the simulator the run creates; iPhone and
 iPad run both versions, the others run 27. Either flag creates a fresh sandbox and simulator instead
 of reusing the last ones, and neither combines with `--id` or `--build-only`:

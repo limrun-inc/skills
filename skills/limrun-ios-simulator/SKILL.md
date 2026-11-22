@@ -29,11 +29,12 @@ not shown here, check `lim ios <subcommand> --help` instead of guessing.
 
 ## Choose the device model and iOS version
 
-`lim ios create` takes `--model iphone|iphone-se|iphone-17e|iphone-duo|ipad|watch`
+`lim ios create` takes `--model iphone|iphone-se|iphone-17e|iphone-16-pro-max|iphone-duo|ipad|ipad-pro-13|watch`
 (default `iphone`, an iPhone 16 Pro) and `--os-version 26|27`. For smaller
 screens, `iphone-se` is an iPhone SE (3rd generation) and `iphone-17e` an
-iPhone 17e. iPhone and iPad run both versions; iPhone SE, iPhone 17e and iPhone
-Duo run 27; Apple Watch runs 26. The default is 26, or 27 on the models that run
+iPhone 17e. For App Store screenshots on iOS 27, choose `iphone-16-pro-max`
+(6.9 inches) or `ipad-pro-13` (13 inches). The default iPhone and iPad run both
+versions. iPhone SE, iPhone 17e and iPhone Duo run 27. Apple Watch runs 26. The default is 26, or 27 on the models that run
 only 27.
 
 ```bash
@@ -524,6 +525,8 @@ lim ios element-tree
 ```
 
 ## Interacting with the app
+
+Tap and scroll coordinates follow the app’s interface orientation. Use the element tree’s points directly when an app requests landscape while the device stays portrait.
 
 Prefer tapping by accessibility id, then by label, then coordinates as a last
 resort:
