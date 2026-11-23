@@ -829,7 +829,13 @@ Taps, swipes, typing, buttons, screenshots, `describe`, `await-ui-element`,
 app launch, URLs and rotation work. Screen recording, Argent's native
 inspection tools and its native profiler do not; use `lim ios record` for
 video. After `paste`, iOS can show an **Allow Paste** alert that has to be
-tapped. Details: [Argent docs](https://docs.limrun.com/docs/agents/argent).
+tapped.
+
+On Linux (CI runners, cloud sandboxes), input, screenshots, app launch, URLs
+and rotation still work, but Argent refuses its accessibility tools
+(`describe`, `ui-tree`, `await-ui-element`, `fill`, `foreground-app`) on any
+host other than macOS. There, read the screen with `lim ios element-tree`
+instead. Details: [Argent docs](https://docs.limrun.com/docs/agents/argent).
 
 ## Cleanup
 
