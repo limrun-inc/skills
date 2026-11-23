@@ -1,6 +1,6 @@
 ---
 name: limrun-android-emulator
-description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, send all traffic through the user's proxy, trust a custom CA certificate, block domains, and use adb over the CLI's tunnel for full logcat and interactive tools. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', 'route all traffic through my proxy', 'block this site', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
+description: "Drive an app running on a Limrun cloud Android emulator: install an APK, launch and terminate apps with crash reports, tap, type, read the UI element tree, screenshot, record video, inject microphone audio, shape network bandwidth, read app logs, run shell commands, transfer files, tunnel the app's network destinations through your machine with HTTP inspection and HAR capture, reach a private network through a private tunnel, send all traffic through the user's proxy, trust a custom CA certificate, block domains, use adb over the CLI's tunnel for full logcat and interactive tools, and drive the emulator with Argent. Use after a build (from limrun-gradle or any builder) when the user wants to see, test, or interact with their app on an emulator, or says 'show me a screenshot', 'tap', 'run it on the emulator', 'check logcat', 'record a video', 'inspect network traffic', 'route all traffic through my proxy', 'block this site', 'use Argent', or 'reach my local server from the emulator'. To build the APK or AAB first, use limrun-gradle."
 user-invocable: true
 effort: high
 ---
@@ -187,6 +187,17 @@ exits, `adb devices` shows the serial as `offline` while the instance keeps
 running. Just run `lim android connect` again to get a new tunnel (the port
 changes each time). Stale offline serials are harmless; `adb disconnect`
 clears them.
+
+## Drive the emulator with Argent
+
+[Argent](https://github.com/software-mansion/argent) needs no Limrun-specific
+setup on Android. Keep `lim android connect` running (or create the instance
+with the default connection), and Argent lists the `127.0.0.1:<port>` serial in
+`list-devices` like any other adb device; pass that serial as `--udid` to its
+tools. Argent treats the serial as a physical device, so it refuses `paste`,
+`shake`, `fold` and `network-conditions` on it. While Argent's helper app runs
+on the emulator, `uiautomator dump` fails, and so does
+`lim android element-tree`; use separate instances when you need both tools.
 
 ## Testing changes
 

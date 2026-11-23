@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, check the app's CPU and memory, screenshot, record video, connect the app to local services or a private tunnel, access a server inside the simulator through localhost, play a video file as the camera, send all traffic through the user's proxy and trust its CA, block domains, set the clipboard, read and write user defaults, post notifications, grant privacy permissions without prompts, wipe the keychain, rotate the device, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'how much memory does it use', 'is it using too much CPU', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'block this site', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', 'grant camera access', 'skip the permission prompt', 'log out by clearing the keychain', 'rotate to landscape', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, check the app's CPU and memory, screenshot, record video, connect the app to local services or a private tunnel, access a server inside the simulator through localhost, play a video file as the camera, send all traffic through the user's proxy and trust its CA, block domains, set the clipboard, read and write user defaults, post notifications, grant privacy permissions without prompts, wipe the keychain, rotate the device, run timed action chains, and connect the simulator to Argent. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'how much memory does it use', 'is it using too much CPU', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'block this site', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', 'grant camera access', 'skip the permission prompt', 'log out by clearing the keychain', 'rotate to landscape', 'use Argent', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -803,6 +803,33 @@ the stream stays visible while the app installs, launches, and opens the URL.
 An `Installing <asset name>` overlay shows installation progress and disappears
 when the preview is ready.
 
+
+## Drive the simulator with Argent
+
+When the user wants to drive the simulator with
+[Argent](https://github.com/software-mansion/argent) (its tools or its MCP
+server) instead of `lim ios` commands, connect the two with `lim ios argent`
+(lim 0.61.0 or newer, and the Argent CLI on PATH:
+`npm install -g @swmansion/argent`). Run it in a background shell and keep it
+alive:
+
+```bash
+lim ios argent --id <instance-id>    # prints ext:limrun-<prefix>:<udid>
+```
+
+It prints the id Argent lists the simulator under, then runs Argent's
+tool-server until interrupted, replacing one that is already running. Use the
+printed id as `--udid` with Argent's tools, from the same Argent install:
+
+```bash
+argent run describe --udid 'ext:limrun-<prefix>:<udid>'
+```
+
+Taps, swipes, typing, buttons, screenshots, `describe`, `await-ui-element`,
+app launch, URLs and rotation work. Screen recording, Argent's native
+inspection tools and its native profiler do not; use `lim ios record` for
+video. After `paste`, iOS can show an **Allow Paste** alert that has to be
+tapped. Details: [Argent docs](https://docs.limrun.com/docs/agents/argent).
 
 ## Cleanup
 
