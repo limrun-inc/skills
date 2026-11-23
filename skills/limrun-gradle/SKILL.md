@@ -1,6 +1,6 @@
 ---
 name: limrun-gradle
-description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, inspect build logs, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
+description: "Build an Android app on a remote Gradle sandbox with `lim gradle build` instead of local Gradle or Android Studio, from any environment (Linux, Windows, macOS, VM, container). Use when the user wants to build an APK or AAB, sign a release with an upload key, prepare a Play Store publish, inspect build logs, reuse Gradle caches across sandboxes with disk snapshots, or select sandbox tools and run shell commands, for native Android projects, React Native, and Expo. To run, tap, screenshot, or otherwise interact with the built APK on an emulator, use limrun-android-emulator. For iOS builds, use limrun-xcode or limrun-expo-development."
 user-invocable: true
 effort: high
 ---
@@ -75,6 +75,42 @@ Omitting the flag keeps the installed Expo CLI's default.
 
 For iterating on an Expo app with Metro and hot reload rather than plain
 builds, use **`limrun-expo-development`**.
+
+## Disk snapshots
+
+Reuse the synced project, Gradle caches, ccache, and installed SDK packages
+across Gradle sandboxes. Snapshots are opt-in: without a snapshot key, a new
+sandbox starts from the image. Requires CLI 0.59.0 or later.
+
+From the project directory, create with a snapshot key, build, then delete:
+
+```bash
+GRADLE_ID=$(lim gradle create --snapshot-key myapp-main --json | jq -r .metadata.id)
+lim gradle build . --id "$GRADLE_ID"
+lim gradle delete "$GRADLE_ID" --wait-snapshot
+```
+
+The first run starts cold; later runs restore the saved snapshot. Deletion
+saves it after a successful `lim gradle build` with no later sync, replacing
+the previous snapshot under that key. `--wait-snapshot` waits for the save and
+reports its result. In CI, run deletion in a cleanup step even if the build fails.
+
+For branch fallbacks, add `--snapshot-restore-keys "myapp-pr51,myapp-main"`
+at creation. Each entry tries an exact match, then the newest matching literal
+prefix, before moving to the next entry. Without this flag, the save key is
+also the restore key. Pass only restore keys to reuse a snapshot without saving.
+Use a separate save key per concurrent CI job.
+
+Restores happen only at creation. On an existing sandbox, `build` or `sync`
+with `--snapshot-key` sets the key it saves under at deletion; it does not
+restore. A sandbox saves under one key, and a different key is rejected.
+
+Keys use letters, digits, and `. _ - + / : @ #`, up to 248 characters, and
+can't start with `users/` or `shared/`. Manage saved snapshots with
+`lim gradle snapshot list --prefix <prefix>`, `get <key>`, and `delete <key>`.
+
+See the [Gradle disk snapshot guide](https://docs.limrun.com/docs/android/snapshots)
+for cold builds, skipped saves, and SDK usage.
 
 ## Private dependency credentials
 
