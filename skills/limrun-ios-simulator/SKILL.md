@@ -1,6 +1,6 @@
 ---
 name: limrun-ios-simulator
-description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, check the app's CPU and memory, screenshot, record video, connect the app to local services or a private tunnel, access a server inside the simulator through localhost, play a video file as the camera, send all traffic through the user's proxy and trust its CA, block domains, set the clipboard, read and write user defaults, post notifications, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'how much memory does it use', 'is it using too much CPU', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'block this site', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
+description: "Drive an app running on a Limrun cloud iOS simulator: launch, tap, type, read the accessibility element tree, read app logs and simulator syslog, check the app's CPU and memory, screenshot, record video, connect the app to local services or a private tunnel, access a server inside the simulator through localhost, play a video file as the camera, send all traffic through the user's proxy and trust its CA, block domains, set the clipboard, read and write user defaults, post notifications, grant privacy permissions without prompts, wipe the keychain, rotate the device, and run timed action chains. Use after a build (from any builder) when the user wants to see, test, or interact with their app on a simulator, or says 'show me a screenshot', 'tap', 'run the UI test', 'record a video', 'read the logs', 'how much memory does it use', 'is it using too much CPU', 'connect localhost', 'reach my local server from the simulator', 'route all traffic through my proxy', 'trust my CA', 'block this site', 'mock the camera', 'paste into the app', 'change the language', 'simulate Face ID', 'grant camera access', 'skip the permission prompt', 'log out by clearing the keychain', 'rotate to landscape', or 'launch on simulator'. To build the app first, use limrun-xcode-bazel (Bazel workspaces) or limrun-xcode (xcodebuild projects)."
 user-invocable: true
 effort: high
 ---
@@ -690,6 +690,13 @@ lim ios defaults -- read -g AppleLanguages
 `lim ios simctl -- spawn booted defaults ...` does the same. Only `read`,
 `write`, and `delete` are available.
 
+System prompts, such as permission and location alerts, keep the old language
+until their services restart. Restarting SpringBoard closes every running app:
+
+```bash
+lim ios restart-services com.apple.SpringBoard com.apple.locationd com.apple.tccd com.apple.akd
+```
+
 ## Darwin notifications
 
 Post a notification, or set and read a notification's state, inside the
@@ -713,6 +720,54 @@ lim ios notify post com.apple.BiometricKit_Sim.pearl.nomatch    # the next scan 
 ```
 
 `lim ios simctl -- spawn booted notifyutil -p|-s|-g ...` does the same.
+
+## Privacy permissions
+
+Grant or deny a permission before the app asks, so the system prompt never
+appears, or read what the app was given:
+
+```bash
+lim ios permission set com.example.app camera granted
+lim ios permission set com.example.app photos limited          # selected photos only
+lim ios permission set com.example.app notifications critical  # critical alerts too
+lim ios permission set com.example.app contacts denied
+lim ios permission set com.example.app faceid unset            # the app asks again
+lim ios permission get com.example.app camera                  # granted, denied, limited or unset
+```
+
+Services: `calendar`, `camera`, `contacts`, `faceid`, `health`, `homekit`,
+`medialibrary`, `microphone`, `motion`, `notifications`, `photos`, `reminders`,
+`siri`, `speech`, and `usertracking`. Setting `notifications` restarts
+SpringBoard, which closes every running app, so set it before launching the
+app. Notifications cannot be read back. For location, use
+`lim ios simctl -- privacy booted grant location <bundle-id>`.
+
+## Keychain
+
+Wipe every keychain item, for example to sign the app out of an account it
+remembers across reinstalls. CA certificates added with `lim ios ca add` stay
+trusted:
+
+```bash
+lim ios keychain reset
+```
+
+To keep a logged-in state for later instances instead, save the keychain with
+`lim ios keychain save` and apply it with `lim ios keychain restore`.
+
+## Orientation and hardware keys
+
+```bash
+lim ios set-orientation landscape-right   # or portrait, portrait-upside-down, landscape-left
+```
+
+`lim ios info` reports the current orientation. Press any HID usage, such as a
+media or brightness key, with `perform`. Page 12 usage 111 is Brightness
+Increment:
+
+```bash
+lim ios perform --action type=usageDown,usagePage=12,usage=111 --action type=usageUp,usagePage=12,usage=111
+```
 
 ## Preview URL for humans
 
