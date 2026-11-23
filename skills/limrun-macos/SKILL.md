@@ -99,14 +99,15 @@ Go uses `client.MacosInstances` with `New`, `List`, `Get`, `Update`, and
 ## Show the desktop in a web app
 
 To embed the desktop in the user's own React app, render `RemoteControl` from
-`@limrun/ui` with the instance's WebSocket URL and token:
+`@limrun/ui` with the instance's WebSocket URL and stream token:
 
 ```tsx
 import { RemoteControl } from '@limrun/ui';
 
-<RemoteControl url={mac.status.endpointWebSocketUrl!} token={mac.status.token!} />;
+<RemoteControl url={mac.status.endpointWebSocketUrl!} token={mac.status.streamToken!} />;
 ```
 
-`status.token` grants full control of the instance, so hand it only to viewers
-who should control the desktop. For a watch-only view with no input, pass
-`status.streamToken` instead.
+`status.streamToken` opens the stream with input, so the browser can see and
+control the desktop, but it can't reach the instance API or change the
+instance record. `status.token` is the control token: keep it on the user's
+backend and don't send it to the browser.
