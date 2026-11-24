@@ -332,8 +332,8 @@ major's GA (`27.1` selects the beta); the simulator keeps the fleet default
 runtime, so the run warns and proceeds (runtime-dependent failures are possible).
 
 `--model` (`iphone`, `iphone-se`, `iphone-17e`, `iphone-duo`, `ipad`) and
-`--os-version` (`26`, `27`) choose the simulator the run creates; iPhone and
-iPad run both versions, the others run 27. Either flag creates a fresh sandbox and simulator instead
+`--os-version` (`18`, `26`, `27`) choose the simulator the run creates; iPhone
+runs all three versions, iPad runs 26 and 27, the others run 27. Either flag creates a fresh sandbox and simulator instead
 of reusing the last ones, and neither combines with `--id` or `--build-only`:
 
 ```bash
