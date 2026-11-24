@@ -30,11 +30,11 @@ not shown here, check `lim ios <subcommand> --help` instead of guessing.
 ## Choose the device model and iOS version
 
 `lim ios create` takes `--model iphone|iphone-se|iphone-17e|iphone-duo|ipad|watch`
-(default `iphone`, an iPhone 16 Pro) and `--os-version 26|27`. For smaller
+(default `iphone`, an iPhone 16 Pro) and `--os-version 18|26|27`. For smaller
 screens, `iphone-se` is an iPhone SE (3rd generation) and `iphone-17e` an
-iPhone 17e. iPhone and iPad run both versions; iPhone SE, iPhone 17e and iPhone
-Duo run 27; Apple Watch runs 26. The default is 26, or 27 on the models that run
-only 27.
+iPhone 17e. iPhone runs all three versions; iPad runs 26 and 27; iPhone SE,
+iPhone 17e and iPhone Duo run 27; Apple Watch runs 26. The default is 26, or 27
+on the models that run only 27.
 
 ```bash
 lim ios create --model ipad --os-version 27
