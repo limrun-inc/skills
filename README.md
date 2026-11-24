@@ -34,7 +34,7 @@ The plugin bundles all skills plus the remote MCP server at `https://mcp.limrun.
 
 ## Open a support ticket
 
-To let an agent report a failed build, grant `support:*:create` through a workload identity binding or a support API key, then use `lim support create`. The [support ticket guide](https://docs.limrun.com/docs/platform/support-tickets) includes the key setup and examples for the CLI, cURL, TypeScript, and Go.
+To let an agent report a failed build, grant `support:*:create` through a workload identity binding or a support API key, then use `lim support create`. To notify teammates when support responds, repeat `--cc EMAIL` for each recipient. They need organization access to read the ticket. The [support ticket guide](https://docs.limrun.com/docs/platform/support-tickets) includes the key setup and examples for the CLI, cURL, TypeScript, and Go.
 
 ## Maintaining
 
