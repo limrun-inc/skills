@@ -85,7 +85,7 @@ key or `--no-snapshot` to disable snapshots. Without a usable Git origin or
 an explicit key, the sandbox starts from the image.
 
 Pass `--snapshot-ttl 7d` to expire a snapshot seven days after publication.
-Each save starts a new TTL. Restores leave the deadline unchanged.
+The default is 30 days. Each save starts a new TTL. Restores leave the deadline unchanged.
 
 From the project directory, create with a snapshot key, build, then delete:
 
