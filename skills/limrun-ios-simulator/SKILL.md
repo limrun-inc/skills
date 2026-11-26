@@ -543,18 +543,25 @@ retrying the tap until the row materializes, which can take ~10s. Pass
 `--activate ax` to use an accessibility press instead of a touch (no
 scrolling, works on elements without a usable frame).
 
-**Toolbar / nav-bar items usually can't be tapped by id.** SwiftUI collapses
-toolbar children into a single nav-bar group, and those items report
-`AXUniqueId: null` even when you set `.accessibilityIdentifier(...)` (regular
-content `Button`s do expose it). So `tap-element --ax-unique-id` finds nothing
-for a nav-bar button. Set an `.accessibilityLabel` / `.accessibilityIdentifier`
-anyway for documentation, but to actually tap it, read its `AXFrame` from the
-element tree and tap the center by coordinate:
+**Navigation bars, tab bars and the keyboard.** The default tree has no
+containers for navigation bars or tab bars, and it leaves out elements the
+software keyboard covers. Toolbar items can also report `AXUniqueId: null` there
+even with `.accessibilityIdentifier(...)` set, so `tap-element --ax-unique-id`
+finds nothing. Read XCTest's snapshot instead (`lim` 0.64.0 or later): bars and
+the keyboard are `NavigationBar`, `TabBar` and `Keyboard` elements with their
+children inside, and covered elements stay in the tree.
 
 ```bash
-lim ios element-tree --id <id> | grep -i -A6 -B2 moon   # find the item's AXFrame
-lim ios tap <x> <y> --id <id>                           # tap the frame's center
+lim ios element-tree --id <id> --source xcuitest --json \
+  | jq '.. | objects | select(.type == "NavigationBar")'   # find the item's frame
+lim ios tap <x> <y> --id <id>                              # tap the frame's center
 ```
+
+`tap-element` searches the default tree, so tap what you found only in the
+snapshot by coordinate; both use the same points. An `xcuitest` read takes about
+a second and always reads the whole tree, so it does not combine with
+`--visible-only`. Views XCTest has no type for keep their UIKit class name in
+`type`, and alerts have no type of their own, so match those by `AXLabel`.
 
 For text input, focus a field first (tap it), then type:
 
@@ -574,6 +581,15 @@ lim ios set-text "P@ssw0rd!" --focused                 # into the focused field
 lim ios set-text "hello" --ax-unique-id emailField     # by selector
 ```
 
+`type` also reaches a focused field the software keyboard covers. iOS leaves
+covered elements out of the element tree, so `type` takes the keyboard itself as
+proof that a field has focus. `set-text` can't write there and fails with
+`covered_by_keyboard`. To see where typed text goes:
+
+```bash
+lim ios focused-element    # the focused element, or a note that it's under the keyboard
+```
+
 For scrolling and drags:
 
 ```bash
@@ -584,10 +600,16 @@ lim ios swipe --from 200,600 --to 200,200              # explicit drag; --durati
 
 After every interaction, re-run `element-tree` to confirm the UI transitioned.
 No sleep is needed between a tap and `element-tree`; the tap blocks until done.
+A transition or a load the tap started can still be running, though, so after a
+tap that navigates or loads data, wait for the screen to settle:
 
 ```bash
-lim ios element-tree
+lim ios element-tree --wait-for-idle-timeout-ms 3000   # warns on stderr if it never settled
 ```
+
+The read waits until two reads in a row match and the screen stops animating.
+A blinking text cursor does not count as animation, but a spinner does, so a
+screen with one takes the whole wait.
 
 Chain multiple actions with precise timing via `perform`:
 
@@ -827,8 +849,15 @@ lim ios delete
   keyboard on the live stream works. When automating, drive submit through a
   tappable control (a button, a suggestion chip) rather than relying on text
   bound to reactive state, or have the app expose a test affordance.
-- **Toolbar / nav-bar items aren't tappable by id.** See "Interacting with the
-  app" above: read the `AXFrame` from `element-tree` and tap by coordinate.
+- **Toolbar / nav-bar items aren't always tappable by id.** See "Interacting
+  with the app" above: find the item with `--source xcuitest` and tap its frame's
+  center by coordinate.
+- **Branch on error codes, not messages.** With `--json`, a failed device
+  command prints `{"error":{"code":"...","message":"..."}}` on stderr. Codes
+  include `no_focused_element`, `covered_by_keyboard`, `element_not_found`,
+  `ambiguous_selector` and `unavailable` (retry it). `type`, `set-text` and
+  `press-key` add `written`: `none` means nothing was typed, so a retry is safe;
+  `unknown` means some input may have landed, so read the field before retrying.
 - **Bundle ID discovery.** If you don't know the bundle ID, run
   `lim ios list-apps` after a successful install.
 - **Build errors are the build skill's job.** If the app isn't installing, the
