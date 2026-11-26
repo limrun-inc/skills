@@ -293,6 +293,18 @@ The app reaches the tunnel's selectors, such as `localhost:3000` or
 machine, not on yours. The tunnel takes the instance's one destination
 tunnel, so do not start or stop `lim ios tunnel` on it.
 
+Every HTTP and HTTPS request the tunnel inspects carries
+`Limrun-Instance-Id: <ios-instance-id>`, so the service behind a shared tunnel
+can tell your instances apart. To tag requests with your own values, such as a
+test run ID, add `--tunnel-header` (repeatable):
+
+```bash
+lim ios create --tunnel <tunnel-name> --tunnel-header 'X-Run-Id: <run-id>'
+```
+
+The headers are fixed at create time and replace any value the app sends for
+the same name. They show in the network capture, so never put secrets in them.
+
 Creation checks the tunnel and fails when it is not usable:
 
 - `tunnel <name> does not exist`: the name is wrong or the tunnel was not

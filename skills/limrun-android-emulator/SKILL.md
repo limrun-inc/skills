@@ -388,6 +388,18 @@ connector's machine, not on yours. Android instances attach only when every
 exact selector uses port 1024 or higher. The tunnel takes the instance's one
 destination tunnel, so do not start or stop `lim android tunnel` on it.
 
+Every HTTP and HTTPS request the tunnel inspects carries
+`Limrun-Instance-Id: <android-instance-id>`, so the service behind a shared
+tunnel can tell your instances apart. To tag requests with your own values,
+such as a test run ID, add `--tunnel-header` (repeatable):
+
+```bash
+lim android create --tunnel <tunnel-name> --tunnel-header 'X-Run-Id: <run-id>'
+```
+
+The headers are fixed at create time and replace any value the app sends for
+the same name. They show in the network capture, so never put secrets in them.
+
 Creation checks the tunnel and fails when it is not usable:
 
 - `tunnel <name> does not exist`: the name is wrong or the tunnel was not
