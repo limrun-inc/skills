@@ -148,6 +148,9 @@ CLI **0.35.1 and earlier** use `--cache-*` instead of `--snapshot-*`, and
 `--wait-cache` instead of `--wait-snapshot`. The snapshot rename preserves
 the old flags as aliases.
 
+Pass `--snapshot-ttl 7d` to expire a snapshot seven days after publication.
+Each save starts a new TTL. Restores leave the deadline unchanged.
+
 From the project directory, create with a snapshot key, build, then delete:
 
 ```bash

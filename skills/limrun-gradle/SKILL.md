@@ -79,8 +79,13 @@ builds, use **`limrun-expo-development`**.
 ## Disk snapshots
 
 Reuse the synced project, Gradle caches, ccache, and installed SDK packages
-across Gradle sandboxes. Snapshots are opt-in: without a snapshot key, a new
-sandbox starts from the image. Requires CLI 0.59.0 or later.
+across Gradle sandboxes. When the CLI creates a sandbox, it derives the key
+from the Git origin and project directory. Pass `--snapshot-key` to choose a
+key or `--no-snapshot` to disable snapshots. Without a usable Git origin or
+an explicit key, the sandbox starts from the image.
+
+Pass `--snapshot-ttl 7d` to expire a snapshot seven days after publication.
+Each save starts a new TTL. Restores leave the deadline unchanged.
 
 From the project directory, create with a snapshot key, build, then delete:
 
