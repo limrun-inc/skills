@@ -26,24 +26,31 @@ For an existing instance, use its returned ID exactly:
 
 | Instance | Resource and ID prefix | Accepted actions |
 | --- | --- | --- |
-| iOS simulator | `ios`, `ios_` | `stream`, `all` |
-| Android emulator | `android`, `android_` | `stream`, `all` |
-| Xcode sandbox | `xcode`, `sandbox_` | `all` |
-| Gradle sandbox | `gradle`, `gradle_` | `all` |
+| iOS simulator | `ios`, `ios_` | `stream`, `control`, `all` |
+| Android emulator | `android`, `android_` | `stream`, `control`, `all` |
+| Xcode sandbox | `xcode`, `sandbox_` | `control`, `all` |
+| Gradle sandbox | `gradle`, `gradle_` | `control`, `all` |
 
 `stream` permits interactive streaming, including touch and typing. Give the
 client the token and `status.endpointWebSocketUrl`. It cannot install or
 explicitly launch apps, use the device API or ADB, or fetch the instance record.
 
-`all` permits full control through the instance's endpoints, including streaming
+`control` permits runtime control through the instance's endpoints, including streaming
 where supported. Give a device or build client the token and `status.apiUrl`.
-Have the trusted backend supply the endpoint URL alongside either token; access
-tokens are not a replacement for an API key across all SDK methods.
+Have the backend supply the endpoint URL alongside the token.
 
-Instance grants require a concrete ID. They do not grant organization-wide
-listing, instance creation, deletion, or role updates. Access-token create
-rejects instance `read`, `work`, and `tunnel` actions; the latter two belong to
-specialized build and private-tunnel flows.
+Access tokens use the same endpoint permissions as API keys. Instance targets may
+be a concrete ID or `*`. Named grants permit operations on that instance; wildcard
+`all` also permits listing and lifecycle management. `create` requires a wildcard target. Instance `read`, build `work`, and device
+`tunnel` permissions can be delegated when held by the caller. Changing an instance
+role additionally requires authority to delegate its permissions. Organization,
+billing, membership, and API-key administration still require a member session.
+Issuing long-lived private-tunnel credentials requires an API key or member
+session with the required tunnel permission; access tokens cannot issue them.
+
+Reusing an instance through `reuseIfExists` requires `control` on the matched instance.
+A create-only credential receives `403` when a matching instance exists. Binding
+an Xcode cache key after creation requires `xcode:<instance-id>:update`.
 
 Other accepted grants include:
 
@@ -69,7 +76,7 @@ lim access-token create \
   --json
 ```
 
-Use `all` for full instance control. Repeat `--permission` to combine grants,
+Use `control` for instance runtime access. The default `status.token` carries this permission. It cannot create, update, or delete instance records. Grant `create`, `update`, and `delete` separately for lifecycle management; `all` includes every action. Repeat `--permission` to combine grants,
 for example an asset read permission and `device:*:install`.
 
 The JSON response includes `id`, `token`, `permissions`, and `expiresAt`.
@@ -96,7 +103,7 @@ import Limrun from '@limrun/api';
 
 const lim = new Limrun(); // Reads LIM_API_KEY.
 const access = await lim.accessTokens.create({
-  permissions: [`xcode:${instance.metadata.id}:all`],
+  permissions: [`xcode:${instance.metadata.id}:control`],
   ttlSeconds: 900,
 });
 
@@ -107,7 +114,52 @@ await lim.accessTokens.revoke(access.id);
 
 The SDK revoke method takes an ID. Use `accessTokens` and `permissions` in new integrations. For REST, the matching
 routes are `POST /v1/access_tokens` and `DELETE /v1/access_tokens/{id}`;
-authenticate with the API key in the Authorization Bearer header.
+authenticate with the customer credential in the Authorization Bearer header.
+
+## External workload identities
+
+For SDK code running in CI or another service, an organization admin can configure
+[workload identity federation](https://docs.limrun.com/docs/platform/workload-identity-federation).
+The admin creates an identity provider with the issuer, JWKS URL, audience and
+provider condition, then creates bindings with workload conditions and fixed
+permissions. One provider can serve multiple bindings.
+The TypeScript, Python, and Go SDKs read `LIMRUN_WORKLOAD_IDENTITY_TOKEN_FILE` and
+`LIMRUN_WORKLOAD_IDENTITY_BINDING_ID` when no API key is configured. The file contains the
+external JWT. The SDK exchanges it for a Limrun session and re-reads it on renewal.
+The runtime must rotate that source file. Federation uses a form-encoded token
+exchange at `https://sts.limrun.com/v1/access_tokens`; existing JSON issuance
+requests keep their request and response formats.
+Limrun fetches signing keys when saving a provider and refreshes them periodically.
+Token exchanges use stored keys; an unknown signing key does not trigger a fetch.
+Publish new keys at least 48 minutes before using them and allow propagation time.
+Missing or expired keys return `503 temporarily_unavailable`; honor `Retry-After`
+before retrying with backoff. Malformed JWKS or invalid endpoint settings return
+`400` when saving a provider, while temporary fetch failures return `503`.
+
+The CLI reads the same variables. Run `lim whoami` to check the
+organization and permissions reported by Limrun as JSON. Workload identity takes precedence over a saved CLI login. Remove
+`LIM_API_KEY` and omit `--api-key` when testing federation, since explicit API
+keys take precedence.
+
+TypeScript also accepts explicit `workloadTokenFile` and `bindingId` options:
+
+```ts
+const lim = new Limrun({
+  workloadTokenFile: '/var/run/identity/token',
+  bindingId: 'binding_REPLACE_WITH_BINDING_ID',
+});
+```
+
+Federation bindings accept only `ios`, `android`, `xcode`, `gradle`, `asset`,
+`secret`, `tunnel`, `nodepool`, `remotecache`, `remoteexecution`, `analytics`,
+`device`, `applerelay`, and `accesstoken` permissions. They reject `organization`,
+`member`, `billing`, `apikey`, and wildcard resource types such as `*:*:all`.
+Resource ID wildcards such as `xcode:*:all` remain valid.
+
+The binding grants a fixed permission list after verifying issuer, audience,
+signature, expiry, and both the provider and binding conditions. Add `accesstoken:*:all` to the
+binding only when the workload needs to delegate tokens. Derived tokens cannot
+outlive their source credential. The CLI still uses `lim login` or `LIM_API_KEY`.
 
 ## Lifetime and revocation
 
@@ -117,4 +169,6 @@ Tokens created with an API key or CLI login default to one hour.
 The management and registry APIs check revocation after it propagates. Instance
 endpoints verify tokens offline and continue accepting them until expiry or
 instance termination. Revocation does not close existing connections or
-terminate the instance. Choose the lifetime with these limits in mind.
+terminate the instance. Revoking a parent does not revoke already-issued children,
+but every descendant is capped by its parent's expiry. Repeated delegation cannot
+extend the original token's lifetime. Choose the lifetime with these limits in mind.
