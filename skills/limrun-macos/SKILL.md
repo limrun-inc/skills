@@ -14,8 +14,8 @@ The CLI and SDKs offer no command execution or file transfer for macOS
 instances. Don't improvise any (no SSH, no guessed subcommands). When a task
 needs work inside the Mac, give the user the console URL so they can do it on
 the desktop. The one way to put an app on the Mac is to build it on an Xcode
-sandbox with the macOS instance attached; see "Run your Mac app" below. To
-build iOS apps, use **limrun-xcode**; to run them, use
+sandbox with the macOS instance attached; the "Run your Mac app" section shows
+how. To build iOS apps, use **limrun-xcode**; to run them, use
 **limrun-ios-simulator**.
 
 ## Auth and CLI
@@ -86,7 +86,8 @@ instance's `~/Applications` and launches it, sending only the files that
 changed:
 
 ```bash
-lim xcode attach-macos [ID]     # defaults to the last macOS instance created here
+lim xcode create                            # if there is no Xcode sandbox yet
+lim xcode attach-macos [macos-instance-id]  # defaults to the last one created here
 lim xcode build . --sdk macosx
 ```
 
