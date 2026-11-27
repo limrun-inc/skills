@@ -421,8 +421,10 @@ Tunnels carry only declared destinations; there is no catch-all selector. When
 the user wants all traffic to leave through their proxy (for example a
 recording proxy), point the emulator's global HTTP proxy at a proxy the tunnel
 reaches. Tunnel inspection passes requests meant for the proxy through as
-sent. Use a port other than 8080 for a `localhost` proxy; the
-emulator already uses 8080.
+sent. On an instance created with `--tunnel-header`, each one, including the
+`CONNECT` that opens an HTTPS connection, also carries `Limrun-Instance-Id`
+and the tunnel headers. Use a port other than 8080 for a `localhost` proxy;
+the emulator already uses 8080.
 
 ```bash
 lim android tunnel --selector localhost:3128 --detach --id <android-instance-id>
