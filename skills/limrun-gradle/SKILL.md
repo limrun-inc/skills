@@ -179,8 +179,8 @@ lim android create --no-open --no-connect
 lim gradle attach-emulator <android-instance-id> --id <gradle-instance-id>
 ```
 
-Reuse an existing emulator when one is already running. Share its signed stream
-URL as a Markdown link, such as `[Live emulator](<signed-stream-url>)`.
+Reuse an existing emulator when one is already running. Share its Console URL
+as `[Live emulator](<console-url>)` and mention that it requires sign-in.
 
 Use `lim gradle build . --upload myapp.apk` when you also need a reusable asset.
 Build uploads default to a 14-day TTL: each build pushes the asset's expiry

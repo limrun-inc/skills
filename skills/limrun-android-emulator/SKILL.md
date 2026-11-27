@@ -31,10 +31,8 @@ not shown here, check `lim android <subcommand> --help` instead of guessing.
 
 You can build with Limrun's remote Gradle service and have the APK installed
 on a fresh emulator automatically, or install a pre-built local APK or a URL.
-One default to know first: `lim android create` opens an ADB tunnel
-(`--connect`) and a browser tab with the live stream (`--open`) unless told
-otherwise. As an agent, pass `--no-open` always, and `--no-connect` unless you
-need adb right away.
+`lim android create` starts an ADB tunnel by default. Pass `--no-connect`
+unless you need adb right away. Pass `--no-open` to skip opening the Console URL.
 
 ### Build and install
 
@@ -56,11 +54,11 @@ Reuse an existing emulator when one is already running. Use Asset Storage when
 you need a reusable APK for other instances.
 
 Create blocks until the instance is ready to drive; no boot wait is needed.
-The create output includes a signed stream URL; share it with the user as a
-Markdown link, like `[Live emulator](<signed-stream-url>)`. If you have a
-browser the user can see, open the URL there and tell them. Create also
-prints a console URL: it opens the same live view but requires a console
-login, so prefer the signed stream URL for sharing.
+Share the Console URL from create output as `[Live emulator](<console-url>)`
+and mention that it requires sign-in. Creation opens the Console URL by
+default. Pass `--no-open` when you have no browser to show the user. With
+`--json`, creation returns `consoleUrl` without opening a browser. Signed
+stream URLs are omitted.
 
 Signed links open the shared device workspace without login. Full instance tokens
 show Inspect, Connect, and the logs, events, and network inspector. Stream-only
