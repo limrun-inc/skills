@@ -32,6 +32,10 @@ If you prefer your agent's own plugin or skills mechanism:
 The plugin bundles all skills plus the remote MCP server at `https://mcp.limrun.com/mcp`
 (OAuth sign-in on first use, or set an org API key as a bearer token).
 
+## Open a support ticket
+
+To let an agent report a failed build, grant `support:*:create` through a workload identity binding or a support API key, then use `lim support create`. To notify teammates when support responds, repeat `--cc EMAIL` for each recipient. CC recipients receive public staff replies by email. Adding a CC grants no ticket access. The [support ticket guide](https://docs.limrun.com/docs/support/tickets) includes the key setup and examples for the CLI, cURL, TypeScript, and Go.
+
 ## Maintaining
 
 `distribution.json` is the single source of truth for publishing metadata. Every manifest
