@@ -1,6 +1,6 @@
 ---
 name: limrun-xcode
-description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, run project commands with `lim xcode run`, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, run code generation or Make targets, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
+description: "Build an iOS / Apple app on remote Xcode with `lim xcode build` instead of local xcodebuild, run project commands with `lim xcode run`, or run its XCTest suites with `lim xcode test`, from any environment (Linux, Windows, macOS, VM, container). Use for non-Bazel projects (an `.xcodeproj` / `.xcworkspace`, an XcodeGen `project.yml` with a gitignored project, React Native / Expo native build) when the user wants to build, compile, run code generation or Make targets, test, inspect build logs, reload, produce a preview build, or ship a signed device IPA, or to build a Mac app and run it on a Limrun macOS instance. To run, tap, screenshot, or otherwise interact with the result on a simulator, use limrun-ios-simulator. For Bazel workspaces, use limrun-xcode-bazel."
 user-invocable: true
 effort: high
 ---
@@ -311,6 +311,33 @@ LLDB workflow.
 To disconnect the simulator from its build sandbox and stop automatic installation, run
 `lim xcode detach-simulator --id <xcode-instance-id>`. Both instances,
 installed apps, and retained builds remain available. Repeated detach requests succeed.
+
+## Run a Mac app on a macOS instance
+
+For a Mac app (a macOS target), build with `--sdk macosx` and attach a macOS
+instance instead of a simulator. Every successful build then installs the app in
+the macOS instance's `~/Applications` and launches it, sending only the files that
+changed since the previous build. Attaching installs nothing by itself; the next
+build is the first one installed. The `lim macos` commands are covered by
+**`limrun-macos`**.
+
+```bash
+lim macos create --inactivity-timeout 30m   # a macOS instance to run the app on
+lim xcode attach-macos [macos-instance-id]  # defaults to the last one created here
+lim xcode build . --sdk macosx
+```
+
+Share the macOS instance's console URL (`lim macos get`) as a Markdown link so the
+user can use the app. While a macOS instance is attached and no simulator is,
+`macosx` is the default SDK.
+
+A `macosx` build is signed to run locally: signing flags, `--upload-to-appstore`
+and `--ios` are rejected with it, and capabilities that need a provisioning
+profile (iCloud, push) are unavailable. `lim xcode test` runs on simulators only.
+To stop installing on the macOS instance, run
+`lim xcode detach-macos --id <xcode-instance-id>`; both instances and the
+installed app stay. If `lim xcode attach-macos` is an unknown command, run
+`npm install --global lim@latest`.
 
 ## Run tests (XCTest)
 

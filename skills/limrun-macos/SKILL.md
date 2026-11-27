@@ -1,6 +1,6 @@
 ---
 name: limrun-macos
-description: "Create, list, inspect, and delete Limrun macOS instances (full macOS virtual machines in the cloud) with `lim macos` or the SDKs, and show or control the desktop in a browser. Use when the user wants a cloud Mac, a macOS VM or desktop, a remote Mac to look at or click around in, or to embed a macOS desktop stream in their own web app. To build an iOS app, use limrun-xcode; to run one, use limrun-ios-simulator."
+description: "Create, list, inspect, and delete Limrun macOS instances (full macOS virtual machines in the cloud) with `lim macos` or the SDKs, and show or control the desktop in a browser. Use when the user wants a cloud Mac, a macOS VM or desktop, a remote Mac to look at or click around in, or to embed a macOS desktop stream in their own web app. To build an iOS or Mac app, use limrun-xcode (it installs Mac builds on an attached macOS instance); to run an iOS app, use limrun-ios-simulator."
 user-invocable: true
 ---
 
@@ -10,11 +10,13 @@ A macOS instance is a full macOS virtual machine in the cloud. Its ID looks
 like `macos_<region>_<id>`. You can create, list, inspect, and delete it, and
 the user can see and control its desktop in a browser.
 
-The CLI and SDKs offer no command execution, file transfer, app install, or
-build tooling for macOS instances. Don't improvise any (no SSH, no guessed
-subcommands). When a task needs work inside the Mac, give the user the console
-URL so they can do it on the desktop. To build iOS apps, use
-**limrun-xcode**; to run them, use **limrun-ios-simulator**.
+The CLI and SDKs offer no command execution or file transfer for macOS
+instances. Don't improvise any (no SSH, no guessed subcommands). When a task
+needs work inside the Mac, give the user the console URL so they can do it on
+the desktop. The one way to put an app on the Mac is to build it on an Xcode
+sandbox with the macOS instance attached; see "Run your Mac app" below. To
+build iOS apps, use **limrun-xcode**; to run them, use
+**limrun-ios-simulator**.
 
 ## Auth and CLI
 
@@ -75,6 +77,21 @@ instances when none is remembered.
 Deleting discards the instance's disk. Nothing on it can be recovered, so
 delete only when the user is done with it, and confirm first if they may have
 unsaved work on the desktop.
+
+## Run your Mac app
+
+To run the user's own Mac app, attach the macOS instance to an Xcode sandbox.
+Every successful `lim xcode build --sdk macosx` then installs the app in the
+instance's `~/Applications` and launches it, sending only the files that
+changed:
+
+```bash
+lim xcode attach-macos [ID]     # defaults to the last macOS instance created here
+lim xcode build . --sdk macosx
+```
+
+The build workflow, its options, and its limits are covered by
+**`limrun-xcode`** ("Run a Mac app on a macOS instance").
 
 ## SDKs
 
