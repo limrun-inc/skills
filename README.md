@@ -32,6 +32,8 @@ If you prefer your agent's own plugin or skills mechanism:
 The plugin bundles all skills plus the remote MCP server at `https://mcp.limrun.com/mcp`
 (OAuth sign-in on first use, or set an org API key as a bearer token).
 
+API keys are organization credentials; access tokens are signed credentials with limited scopes and a short lifetime. Both use Bearer authentication. Mint access tokens with `POST /v1/access_tokens` and revoke them with `DELETE /v1/access_tokens/{tokenId}`. The legacy `/v1/scoped_tokens` routes remain compatible; existing API keys and `LIM_API_KEY` do not change. See the [credential reference](https://docs.limrun.com/docs/reference/sdk#access-tokens).
+
 ## Maintaining
 
 `distribution.json` is the single source of truth for publishing metadata. Every manifest
