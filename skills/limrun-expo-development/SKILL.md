@@ -202,7 +202,25 @@ If opening fails and the primary scheme came from `scheme`, retry once with
 `exp+${SLUG}`. On a fresh instance, the iOS dev-menu onboarding sheet can
 consume the first deep link; tap through it and open the URL again.
 
-For Expo Go, replace `--dev-client` with `--go`, then open:
+For Expo Go, replace `--dev-client` with `--go`. Limrun simulators do not come
+with Expo Go, so install the Expo Go build that matches the project's Expo SDK.
+List the catalog builds and pass the matching one when you create the simulator:
+
+```bash
+lim asset list --include-app-store --name-prefix appstore/Expo-Go
+lim ios create --reuse-if-exists --install-asset "appstore/<matching Expo Go asset>"
+```
+
+If the simulator already exists, or the catalog has no build for the SDK,
+install Expo's own release instead, replacing `<version>` with the Expo Go
+version for the SDK:
+
+```bash
+lim ios install-app --id <ios-instance-id> \
+  "https://github.com/expo/expo-go-releases/releases/download/Expo-Go-<version>/Expo-Go-<version>.tar.gz"
+```
+
+Then open the project:
 
 ```bash
 lim ios open-url \

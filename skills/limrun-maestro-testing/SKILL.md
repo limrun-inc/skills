@@ -88,9 +88,11 @@ not look for an asset matching your Maestro version.
 
 Install the app under test as usual (`lim ios create --install app.ipa`,
 `lim ios install-app`, or a build skill), then reference its bundle id via
-`appId:` in the flow. For Expo Go testing, also preinstall
-`appstore/Expo-Go-54.0.6.tar.gz` and open the project URL with `openLink`
-(env vars must be prefixed `MAESTRO_` to be visible in flows):
+`appId:` in the flow. For Expo Go testing, also install the Expo Go build that
+matches the project's Expo SDK, since simulators do not come with it (list them
+with `lim asset list --include-app-store --name-prefix appstore/Expo-Go`).
+Then open the project URL with `openLink` (env vars must be prefixed `MAESTRO_`
+to be visible in flows):
 
 ```bash
 MAESTRO_EXPO_URL='exp://<tunnel-host>' lim ios maestro test flow.yaml
